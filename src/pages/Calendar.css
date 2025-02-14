@@ -1,0 +1,67 @@
+/* General Container */
+.calendar-container {
+    font-family: 'Arial, sans-serif';
+    padding: 20px;
+    background-color: #f4f4f4;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Title */
+.calendar-title {
+    color: #333;
+    font-size: 2em;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Loading and Error States */
+.calendar-loading,
+.calendar-error {
+    text-align: center;
+    font-size: 1.2em;
+    color: #ff0000;
+    margin-top: 20px;
+}
+
+/* No Events Message */
+.calendar-no-events {
+    text-align: center;
+    font-size: 1.2em;
+    color: #666;
+}
+
+/* Event List */
+.calendar-event-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Event Item */
+.calendar-event-item {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+    transition: box-shadow 0.3s ease;
+}
+
+.calendar-event-item:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Event Title */
+.calendar-event-title {
+    margin: 0 0 10px;
+    font-size: 1.5em;
+    color: #ffa500;
+}
+
+/* Event Details */
+.calendar-event-item p {
+    margin: 5px 0;
+    font-size: 1em;
+    color: #555;
+}

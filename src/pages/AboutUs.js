@@ -30,9 +30,9 @@ const AboutUs = () => {
         Agrieldo is revolutionizing farm management by providing cutting-edge
         solutions to farmers in Kenya and Africa. With a focus on innovation, we
         are committed to improving the agricultural sector by addressing key
-        challenges such as lack of proper record keeping, inadequate vet services,
+        challenges such as lack of proper record keeping, inadequate vet services
         and poverty. Our platform provides solutions for real-time surveillance,
-        easy record-keeping, and access to essential services like veterinary
+        easy record-keeping and access to essential services like veterinary
         care, making it a game-changer for farmers in Kenya and across Africa.
       </motion.p>
     </div>

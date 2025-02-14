@@ -11,7 +11,7 @@ const features = [
   {
     title: "Record Keeping",
     description:
-      "Easily track and manage farm data, including animal health records, feed schedules, and financial transactions.",
+      "Easily track and manage farm data including animal health records, feed schedules and financial transactions.",
     icon: "📋",
   },
   {
@@ -29,7 +29,7 @@ const features = [
   {
     title: "Educational Resources",
     description:
-      "Access a library of agricultural tips, tutorials, and guides to improve your farm's productivity.",
+      "Access a library of agricultural tips, tutorials and guides to improve your farm's productivity.",
     icon: "📚",
   },
   {

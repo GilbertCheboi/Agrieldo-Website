@@ -1,0 +1,30 @@
+/* src/Navbar.css */
+
+/* Remove the default list styling */
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  /* Ensure the navigation links are displayed horizontally on large screens */
+  ul li {
+    display: inline-block;
+  }
+  
+  /* Optional: Add a bottom border to each link for a more stylish look */
+  ul li a {
+    padding: 10px 20px;
+    text-decoration: none;
+    display: inline-block;
+    color: white;
+    font-weight: 500;
+    transition: color 0.3s, border-bottom 0.3s;
+  }
+  
+  /* Hover effect for links */
+  ul li a:hover {
+    color: #ffcc00; /* Amber color on hover */
+    border-bottom: 2px solid #ffcc00; /* Adds a bottom border when hovered */
+  }
+  
