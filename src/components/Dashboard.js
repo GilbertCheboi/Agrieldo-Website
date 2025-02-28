@@ -1,6 +1,6 @@
-import React from "react";
-import { Grid, Paper, Typography, Box, Container } from "@mui/material";
-import Sidebar from "./ Sidebar";
+import React, { useState, useEffect } from "react";
+import { Grid, Paper, Typography, Box, Container, Avatar } from "@mui/material";
+import Slider from "./ Sidebar";
 import CalendarComponent from "./ CalendarComponent";
 import ProductionOverview from "./ProductionOverview"; 
 import MilkProductionChart from "./MilkProductionChart";
@@ -10,8 +10,51 @@ import MonthlyActivities from "./MonthlyActivities";
 import TaskManagement from "./TaskManagement";
 import FeedManagement from "./FeedManagement";
 import FarmActivitiesHistory from "./FarmActivitiesHistory"; 
+import axios from "axios";
+
+const backendURL = "https://api.agrieldo.com"; // Replace with your backend URL
 
 const Dashboard = () => {
+  const [profile, setProfile] = useState(null);
+  const [greeting, setGreeting] = useState("");
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const userRole = localStorage.getItem("user_role");
+        const token = localStorage.getItem("accessToken");
+
+        if (!token) return;
+
+        const endpoint =
+          userRole === "staff"
+            ? `${backendURL}/api/profiles/staff/profile/`
+            : `${backendURL}/api/profiles/farmer/profile/`;
+
+        const response = await axios.get(endpoint, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        setProfile(response.data);
+      } catch (error) {
+        console.error("Failed to fetch profile:", error);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) {
+      setGreeting("Good morning");
+    } else if (hour < 18) {
+      setGreeting("Good afternoon");
+    } else {
+      setGreeting("Good evening");
+    }
+  }, []);
+
   return (
     <Box
       sx={{
@@ -21,24 +64,60 @@ const Dashboard = () => {
       }}
     >
       {/* Sidebar */}
-      <Sidebar />
+      <Slider />
 
       {/* Main Content */}
       <Box sx={{ flexGrow: 1, p: { xs: 2, md: 4 } }}>
         <Container maxWidth="xl">
-          {/* Dashboard Title */}
-          <Typography
-            variant="h4"
-            gutterBottom
+          {/* Dashboard Header with Profile */}
+          <Box
             sx={{
-              fontWeight: "bold",
-              color: "#333",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
               mb: 3,
-              textAlign: { xs: "center", md: "left" },
             }}
           >
-            🚜 Farmer Dashboard
-          </Typography>
+            {/* Dashboard Title & Profile */}
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              {/* Profile Picture */}
+              {profile?.image ? (
+                <Avatar
+                  src={`${backendURL}${profile.image}`}
+                  alt="Profile"
+                  sx={{
+                    width: 100,
+                    height: 100,
+                    mr: 2,
+                    border: "2px solid #ffa500",
+                  }}
+                />
+              ) : (
+                <Avatar
+                  sx={{
+                    width: 50,
+                    height: 50,
+                    mr: 2,
+                    bgcolor: "#ffa500",
+                  }}
+                >
+                  {profile?.first_name ? profile.first_name[0] : "?"}
+                </Avatar>
+              )}
+
+              {/* Greeting Message with User Name */}
+              <Typography
+                variant="h4"
+                sx={{
+                  fontWeight: "bold",
+                  color: "#333",
+                  textAlign: { xs: "center", md: "left" },
+                }}
+              >
+                {greeting} {profile?.first_name && `- ${profile.first_name}`}!
+              </Typography>
+            </Box>
+          </Box>
 
           {/* Responsive Grid Layout */}
           <Grid container spacing={3}>

@@ -355,3 +355,16 @@ export const getFarms  = async () => {
   }
 };
 
+export const getMachineryDetails = async (id) => {
+  return  await API.get(`/${id}/`);
+};
+
+export const getLogs = async (id, logType) => {
+  return  await API.get(`/${id}/${logType}/`);
+};
+
+export const addLog = async (id, logType, data) => {
+  return  await API.get(`/${id}/${logType}/`, data, {
+    headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
+  });
+};

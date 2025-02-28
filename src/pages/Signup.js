@@ -55,7 +55,7 @@ const Signup = () => {
   
     try {
       const response = await axios.post(
-        "http://207.154.253.97:8000/api/accounts/users/",
+        "https://api.agrieldo.com/api/accounts/users/",
         formDataToSend, // Send the form data as multipart/form-data
         { headers: { "Content-Type": "multipart/form-data" } }
       );

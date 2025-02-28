@@ -1,15 +1,30 @@
+// src/components/Slider.js
 import React, { useState } from "react";
-import { Drawer, List, ListItem, ListItemIcon, ListItemText, IconButton, Divider } from "@mui/material";
+import { Drawer, List, ListItem, ListItemIcon, ListItemText, IconButton, Divider, Collapse } from "@mui/material";
 import { 
-  Dashboard, Agriculture, MonetizationOn, Task, Menu, Fastfood, Build, People, Videocam, History, BarChart 
+  Dashboard, Agriculture, MonetizationOn, Task, Menu, Fastfood, Build, People, Videocam, History, BarChart, ExpandLess, ExpandMore 
 } from "@mui/icons-material";
 import { Link } from "react-router-dom";
 
-const Sidebar = () => {
+const Slider = ({ onFilterChange }) => {
   const [open, setOpen] = useState(false);
+  const [livestockOpen, setLivestockOpen] = useState(false);
+  const [filter, setFilter] = useState("All"); // Default filter
 
   const toggleDrawer = () => {
     setOpen(!open);
+  };
+
+  const toggleLivestockMenu = () => {
+    setLivestockOpen(!livestockOpen);
+  };
+
+  const handleFilterChange = (event) => {
+    const selectedFilter = event.target.value;
+    setFilter(selectedFilter);
+    if (onFilterChange) {
+      onFilterChange(selectedFilter); // Pass filter to parent (e.g., AnimalList)
+    }
   };
 
   return (
@@ -29,10 +44,30 @@ const Sidebar = () => {
             <ListItemIcon><Dashboard /></ListItemIcon>
             <ListItemText primary="Dashboard" />
           </ListItem>
-          <ListItem button component={Link} to="/livestock" onClick={toggleDrawer}>
+          <ListItem button onClick={toggleLivestockMenu}>
             <ListItemIcon><Agriculture /></ListItemIcon>
             <ListItemText primary="Livestock Management" />
+            {livestockOpen ? <ExpandLess /> : <ExpandMore />}
           </ListItem>
+          <Collapse in={livestockOpen} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              <ListItem style={{ paddingLeft: 32 }}>
+                <select
+                  value={filter}
+                  onChange={handleFilterChange}
+                  className="w-full p-2 text-sm border rounded-md bg-white text-gray-800"
+                >
+                  <option value="All">All Animals</option>
+                  <option value="Calf">Calf</option>
+                  <option value="Heifer">Heifer</option>
+                  <option value="Milking">Milking Cow</option>
+                  <option value="Dry">Dry Cow</option>
+                  <option value="Bull">Bull</option>
+                  <option value="Pregnant">Pregnant</option>
+                </select>
+              </ListItem>
+            </List>
+          </Collapse>
           <ListItem button component={Link} to="/financials" onClick={toggleDrawer}>
             <ListItemIcon><MonetizationOn /></ListItemIcon>
             <ListItemText primary="Financials" />
@@ -81,4 +116,4 @@ const Sidebar = () => {
   );
 };
 
-export default Sidebar;
+export default Slider;
