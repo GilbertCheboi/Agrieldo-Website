@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Provider } from "react-redux";
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { store } from "./store/store";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -27,49 +28,60 @@ import Machinery from "./pages/Machinery";
 import MachineryDetails from "./pages/MachineryDetail";
 import AnimalProfileDashboard from "./pages/AnimalProfileDashboard";
 import AnimalList from "./pages/AnimalList";
+import InventoryDashboard from './components/InventoryDashboard';
+import OutletInventory from './components/OutletInventory';
 import "./index.css";
 import "./App.css";
+
+// MUI Theme for FABs and Modals
+const theme = createTheme({
+  palette: {
+    primary: { main: '#4caf50' }, // Green for farming theme
+  },
+});
 
 const App = () => {
   return (
     <Provider store={store}>
-      <Router>
-        <Navbar />
-        <div style={{ display: "flex" }}>
-          <div style={{ flexGrow: 1, padding: "20px" }}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/about" element={<AboutUs />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/features" element={<Features />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/subscribe" element={<SubscriptionForm />} />
-              <Route path="/field-trip-report" element={<FieldTripReport />} />
-              <Route path="/merchandise" element={<MerchandiseScreen />} />
-              <Route path="/calendar" element={<Calendar />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/livestock" element={<Livestock />} />
-              <Route path="/tasks" element={<Tasks />} />
-              <Route path="/daily-consumption" element={<DailyConsumptionPage />} />
-              <Route path="/production-history" element={<ProductionHistory />} />
-              <Route path="/farm-staff" element={<FarmStaff />} />
-              <Route path="/livestock-management" element={<LivestockManagement />} />
-              <Route path="/profile" element={<ProfilePage/> } />
-              <Route path="/my-farm" element={<MyFarm />} />
-              <Route path="/machinery" element={<Machinery />} />
-              <Route path="/machinery/:id" element={<MachineryDetails />} />
-              <Route path="/animal_detail" element={<AnimalProfileDashboard />} />
-              <Route path="/animal_list" element={<AnimalList />} />
-
-
-
-
-            </Routes>
+      <ThemeProvider theme={theme}>
+        <Router>
+          <Navbar />
+          <div style={{ display: "flex" }}>
+            <div style={{ flexGrow: 1, padding: "20px" }}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/about" element={<AboutUs />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/features" element={<Features />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/subscribe" element={<SubscriptionForm />} />
+                <Route path="/field-trip-report" element={<FieldTripReport />} />
+                <Route path="/merchandise" element={<MerchandiseScreen />} />
+                <Route path="/calendar" element={<Calendar />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/livestock" element={<Livestock />} />
+                <Route path="/tasks" element={<Tasks />} />
+                <Route path="/daily-consumption" element={<DailyConsumptionPage />} />
+                <Route path="/production-history" element={<ProductionHistory />} />
+                <Route path="/farm-staff" element={<FarmStaff />} />
+                <Route path="/livestock-management" element={<LivestockManagement />} />
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/my-farm" element={<MyFarm />} />
+                <Route path="/machinery" element={<Machinery />} />
+                <Route path="/machinery/:id" element={<MachineryDetails />} />
+                <Route path="/animal/:id" element={<AnimalProfileDashboard />} />
+                <Route path="/animal_list" element={<AnimalList />} />
+                
+                {/* Inventory Management Routes */}
+                <Route path="/inventory" element={<InventoryDashboard />} />
+                <Route path="/inventory/outlet/:id" element={<OutletInventory />} />
+              </Routes>
+            </div>
           </div>
-        </div>
-        <Footer />
-      </Router>
+          <Footer />
+        </Router>
+      </ThemeProvider>
     </Provider>
   );
 };

@@ -20,6 +20,13 @@ import { GiWheat } from "react-icons/gi";
 import AddIcon from "@mui/icons-material/Add";
 import { addTransaction, fetchFeeds } from "../services/api";
 
+const BASE_URL = "https://api.agrieldo.com/";
+
+const getImageUrl = (imagePath) => {
+  const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
+  return `${BASE_URL}${cleanPath}`;
+};
+
 const FeedManagement = () => {
   const [open, setOpen] = useState(false);
   const [feeds, setFeeds] = useState([]);
@@ -30,7 +37,6 @@ const FeedManagement = () => {
     action: "ADD",
   });
 
-  // Fetch feeds when component loads
   useEffect(() => {
     const loadFeeds = async () => {
       try {
@@ -45,16 +51,13 @@ const FeedManagement = () => {
     loadFeeds();
   }, []);
 
-  // Handle modal open/close
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  // Handle form input change
   const handleChange = (e) => {
     setTransactionData({ ...transactionData, [e.target.name]: e.target.value });
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!transactionData.feed) {
@@ -75,40 +78,52 @@ const FeedManagement = () => {
         <GiWheat color="#ffa500" /> Feed Management
       </Typography>
 
-      {/* Table for displaying feeds */}
       {loading ? (
         <CircularProgress sx={{ display: "block", mx: "auto", my: 2 }} />
       ) : (
         <TableContainer component={Paper} sx={{ mt: 2, borderRadius: 2 }}>
           <Table>
-            <TableHead sx={{ backgroundColor: "#ffa500" }}>
+            <TableHead>
               <TableRow>
-                <TableCell sx={{ fontWeight: "bold", color: "white" }}>Feed Name</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white" }} align="center">Quantity (kg)</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white" }} align="center">Actions</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#ffa500" }}>Image</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#ffa500" }}>Feed Name</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#ffa500" }} align="center">Quantity (kg)</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#ffa500" }} align="center">Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {feeds.length > 0 ? (
                 feeds.map((feed) => (
                   <TableRow key={feed.id}>
+                    <TableCell>
+                      {feed.image ? (
+                        <img
+                          src={getImageUrl(feed.image)}
+                          alt={feed.name}
+                          style={{ maxHeight: "50px", maxWidth: "50px", objectFit: "cover" }}
+                          onError={(e) => (e.target.style.display = "none")}
+                        />
+                      ) : (
+                        "No Image"
+                      )}
+                    </TableCell>
                     <TableCell>{feed.name}</TableCell>
                     <TableCell align="center">{feed.quantity_kg}</TableCell>
                     <TableCell align="center">
                       <Button
-                        variant="contained"
+                        variant="outlined"
                         size="small"
-                        sx={{ backgroundColor: "#ffa500", color: "white" }}
+                        sx={{ color: "#ffa500", borderColor: "#ffa500" }}
                         onClick={handleOpen}
                       >
-                        Add Transaction
+                        Update
                       </Button>
                     </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={3} align="center">
+                  <TableCell colSpan={4} align="center">
                     No feeds available.
                   </TableCell>
                 </TableRow>
@@ -118,7 +133,6 @@ const FeedManagement = () => {
         </TableContainer>
       )}
 
-      {/* Floating Action Button (FAB) */}
       <Fab
         color="primary"
         sx={{ position: "absolute", bottom: 16, right: 16, backgroundColor: "#ffa500" }}
@@ -127,7 +141,6 @@ const FeedManagement = () => {
         <AddIcon />
       </Fab>
 
-      {/* Modal for Handling Feed Transactions */}
       <Modal open={open} onClose={handleClose} sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
         <Box sx={{ backgroundColor: "white", p: 4, borderRadius: 2, width: 400 }}>
           <Typography variant="h6" sx={{ mb: 2 }}>
@@ -138,7 +151,6 @@ const FeedManagement = () => {
             <CircularProgress sx={{ display: "block", mx: "auto", my: 2 }} />
           ) : (
             <form onSubmit={handleSubmit}>
-              {/* Feed Dropdown */}
               <TextField
                 fullWidth
                 select
@@ -156,7 +168,6 @@ const FeedManagement = () => {
                 ))}
               </TextField>
 
-              {/* Quantity Input */}
               <TextField
                 fullWidth
                 label="Quantity (kg)"
@@ -168,7 +179,6 @@ const FeedManagement = () => {
                 sx={{ mb: 2 }}
               />
 
-              {/* Action Dropdown */}
               <TextField
                 fullWidth
                 select

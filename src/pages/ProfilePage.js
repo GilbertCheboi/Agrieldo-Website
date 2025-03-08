@@ -61,7 +61,7 @@ const ProfilePage = () => {
 
     const handleUpdate = async () => {
         try {
-            const userRole = localStorage.getItem("user_role");
+            const userRole = localStorage.getItem("user_type");
             const token = localStorage.getItem("accessToken");
 
             if (!token) {

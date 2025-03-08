@@ -15,9 +15,9 @@ const Login = () => {
       const response = await login(credentials); // Call the login API
       console.log("Login successful, response:", response); // Log the successful response
 
-      // Save token to localStorage for future requests
-      localStorage.setItem("access_token", response.access);
-      localStorage.setItem("refresh_token", response.refresh);
+      // api.js already handles storing tokens and user_type, but we can log it here for confirmation
+      const storedUserType = localStorage.getItem("user_type");
+      console.log("User type from localStorage after login:", storedUserType);
 
       alert("Login successful!");
       navigate("/dashboard"); // Redirect to the dashboard page

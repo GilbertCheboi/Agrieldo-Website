@@ -46,17 +46,21 @@ const Slider = ({ onFilterChange }) => {
           </ListItem>
           <ListItem button onClick={toggleLivestockMenu}>
             <ListItemIcon><Agriculture /></ListItemIcon>
+            <ListItem button component={Link} to="/animal_list" onClick={toggleDrawer}>
             <ListItemText primary="Livestock Management" />
-            {livestockOpen ? <ExpandLess /> : <ExpandMore />}
+            </ListItem>
+
+            {/* {livestockOpen ? <ExpandLess /> : <ExpandMore />} */}
           </ListItem>
-          <Collapse in={livestockOpen} timeout="auto" unmountOnExit>
+          {/* <Collapse in={livestockOpen} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-              <ListItem style={{ paddingLeft: 32 }}>
+              <ListItem style={{ paddingLeft: 32 }}  button component={Link} to="/animal_list" onClick={toggleDrawer} >
                 <select
                   value={filter}
                   onChange={handleFilterChange}
                   className="w-full p-2 text-sm border rounded-md bg-white text-gray-800"
                 >
+                 
                   <option value="All">All Animals</option>
                   <option value="Calf">Calf</option>
                   <option value="Heifer">Heifer</option>
@@ -67,7 +71,7 @@ const Slider = ({ onFilterChange }) => {
                 </select>
               </ListItem>
             </List>
-          </Collapse>
+          </Collapse> */}
           <ListItem button component={Link} to="/financials" onClick={toggleDrawer}>
             <ListItemIcon><MonetizationOn /></ListItemIcon>
             <ListItemText primary="Financials" />
