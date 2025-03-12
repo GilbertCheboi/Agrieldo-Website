@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import kenyaAgricultureImage from "../assets/about.png"; // import the image
+import kenyaAgricultureImage from "../assets/about.webp"; // import the image
 
 const AboutUs = () => {
   return (
