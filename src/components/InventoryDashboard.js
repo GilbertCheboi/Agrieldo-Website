@@ -27,14 +27,15 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import Papa from 'papaparse';
 
-const IMAGE_BASE_URL = 'http://207.154.253.97:8000'; // Change for production if needed
+const IMAGE_BASE_URL = 'https://api.agrieldo.com';
 
 function InventoryDashboard() {
   const [storeStock, setStoreStock] = useState([]);
   const [storeId, setStoreId] = useState(null);
   const [outlets, setOutlets] = useState([]);
   const [produceItems, setProduceItems] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(true);
   const [openTransfer, setOpenTransfer] = useState(false);
   const [openAddToStore, setOpenAddToStore] = useState(false);
@@ -42,7 +43,7 @@ function InventoryDashboard() {
   const fetchData = async () => {
     try {
       const [storeRes, outletRes, produceRes] = await Promise.all([
-        fetchStoreInventory(selectedDate, selectedDate),
+        fetchStoreInventory(startDate, endDate),
         fetchOutlets(),
         fetchProduce(),
       ]);
@@ -63,7 +64,7 @@ function InventoryDashboard() {
 
   useEffect(() => {
     fetchData();
-  }, [selectedDate]);
+  }, [startDate, endDate]);
 
   const handleOpenTransfer = () => setOpenTransfer(true);
   const handleCloseTransfer = () => setOpenTransfer(false);
@@ -74,10 +75,6 @@ function InventoryDashboard() {
     fetchData();
     handleCloseTransfer();
     handleCloseAddToStore();
-  };
-
-  const handleDateChange = (e) => {
-    setSelectedDate(e.target.value);
   };
 
   const getStockQuantity = (produceId, outletId = null) => {
@@ -99,7 +96,7 @@ function InventoryDashboard() {
 
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
-    doc.text('Inventory Report', 14, 15);
+    doc.text(`Inventory Report (${startDate} to ${endDate})`, 14, 15);
 
     const tableColumn = ['Produce Item', 'Store Stock', ...outlets.map(outlet => outlet.name)];
     const tableRows = [];
@@ -119,7 +116,7 @@ function InventoryDashboard() {
       startY: 20,
     });
 
-    doc.save(`inventory_report_${selectedDate}.pdf`);
+    doc.save(`inventory_report_${startDate}_to_${endDate}.pdf`);
   };
 
   const handleDownloadCSV = () => {
@@ -139,7 +136,7 @@ function InventoryDashboard() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `inventory_report_${selectedDate}.csv`);
+    link.setAttribute('download', `inventory_report_${startDate}_to_${endDate}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -151,14 +148,22 @@ function InventoryDashboard() {
     <div>
       <h1 className="text-3xl font-bold mb-6">Inventory Management Dashboard</h1>
 
-      <TextField
-        label="Filter by Date"
-        type="date"
-        value={selectedDate}
-        onChange={handleDateChange}
-        InputLabelProps={{ shrink: true }}
-        sx={{ mb: 4 }}
-      />
+      <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>
+        <TextField
+          label="Start Date"
+          type="date"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+          InputLabelProps={{ shrink: true }}
+        />
+        <TextField
+          label="End Date"
+          type="date"
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
+          InputLabelProps={{ shrink: true }}
+        />
+      </Box>
 
       {/* Download Buttons */}
       <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
