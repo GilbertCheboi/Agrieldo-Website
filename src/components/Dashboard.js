@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Grid, Paper, Typography, Box, Container, Avatar, Card, CardContent } from "@mui/material";
 import Slider from "./ Sidebar";
-import CalendarComponent from "./ CalendarComponent";
+import CalendarComponent from "./ CalendarComponent"
 import MilkProductionChart from "./MilkProductionChart";
 import FeedManagement from "./FeedManagement";
 import ProductionOverview from "./ProductionOverview";
@@ -10,18 +10,18 @@ import LivestockOverview from "./LivestockOverview";
 import MonthlyActivities from "./MonthlyActivities";
 import TaskManagement from "./TaskManagement";
 import FarmActivitiesHistory from "./FarmActivitiesHistory";
-import axios from "axios";
-import { fetchAnimals } from "../services/api";
-import { useNavigate } from "react-router-dom"; // Added for navigation
-import { GiCow, GiBull, GiFemale, GiBabyBottle, GiHeartBeats, GiGrass, GiMilkCarton, GiMedicalPack } from "react-icons/gi";
+import { fetchAnimals, getFarms } from "../services/api";
+import { useNavigate } from "react-router-dom";
+import { GiCow, GiBull, GiFemale, GiBabyBottle, GiHeartBeats, GiGrass, GiMilkCarton, GiMedicalPack, GiBarn } from "react-icons/gi";
+import axios from "axios"; // Kept for profile fetching
 
 const backendURL = "https://api.agrieldo.com";
 
 const calculateAgeInMonths = (dob) => {
   const birthDate = new Date(dob);
-  const today = new Date("2025-03-07"); // Current date from system prompt
+  const today = new Date("2025-03-07");
   const diffMs = today - birthDate;
-  return Math.floor(diffMs / (1000 * 60 * 60 * 24 * 30)); // Approximate months
+  return Math.floor(diffMs / (1000 * 60 * 60 * 24 * 30));
 };
 
 const Dashboard = () => {
@@ -38,9 +38,13 @@ const Dashboard = () => {
     milking: 0,
     sickCows: 0,
   });
+  const [farmsData, setFarmsData] = useState([]);
+  const [selectedFarmId, setSelectedFarmId] = useState(null); // Track selected farm
   const [loadingLivestock, setLoadingLivestock] = useState(true);
-  const navigate = useNavigate(); // Hook for navigation
+  const [loadingFarms, setLoadingFarms] = useState(true);
+  const navigate = useNavigate();
 
+  // Fetch profile (unchanged)
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -60,9 +64,40 @@ const Dashboard = () => {
       }
     };
 
-    const loadLivestockData = async () => {
+    fetchProfile();
+  }, []);
+
+  // Fetch farms and set initial selected farm
+  useEffect(() => {
+    const loadFarmsData = async () => {
       try {
-        const animals = await fetchAnimals();
+        const farms = await getFarms();
+        console.log("Farms data:", farms);
+        const farmsArray = Array.isArray(farms) ? farms : [];
+        setFarmsData(farmsArray);
+        // Set the first farm as default if available
+        if (farmsArray.length > 0) {
+          setSelectedFarmId(farmsArray[0].id);
+        }
+        setLoadingFarms(false);
+      } catch (error) {
+        console.error("Failed to load farms data:", error);
+        setFarmsData([]);
+        setLoadingFarms(false);
+      }
+    };
+
+    loadFarmsData();
+  }, []);
+
+  // Fetch livestock data when selectedFarmId changes
+  useEffect(() => {
+    const loadLivestockData = async () => {
+      if (!selectedFarmId) return; // Skip if no farm selected
+      try {
+        setLoadingLivestock(true);
+        // Assuming fetchAnimals accepts a farmId parameter
+        const animals = await fetchAnimals({ farmId: selectedFarmId }); // Adjust this based on your API
         const counts = {
           totalCows: animals.length,
           bulls: 0,
@@ -97,15 +132,26 @@ const Dashboard = () => {
         setLivestockData(counts);
         setLoadingLivestock(false);
       } catch (error) {
-        console.error("Failed to load livestock data:", error);
+        console.error("Failed to load livestock data for farm:", error);
+        setLivestockData({
+          totalCows: 0,
+          bulls: 0,
+          heifers: 0,
+          calves: 0,
+          newborns: 0,
+          pregnant: 0,
+          dry: 0,
+          milking: 0,
+          sickCows: 0,
+        });
         setLoadingLivestock(false);
       }
     };
 
-    fetchProfile();
     loadLivestockData();
-  }, []);
+  }, [selectedFarmId]); // Re-run when selectedFarmId changes
 
+  // Set greeting (unchanged)
   useEffect(() => {
     const hour = new Date().getHours();
     if (hour < 12) {
@@ -130,7 +176,11 @@ const Dashboard = () => {
   ];
 
   const handleCardClick = (filter) => {
-    navigate(`/animal_list?${filter}`);
+    navigate(`/animal_list?farmId=${selectedFarmId}&${filter}`);
+  };
+
+  const handleFarmCardClick = (farmId) => {
+    setSelectedFarmId(farmId); // Update selected farm
   };
 
   return (
@@ -190,93 +240,142 @@ const Dashboard = () => {
             </Box>
           </Box>
 
-          {/* Livestock Cards */}
+          {/* Farms Cards */}
           <Box sx={{ mb: 4 }}>
             <Typography variant="h6" sx={{ fontWeight: 600, color: "#1a3c34", mb: 2 }}>
-              Livestock Summary
+              My Farms
             </Typography>
             <Grid container spacing={2}>
-              {livestockCards.map((card) => (
-                <Grid item xs={12} sm={6} md={4} lg={2.4} key={card.title}>
-                  <Card
-                    sx={{
-                      bgcolor: "#fff",
-                      borderRadius: "12px",
-                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
-                      transition: "all 0.3s ease",
-                      cursor: "pointer", // Indicate clickability
-                      "&:hover": {
-                        boxShadow: "0 6px 16px rgba(0, 0, 0, 0.1)",
-                        transform: "translateY(-2px)",
-                      },
-                    }}
-                    onClick={() => handleCardClick(card.filter)} // Click handler
-                  >
-                    <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                      {card.icon}
-                      <Box>
-                        <Typography variant="body2" sx={{ color: "#666" }}>
-                          {card.title}
-                        </Typography>
-                        <Typography variant="h6" sx={{ fontWeight: 700, color: card.title === "Sick Cows" ? "red" : "#1a3c34" }}>
-                          {loadingLivestock ? "..." : card.count}
-                        </Typography>
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
+              {loadingFarms ? (
+                <Typography>Loading farms...</Typography>
+              ) : farmsData.length === 0 ? (
+                <Typography>No farms available.</Typography>
+              ) : (
+                farmsData.map((farm) => (
+                  <Grid item xs={12} sm={6} md={4} lg={2.4} key={farm.id}>
+                    <Card
+                      sx={{
+                        bgcolor: selectedFarmId === farm.id ? "#fff3e0" : "#fff", // Highlight selected farm
+                        borderRadius: "12px",
+                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
+                        transition: "all 0.3s ease",
+                        cursor: "pointer",
+                        "&:hover": {
+                          boxShadow: "0 6px 16px rgba(0, 0, 0, 0.1)",
+                          transform: "translateY(-2px)",
+                        },
+                      }}
+                      onClick={() => handleFarmCardClick(farm.id)}
+                    >
+                      <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                        <GiBarn size={24} color="#ffa500" />
+                        <Box>
+                          <Typography variant="body2" sx={{ color: "#666" }}>
+                            {farm.name || "Unnamed Farm"}
+                          </Typography>
+                          <Typography variant="h6" sx={{ fontWeight: 700, color: "#1a3c34" }}>
+                            {farm.location || "Unknown Location"}
+                          </Typography>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))
+              )}
             </Grid>
           </Box>
 
-          {/* Main Dashboard Grid */}
-          <Grid container spacing={3}>
-            <Grid item xs={12} sm={6} lg={4}>
-              <DashboardCard title="📅 Calendar">
-                <CalendarComponent />
-              </DashboardCard>
+          {/* Livestock Cards (for selected farm) */}
+          {selectedFarmId && (
+            <Box sx={{ mb: 4 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, color: "#1a3c34", mb: 2 }}>
+                Livestock Summary - {farmsData.find(f => f.id === selectedFarmId)?.name || "Selected Farm"}
+              </Typography>
+              <Grid container spacing={2}>
+                {livestockCards.map((card) => (
+                  <Grid item xs={12} sm={6} md={4} lg={2.4} key={card.title}>
+                    <Card
+                      sx={{
+                        bgcolor: "#fff",
+                        borderRadius: "12px",
+                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
+                        transition: "all 0.3s ease",
+                        cursor: "pointer",
+                        "&:hover": {
+                          boxShadow: "0 6px 16px rgba(0, 0, 0, 0.1)",
+                          transform: "translateY(-2px)",
+                        },
+                      }}
+                      onClick={() => handleCardClick(card.filter)}
+                    >
+                      <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                        {card.icon}
+                        <Box>
+                          <Typography variant="body2" sx={{ color: "#666" }}>
+                            {card.title}
+                          </Typography>
+                          <Typography variant="h6" sx={{ fontWeight: 700, color: card.title === "Sick Cows" ? "red" : "#1a3c34" }}>
+                            {loadingLivestock ? "..." : card.count}
+                          </Typography>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
+          )}
+
+          {/* Main Dashboard Grid (for selected farm) */}
+          {selectedFarmId && (
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6} lg={4}>
+                <DashboardCard title="📅 Calendar">
+                  <CalendarComponent farmId={selectedFarmId} />
+                </DashboardCard>
+              </Grid>
+              <Grid item xs={12} sm={6} lg={4}>
+                <DashboardCard title="📈 Milk Production">
+                  <MilkProductionChart farmId={selectedFarmId} />
+                </DashboardCard>
+              </Grid>
+              <Grid item xs={12} sm={6} lg={4}>
+                <DashboardCard title="🌾 Feed Management">
+                  <FeedManagement farmId={selectedFarmId} />
+                </DashboardCard>
+              </Grid>
+              <Grid item xs={12} sm={6} lg={4}>
+                <DashboardCard title="📊 Production Overview">
+                  <ProductionOverview farmId={selectedFarmId} />
+                </DashboardCard>
+              </Grid>
+              <Grid item xs={12} sm={6} lg={4}>
+                <DashboardCard title="💰 Financial Overview">
+                  <FinancialOverview farmId={selectedFarmId} />
+                </DashboardCard>
+              </Grid>
+              <Grid item xs={12} sm={6} lg={4}>
+                <DashboardCard title="🐄 Livestock Overview">
+                  <LivestockOverview farmId={selectedFarmId} />
+                </DashboardCard>
+              </Grid>
+              <Grid item xs={12} sm={6} lg={4}>
+                <DashboardCard title="📅 Monthly Activities">
+                  <MonthlyActivities farmId={selectedFarmId} />
+                </DashboardCard>
+              </Grid>
+              <Grid item xs={12} sm={6} lg={4}>
+                <DashboardCard title="📜 Farm Activities">
+                  <FarmActivitiesHistory farmId={selectedFarmId} />
+                </DashboardCard>
+              </Grid>
+              <Grid item xs={12}>
+                <DashboardCard title="📋 Tasks">
+                  <TaskManagement farmId={selectedFarmId} />
+                </DashboardCard>
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6} lg={4}>
-              <DashboardCard title="📈 Milk Production">
-                <MilkProductionChart />
-              </DashboardCard>
-            </Grid>
-            <Grid item xs={12} sm={6} lg={4}>
-              <DashboardCard title="🌾 Feed Management">
-                <FeedManagement />
-              </DashboardCard>
-            </Grid>
-            <Grid item xs={12} sm={6} lg={4}>
-              <DashboardCard title="📊 Production Overview">
-                <ProductionOverview />
-              </DashboardCard>
-            </Grid>
-            <Grid item xs={12} sm={6} lg={4}>
-              <DashboardCard title="💰 Financial Overview">
-                <FinancialOverview />
-              </DashboardCard>
-            </Grid>
-            <Grid item xs={12} sm={6} lg={4}>
-              <DashboardCard title="🐄 Livestock Overview">
-                <LivestockOverview />
-              </DashboardCard>
-            </Grid>
-            <Grid item xs={12} sm={6} lg={4}>
-              <DashboardCard title="📅 Monthly Activities">
-                <MonthlyActivities />
-              </DashboardCard>
-            </Grid>
-            <Grid item xs={12} sm={6} lg={4}>
-              <DashboardCard title="📜 Farm Activities">
-                <FarmActivitiesHistory />
-              </DashboardCard>
-            </Grid>
-            <Grid item xs={12}>
-              <DashboardCard title="📋 Tasks">
-                <TaskManagement />
-              </DashboardCard>
-            </Grid>
-          </Grid>
+          )}
         </Container>
       </Box>
     </Box>

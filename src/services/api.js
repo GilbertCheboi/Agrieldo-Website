@@ -2,8 +2,8 @@ import axios from "axios";
 
 // Base API instance
 const API = axios.create({
-  //baseURL: "http://207.154.253.97:8000/api/", // Update the base URL to match your backend
-  baseURL: "https://api.agrieldo.com/api/", // Alternative URL commented out
+    baseURL: "http://207.154.253.97:8000/api/", // Update the base URL to match your backend
+    //baseURL: "https://api.agrieldo.com/api/", // Alternative URL commented out
 });
 
 // Add a request interceptor to include the JWT token in headers
@@ -119,16 +119,7 @@ export const fetchProduceDetails = async (id) => {
   }
 };
 
-export const fetchOutlets = async () => {
-  try {
-    const response = await API.get("inventory/outlets/", getAuthHeaders());
-    console.log("Fetched Outlets Data:", response.data);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching outlets:", error.response ? error.response.data : error.message);
-    throw error;
-  }
-};
+
 
 export const fetchOutletDetails = async (id) => {
   try {
@@ -141,16 +132,7 @@ export const fetchOutletDetails = async (id) => {
   }
 };
 
-export const fetchInventory = async () => {
-  try {
-    const response = await API.get("inventory/", getAuthHeaders());
-    console.log("Fetched Inventory Data:", response.data);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching inventory:", error.response ? error.response.data : error.message);
-    throw error;
-  }
-};
+
 
 export const fetchPlateauInventory = async () => {
   try {
@@ -179,13 +161,14 @@ export const fetchOutletInventory = async (outletId) => {
 
 export const createInventory = async (inventoryData) => {
   try {
-    const response = await API.post("inventory/", inventoryData, getAuthHeaders());
+    console.log("Sending Inventory Payload:", inventoryData);
+    const response = await API.post("inventory/inventory/", inventoryData, getAuthHeaders());
     console.log("Created Inventory Entry:", response.data);
     return response.data;
   } catch (error) {
-    const errorMessage = error.response?.data?.error || "Error creating inventory";
-    console.error("Error creating inventory:", errorMessage);
-    throw new Error(errorMessage); // Pass detailed error to frontend
+    console.error("Full error response:", error.response?.data);
+    const errorMessage = error.response?.data || "Error creating inventory";
+    throw new Error(JSON.stringify(errorMessage)); // So you get exact error on frontend
   }
 };
 
@@ -473,12 +456,68 @@ export const removeFarmStaff = async (farmId, userId) => {
   }
 };
 
+// Get all vets assigned to a specific farm
+export const getFarmVets = async (farmId) => {
+  try {
+    const response = await API.get(`/farms/${farmId}/vets/`, getAuthHeaders());
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching vets:", error);
+    throw error;
+  }
+};
+
+// Get list of all users eligible to be assigned as vets
+export const getVets = async () => {
+  try {
+    const response = await API.get(`/accounts/list_vets/`, getAuthHeaders());
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching vet users:", error);
+    throw error;
+  }
+};
+
+// Assign vet to a farm
+export const addFarmVet = async (farmId, userId) => {
+  try {
+    const response = await API.post(`/farms/${farmId}/add-vet/`, { user_id: userId }, getAuthHeaders());
+    return response.data;
+  } catch (error) {
+    console.error("Error assigning vet:", error);
+    throw error;
+  }
+};
+
+// Remove vet from a farm
+export const removeFarmVet = async (farmId, userId) => {
+  try {
+    await API.delete(`/farms/${farmId}/remove-vet/${userId}/`, getAuthHeaders());
+    return { message: "Vet removed successfully." };
+  } catch (error) {
+    console.error("Error removing vet:", error);
+    throw error;
+  }
+};
+
+
+
 export const getFarms = async () => {
   try {
     const response = await API.get(`farms/get_farms/`, getAuthHeaders());
     return response.data;
   } catch (error) {
     console.error("Error fetching farms:", error);
+    throw error;
+  }
+};
+
+export const createFarm = async (data) => {
+  try {
+    const response = await API.post("farms/farms/", data, getAuthHeaders()); // ✅ Corrected
+    return response.data;
+  } catch (error) {
+    console.error("Error creating farm:", error);
     throw error;
   }
 };
@@ -560,6 +599,90 @@ export const addReproductiveHistory = async (animalId, data) => {
     return response.data;
   } catch (error) {
     console.error("Error adding reproductive history:", error.response ? error.response.data : error.message);
+    throw error;
+  }
+};
+export const fetchProduceItems = async () => {
+  try {
+    const response = await API.get("inventory/produce/", getAuthHeaders());
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching produce:", error);
+    throw error;
+  }
+};
+
+// --- STORES (Plateau) ---
+export const fetchStoreInventory = async (start_date = null, end_date = null) => {
+  try {
+    let url = "inventory/inventory/";
+
+    // Add query params if dates are provided
+    const params = new URLSearchParams();
+    if (start_date) params.append("start_date", start_date);
+    if (end_date) params.append("end_date", end_date);
+
+    if (params.toString()) {
+      url += `?${params.toString()}`;
+    }
+
+    const response = await API.get(url, getAuthHeaders());
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching store inventory:", error);
+    throw error;
+  }
+};
+
+// --- OUTLETS ---
+export const fetchOutlets = async () => {
+  try {
+    const response = await API.get("inventory/outlets/", getAuthHeaders());
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching outlets:", error);
+    throw error;
+  }
+};
+
+// --- INVENTORY LIST (Stock Distribution) ---
+export const fetchInventory = async () => {
+  try {
+    const response = await API.get("inventory/inventory/", getAuthHeaders());
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching inventory:", error);
+    throw error;
+  }
+};
+
+// --- TRANSACTIONS (All Transfers / Additions) ---
+export const fetchInventoryTransactions = async () => {
+  try {
+    const response = await API.get("inventory/transactions/", getAuthHeaders());
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching transactions:", error);
+    throw error;
+  }
+};
+
+// --- CREATE TRANSACTION (Transfer or Add to Plateau) ---
+export const createTransaction = async (payload) => {
+  try {
+    const response = await API.post("inventory/transactions/", payload, getAuthHeaders());
+    return response.data;
+  } catch (error) {
+    console.error("Error creating transaction:", error.response?.data || error.message);
+    throw error;
+  }
+};
+export const fetchStores = async () => {
+  try {
+    const response = await API.get("inventory/stores/", getAuthHeaders());
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching stores:", error);
     throw error;
   }
 };

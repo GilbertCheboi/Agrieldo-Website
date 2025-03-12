@@ -1,6 +1,18 @@
 import { useState, useEffect } from 'react';
-import { fetchProduce, fetchOutlets, createInventory } from '../services/api';
-import { Modal, Box, TextField, Button, MenuItem, Typography, Alert } from '@mui/material';
+import {
+  fetchProduce,
+  fetchOutlets,
+  createInventory,
+} from '../services/api';
+import {
+  Modal,
+  Box,
+  TextField,
+  Button,
+  MenuItem,
+  Typography,
+  Alert,
+} from '@mui/material';
 
 const style = {
   position: 'absolute',
@@ -14,7 +26,7 @@ const style = {
   borderRadius: 2,
 };
 
-function TransferModal({ open, onClose, onSuccess }) {
+function TransferModal({ open, onClose, onSuccess, storeId }) {
   const [formData, setFormData] = useState({
     produce_id: '',
     quantity: '',
@@ -32,15 +44,25 @@ function TransferModal({ open, onClose, onSuccess }) {
         const outletsRes = await fetchOutlets();
         setProduceList(produceRes);
         setOutlets(outletsRes);
-        if (produceRes.length > 0) setFormData({ ...formData, produce_id: produceRes[0].id });
-        if (outletsRes.length > 0) setFormData({ ...formData, outlet_id: outletsRes[0].id });
-      } catch (error) {
-        console.error('Error fetching data:', error);
+
+        // Preselect first produce and outlet if available
+        setFormData(prev => ({
+          ...prev,
+          produce_id: produceRes.length > 0 ? produceRes[0].id : '',
+          outlet_id: outletsRes.length > 0 ? outletsRes[0].id : '',
+        }));
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Failed to load produce or outlets. Please try again.');
       } finally {
         setLoading(false);
       }
     };
-    if (open) fetchData();
+
+    if (open) {
+      setLoading(true);
+      fetchData();
+    }
   }, [open]);
 
   const handleChange = (e) => {
@@ -50,28 +72,55 @@ function TransferModal({ open, onClose, onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('Form submitted');
+    console.log('Form data:', formData);
+    console.log('storeId:', storeId);
+
+    if (
+      !formData.produce_id ||
+      !formData.quantity ||
+      !formData.outlet_id ||
+      !storeId
+    ) {
+      setError('All fields are required, including store ID.');
+      return;
+    }
+
     try {
-      await createInventory({
-        produce_id: formData.produce_id,
-        outlet_id: formData.outlet_id,
+      const payload = {
+        produce: parseInt(formData.produce_id),   // ✅ Correct field name
+        store: storeId,                           // ✅ Correct field name
+        outlet: parseInt(formData.outlet_id),     // ✅ Correct field name
         quantity: parseFloat(formData.quantity),
-      });
-      alert('Transfer successful!');
+      };
+
+      console.log('Sending payload:', payload);
+      await createInventory(payload);
+
+      console.log('Transfer successful');
       onSuccess();
-    } catch (error) {
-      setError(error.message);
+      onClose();
+    } catch (err) {
+      console.error('Transfer error:', err);
+      setError(err.message || 'Failed to transfer stock. Please try again.');
     }
   };
 
-  if (loading && open) return <p>Loading...</p>;
+  if (loading && open) return <p className="text-center mt-4">Loading...</p>;
 
   return (
     <Modal open={open} onClose={onClose} aria-labelledby="transfer-modal-title">
       <Box sx={style}>
-        <Typography id="transfer-modal-title" variant="h6" component="h2" gutterBottom>
-          Transfer Stock from Plateau
+        <Typography id="transfer-modal-title" variant="h6" gutterBottom>
+          Transfer Stock to Outlet
         </Typography>
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+
         <form onSubmit={handleSubmit}>
           <TextField
             select
@@ -81,22 +130,15 @@ function TransferModal({ open, onClose, onSuccess }) {
             onChange={handleChange}
             fullWidth
             margin="normal"
+            required
           >
             {produceList.map(item => (
               <MenuItem key={item.id} value={item.id}>
-                <div className="flex items-center">
-                  {item.image && (
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-8 h-8 object-cover mr-2 rounded"
-                    />
-                  )}
-                  {item.name}
-                </div>
+                {item.name}
               </MenuItem>
             ))}
           </TextField>
+
           <TextField
             type="number"
             label="Quantity"
@@ -106,7 +148,9 @@ function TransferModal({ open, onClose, onSuccess }) {
             fullWidth
             margin="normal"
             required
+            inputProps={{ min: 0.01, step: 0.01 }}
           />
+
           <TextField
             select
             label="Destination Outlet"
@@ -115,6 +159,7 @@ function TransferModal({ open, onClose, onSuccess }) {
             onChange={handleChange}
             fullWidth
             margin="normal"
+            required
           >
             {outlets.map(outlet => (
               <MenuItem key={outlet.id} value={outlet.id}>
@@ -122,6 +167,7 @@ function TransferModal({ open, onClose, onSuccess }) {
               </MenuItem>
             ))}
           </TextField>
+
           <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
             <Button onClick={onClose} sx={{ mr: 1 }}>
               Cancel

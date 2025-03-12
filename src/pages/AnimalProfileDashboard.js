@@ -24,7 +24,15 @@ export default function AnimalProfileDashboard() {
   const [editingHealthRecordId, setEditingHealthRecordId] = useState(null);
 
   // Form states
-  const [productionForm, setProductionForm] = useState({ date: "", milk_yield: "", scc: "", feed_consumption: "", fat_percentage: "", protein_percentage: "" });
+  const [productionForm, setProductionForm] = useState({ 
+    date: "", 
+    session: "MORNING", // Default to MORNING
+    milk_yield: "", 
+    scc: "", 
+    feed_consumption: "", 
+    fat_percentage: "", 
+    protein_percentage: "" 
+  });
   const [healthForm, setHealthForm] = useState({ date: "", type: "", details: "", is_sick: false, clinical_signs: "", diagnosis: "", treatment: "" });
   const [reproductionForm, setReproductionForm] = useState({ date: "", event: "AI", details: "" });
 
@@ -58,6 +66,7 @@ export default function AnimalProfileDashboard() {
     try {
       const newRecord = {
         date: productionForm.date || new Date().toISOString().split('T')[0],
+        session: productionForm.session,
         milk_yield: parseFloat(productionForm.milk_yield) || 0,
         scc: parseInt(productionForm.scc, 10) || 0,
         feed_consumption: parseFloat(productionForm.feed_consumption) || 0,
@@ -67,7 +76,15 @@ export default function AnimalProfileDashboard() {
       await addProductionData(animalIdInt, newRecord);
       setReloadTrigger(prev => prev + 1); // Trigger reload
       setIsProductionModalOpen(false);
-      setProductionForm({ date: "", milk_yield: "", scc: "", feed_consumption: "", fat_percentage: "", protein_percentage: "" });
+      setProductionForm({ 
+        date: "", 
+        session: "MORNING", 
+        milk_yield: "", 
+        scc: "", 
+        feed_consumption: "", 
+        fat_percentage: "", 
+        protein_percentage: "" 
+      });
     } catch (err) {
       setError("Failed to add production record: " + (err.message || "Permission denied"));
     }
@@ -164,15 +181,63 @@ export default function AnimalProfileDashboard() {
   if (error) return <div className="text-center p-6 text-red-600">{error}</div>;
   if (!animalData) return <div className="text-center p-6">No data available</div>;
 
-  const productionChartData = animalData.production_data.map(record => ({
-    name: record.date,
-    Milk: record.milk_yield,
-    Feed: record.feed_consumption,
-    SCC: record.scc,
-    Fat: record.fat_percentage,
-    Protein: record.protein_percentage,
-    FCR: record.feed_consumption ? (record.milk_yield / record.feed_consumption).toFixed(2) : 0,
-  }));
+  // Aggregate production data by date for totals, with session details for tooltip
+  const productionChartData = Object.values(
+    animalData.production_data.reduce((acc, record) => {
+      const date = record.date;
+      if (!acc[date]) {
+        acc[date] = {
+          name: date,
+          Milk: 0, // Total milk yield for the day
+          Feed: 0, // Total feed consumption (optional for other charts)
+          SCC: 0, // Total SCC (optional for other charts)
+          Fat: 0, // Average fat percentage (optional)
+          Protein: 0, // Average protein percentage (optional)
+          sessions: [], // Store session details for tooltip
+        };
+      }
+      acc[date].Milk += record.milk_yield;
+      acc[date].Feed += record.feed_consumption;
+      acc[date].SCC += record.scc;
+      acc[date].Fat += record.fat_percentage; // Sum for averaging later if needed
+      acc[date].Protein += record.protein_percentage; // Sum for averaging later if needed
+      acc[date].sessions.push({
+        session: record.session,
+        milk_yield: record.milk_yield,
+        feed_consumption: record.feed_consumption,
+        scc: record.scc,
+        fat_percentage: record.fat_percentage,
+        protein_percentage: record.protein_percentage,
+      });
+      return acc;
+    }, {})
+  ).map(day => ({
+    ...day,
+    Fat: day.sessions.length ? day.Fat / day.sessions.length : 0, // Average fat
+    Protein: day.sessions.length ? day.Protein / day.sessions.length : 0, // Average protein
+    FCR: day.Feed ? (day.Milk / day.Feed).toFixed(2) : 0, // Calculate FCR for the day
+  })).sort((a, b) => new Date(a.name) - new Date(b.name));
+
+  // Custom Tooltip for Daily Milk Production
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-white dark:bg-gray-800 p-3 border border-gray-300 dark:border-gray-700 rounded shadow-lg text-black dark:text-white">
+          <p className="font-bold">{`Date: ${formatXAxis(label)}`}</p>
+          <p>{`Total Milk: ${data.Milk.toFixed(1)} L`}</p>
+          <hr className="my-1 border-gray-300 dark:border-gray-600" />
+          <p className="font-semibold">Sessions:</p>
+          {data.sessions.map((session, index) => (
+            <div key={index} className="text-sm">
+              <p>{`${session.session}: ${session.milk_yield.toFixed(1)} L`}</p>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
 
   const financialChartData = [
     { name: "Feed Costs", value: animalData.financial_details?.feed_cost_per_month || 0 },
@@ -305,9 +370,15 @@ export default function AnimalProfileDashboard() {
               tick={{ fontSize: 12 }}
             />
             <YAxis stroke={darkMode ? "#fff" : "#000"} />
-            <Tooltip contentStyle={{ backgroundColor: darkMode ? "#1F2937" : "#fff", color: darkMode ? "#fff" : "#000" }} />
+            <Tooltip content={<CustomTooltip />} />
             <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#4B5563" : "#E5E7EB"} />
-            <Line type="monotone" dataKey="Milk" stroke={CHART_COLORS.Milk} strokeWidth={2} name="Milk Yield (L)" />
+            <Line 
+              type="monotone" 
+              dataKey="Milk" 
+              stroke={CHART_COLORS.Milk} 
+              strokeWidth={2} 
+              name="Milk Yield (L)" 
+            />
           </LineChart>
         </div>
 
@@ -400,7 +471,7 @@ export default function AnimalProfileDashboard() {
             </span>
           </h2>
           <BarChart width={300} height={200} data={productionChartData}>
-            <XAxis dataKey="name" stroke={darkMode ? "#fff" : "#000"} />
+            <XAxis dataKey="name" stroke={darkMode ? "#fff" : "#000"} tickFormatter={formatXAxis} />
             <YAxis stroke={darkMode ? "#fff" : "#000"} />
             <Tooltip contentStyle={{ backgroundColor: darkMode ? "#1F2937" : "#fff", color: darkMode ? "#fff" : "#000" }} />
             <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#4B5563" : "#E5E7EB"} />
@@ -418,7 +489,7 @@ export default function AnimalProfileDashboard() {
             </span>
           </h2>
           <AreaChart width={300} height={200} data={productionChartData}>
-            <XAxis dataKey="name" stroke={darkMode ? "#fff" : "#000"} />
+            <XAxis dataKey="name" stroke={darkMode ? "#fff" : "#000"} tickFormatter={formatXAxis} />
             <YAxis stroke={darkMode ? "#fff" : "#000"} />
             <Tooltip contentStyle={{ backgroundColor: darkMode ? "#1F2937" : "#fff", color: darkMode ? "#fff" : "#000" }} />
             <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#4B5563" : "#E5E7EB"} />
@@ -437,7 +508,7 @@ export default function AnimalProfileDashboard() {
             </span>
           </h2>
           <ScatterChart width={300} height={200}>
-            <XAxis dataKey="name" stroke={darkMode ? "#fff" : "#000"} />
+            <XAxis dataKey="name" stroke={darkMode ? "#fff" : "#000"} tickFormatter={formatXAxis} />
             <YAxis stroke={darkMode ? "#fff" : "#000"} />
             <Tooltip contentStyle={{ backgroundColor: darkMode ? "#1F2937" : "#fff", color: darkMode ? "#fff" : "#000" }} />
             <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#4B5563" : "#E5E7EB"} />
@@ -507,6 +578,15 @@ export default function AnimalProfileDashboard() {
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-black"
                 placeholder="Date"
               />
+              <select
+                value={productionForm.session}
+                onChange={(e) => setProductionForm({ ...productionForm, session: e.target.value })}
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-black"
+              >
+                <option value="MORNING">Morning</option>
+                <option value="AFTERNOON">Afternoon</option>
+                <option value="EVENING">Evening</option>
+              </select>
               <input
                 type="number"
                 value={productionForm.milk_yield}

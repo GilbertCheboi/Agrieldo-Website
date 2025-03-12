@@ -1,31 +1,61 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { fetchPlateauInventory, fetchOutlets, fetchDailyInventory } from '../services/api';
-import { Fab, Box, Tooltip, TextField } from '@mui/material';
+import {
+  fetchStoreInventory,
+  fetchOutlets,
+  fetchProduce,
+} from '../services/api';
+import {
+  Fab,
+  Box,
+  Tooltip,
+  TextField,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Paper,
+  Avatar,
+  Button,
+} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import MoveIcon from '@mui/icons-material/ArrowForward';
+import DownloadIcon from '@mui/icons-material/Download';
 import TransferModal from './TransferModal';
-import AddToPlateauModal from './AddToPlateauModal';
+import AddToStoreModal from './AddToStoreModal ';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import Papa from 'papaparse';
+
+const IMAGE_BASE_URL = 'http://207.154.253.97:8000'; // Change for production if needed
 
 function InventoryDashboard() {
-  const [plateauStock, setPlateauStock] = useState([]);
+  const [storeStock, setStoreStock] = useState([]);
+  const [storeId, setStoreId] = useState(null);
   const [outlets, setOutlets] = useState([]);
-  const [dailyStock, setDailyStock] = useState([]);
+  const [produceItems, setProduceItems] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(true);
   const [openTransfer, setOpenTransfer] = useState(false);
-  const [openAddToPlateau, setOpenAddToPlateau] = useState(false);
+  const [openAddToStore, setOpenAddToStore] = useState(false);
 
   const fetchData = async () => {
     try {
-      const plateauRes = await fetchPlateauInventory();
-      const outletsRes = await fetchOutlets();
-      const dailyRes = await fetchDailyInventory(selectedDate);
-      setPlateauStock(plateauRes);
-      setOutlets(outletsRes);
-      setDailyStock(dailyRes);
+      const [storeRes, outletRes, produceRes] = await Promise.all([
+        fetchStoreInventory(selectedDate, selectedDate),
+        fetchOutlets(),
+        fetchProduce(),
+      ]);
+
+      setStoreStock(storeRes);
+      if (storeRes.length > 0) {
+        setStoreId(storeRes[0].store?.id || storeRes[0].store);
+      }
+
+      setOutlets(outletRes);
+      setProduceItems(produceRes);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error fetching inventory data:', error);
     } finally {
       setLoading(false);
     }
@@ -37,26 +67,92 @@ function InventoryDashboard() {
 
   const handleOpenTransfer = () => setOpenTransfer(true);
   const handleCloseTransfer = () => setOpenTransfer(false);
-  const handleOpenAddToPlateau = () => setOpenAddToPlateau(true);
-  const handleCloseAddToPlateau = () => setOpenAddToPlateau(false);
+  const handleOpenAddToStore = () => setOpenAddToStore(true);
+  const handleCloseAddToStore = () => setOpenAddToStore(false);
+
   const handleSuccess = () => {
     fetchData();
     handleCloseTransfer();
-    handleCloseAddToPlateau();
+    handleCloseAddToStore();
   };
 
   const handleDateChange = (e) => {
     setSelectedDate(e.target.value);
   };
 
-  if (loading) return <p>Loading...</p>;
+  const getStockQuantity = (produceId, outletId = null) => {
+    const filtered = storeStock.filter((item) => {
+      const itemProduceId = item.produce?.id || item.produce;
+      const isProduceMatch = itemProduceId === produceId;
+
+      if (outletId !== null) {
+        const itemOutletId = item.outlet?.id || item.outlet;
+        return isProduceMatch && itemOutletId === outletId;
+      } else {
+        return isProduceMatch && (!item.outlet || item.outlet === null);
+      }
+    });
+
+    const total = filtered.reduce((sum, i) => sum + i.quantity, 0);
+    return total;
+  };
+
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    doc.text('Inventory Report', 14, 15);
+
+    const tableColumn = ['Produce Item', 'Store Stock', ...outlets.map(outlet => outlet.name)];
+    const tableRows = [];
+
+    produceItems.forEach((produce) => {
+      const rowData = [
+        produce.name,
+        getStockQuantity(produce.id),
+        ...outlets.map((outlet) => getStockQuantity(produce.id, outlet.id)),
+      ];
+      tableRows.push(rowData);
+    });
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+    });
+
+    doc.save(`inventory_report_${selectedDate}.pdf`);
+  };
+
+  const handleDownloadCSV = () => {
+    const csvData = produceItems.map((produce) => {
+      const row = {
+        'Produce Item': produce.name,
+        'Store Stock': getStockQuantity(produce.id),
+      };
+      outlets.forEach((outlet) => {
+        row[outlet.name] = getStockQuantity(produce.id, outlet.id);
+      });
+      return row;
+    });
+
+    const csv = Papa.unparse(csvData);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `inventory_report_${selectedDate}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  if (loading) return <p>Loading inventory...</p>;
 
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Inventory Management Dashboard</h1>
-      
+
       <TextField
-        label="Select Date"
+        label="Filter by Date"
         type="date"
         value={selectedDate}
         onChange={handleDateChange}
@@ -64,56 +160,101 @@ function InventoryDashboard() {
         sx={{ mb: 4 }}
       />
 
-      <section className="mb-10">
-        <h2 className="text-2xl font-semibold mb-4">Plateau Stock (as of {selectedDate})</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {dailyStock.filter(item => !item.outlet).map(item => (
-            <div key={item.id} className="bg-white p-4 rounded shadow flex items-center">
-              {item.produce.image && (
-                <img
-                  src={item.produce.image}
-                  alt={item.produce.name}
-                  className="w-16 h-16 object-cover mr-4 rounded"
-                />
-              )}
-              <div>
-                <h3 className="font-bold">{item.produce.name}</h3>
-                <p>{item.quantity} {item.produce.unit}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* Download Buttons */}
+      <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<DownloadIcon />}
+          onClick={handleDownloadPDF}
+        >
+          Download PDF
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={handleDownloadCSV}
+        >
+          Download CSV
+        </Button>
+      </Box>
 
-      <section>
-        <h2 className="text-2xl font-semibold mb-4">Outlets (as of {selectedDate})</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {outlets.map(outlet => (
-            <Link to={`/inventory/outlet/${outlet.id}`} key={outlet.id} className="bg-white p-4 rounded shadow hover:bg-gray-50">
-              <h3 className="font-bold">{outlet.name}</h3>
-              <p>Total Stock: {dailyStock
-                .filter(item => item.outlet && item.outlet.id === outlet.id)
-                .reduce((sum, item) => sum + item.quantity, 0)} units</p>
-            </Link>
-          ))}
-        </div>
-      </section>
+      <Paper sx={{ overflowX: 'auto' }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell><strong>Produce Item</strong></TableCell>
+              <TableCell><strong>Store Stock</strong></TableCell>
+              {outlets.map((outlet) => (
+                <TableCell key={outlet.id}><strong>{outlet.name}</strong></TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {produceItems.map((produce) => (
+              <TableRow key={produce.id}>
+                <TableCell>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Avatar
+                      src={
+                        produce.image
+                          ? `${IMAGE_BASE_URL}${produce.image}`
+                          : `https://via.placeholder.com/40?text=${produce.name.charAt(0)}`
+                      }
+                      alt={produce.name}
+                      sx={{ width: 40, height: 40 }}
+                    />
+                    {produce.name}
+                  </Box>
+                </TableCell>
+                <TableCell>{getStockQuantity(produce.id)}</TableCell>
+                {outlets.map((outlet) => (
+                  <TableCell key={outlet.id}>
+                    {getStockQuantity(produce.id, outlet.id)}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Paper>
 
-      <Box sx={{ position: 'fixed', bottom: 16, right: 16, display: 'flex', flexDirection: 'column', gap: 2 }}>
+      {/* Floating Action Buttons */}
+      <Box
+        sx={{
+          position: 'fixed',
+          bottom: 16,
+          right: 16,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+        }}
+      >
         <Tooltip title="Transfer Stock">
           <Fab color="primary" aria-label="transfer" onClick={handleOpenTransfer}>
             <MoveIcon />
           </Fab>
         </Tooltip>
-        <Tooltip title="Add to Plateau">
-          <Fab color="primary" aria-label="add" onClick={handleOpenAddToPlateau}>
+        <Tooltip title="Add to Store">
+          <Fab color="secondary" aria-label="add" onClick={handleOpenAddToStore}>
             <AddIcon />
           </Fab>
         </Tooltip>
       </Box>
 
-      <TransferModal open={openTransfer} onClose={handleCloseTransfer} onSuccess={handleSuccess} />
-      <AddToPlateauModal open={openAddToPlateau} onClose={handleCloseAddToPlateau} onSuccess={handleSuccess} />
+      {/* Modals */}
+      <TransferModal
+        open={openTransfer}
+        onClose={handleCloseTransfer}
+        onSuccess={handleSuccess}
+        storeId={storeId}
+      />
+
+      <AddToStoreModal
+        open={openAddToStore}
+        onClose={handleCloseAddToStore}
+        onSuccess={handleSuccess}
+      />
     </div>
   );
 }

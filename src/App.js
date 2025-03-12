@@ -30,6 +30,8 @@ import AnimalProfileDashboard from "./pages/AnimalProfileDashboard";
 import AnimalList from "./pages/AnimalList";
 import InventoryDashboard from './components/InventoryDashboard';
 import OutletInventory from './components/OutletInventory';
+import Farms from "./pages/Farms";
+import VetStaff from "./components/VetStaff";
 import "./index.css";
 import "./App.css";
 
@@ -72,6 +74,11 @@ const App = () => {
                 <Route path="/machinery/:id" element={<MachineryDetails />} />
                 <Route path="/animal/:id" element={<AnimalProfileDashboard />} />
                 <Route path="/animal_list" element={<AnimalList />} />
+                <Route path="/farms" element={<Farms />} />
+                <Route path="/farm-vets" element={<VetStaff />} />
+
+                
+
                 
                 {/* Inventory Management Routes */}
                 <Route path="/inventory" element={<InventoryDashboard />} />
