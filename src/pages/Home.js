@@ -138,6 +138,26 @@ const Home = () => {
       </motion.div>
 
 
+{/* Subscription Section */}
+<div className="bg-gradient-to-r from-[#FFA500] to-[#333333] py-16 px-6 rounded-lg shadow-lg text-white">
+  <div className="max-w-3xl mx-auto text-center">
+    <h2 className="text-5xl font-extrabold tracking-tight">Stay Connected with Agrieldo</h2>
+    <p className="mt-4 text-lg font-light text-white">
+      Subscribe to receive the latest updates, industry insights, and exclusive offers tailored just for you.
+    </p>
+    <div className="mt-8 flex flex-col sm:flex-row items-center justify-center">
+      <input
+        type="email"
+        placeholder="Enter your email address"
+        className="w-full sm:w-80 p-4 rounded-full text-gray-800 focus:outline-none focus:ring-4 focus:ring-orange-300"
+      />
+      <button className="mt-4 sm:mt-0 sm:ml-4 bg-white text-amber-600 px-6 py-3 rounded-full font-semibold text-lg shadow-md hover:bg-gray-200 transition">
+        Subscribe
+      </button>
+    </div>
+  </div>
+</div>
+
         {/* Call to Action Section */}
         <div
         className="text-center py-16 text-white"
