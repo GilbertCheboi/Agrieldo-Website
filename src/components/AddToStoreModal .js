@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { fetchProduce, fetchStores, createInventory } from '../services/api';
 import {
   Modal,
   Box,
@@ -12,6 +11,7 @@ import {
   ListItemText,
   ListItemIcon,
 } from '@mui/material';
+import { fetchProduce, fetchStores, createInventory } from '../services/api';
 
 const style = {
   position: 'absolute',
@@ -32,7 +32,9 @@ function AddToStoreModal({ open, onClose, onSuccess }) {
     produce: '',
     store: '',
     quantity: '',
+    created_at: '', // ✅ Add created_at to formData
   });
+
   const [produceList, setProduceList] = useState([]);
   const [storeList, setStoreList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -71,21 +73,30 @@ function AddToStoreModal({ open, onClose, onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const payload = {
-        produce: parseInt(formData.produce),
-        quantity: parseFloat(formData.quantity),
-        store: formData.store ? parseInt(formData.store) : null,
-        outlet: null  // explicitly set outlet to null so backend doesn't complain
-      };
   
+    console.log('formData before submit:', formData); // Debug line
+    const isoDate = formData.created_at
+      ? new Date(`${formData.created_at}T00:00:00`).toISOString()
+      : null;
+  
+    const payload = {
+      produce: parseInt(formData.produce),
+      quantity: parseFloat(formData.quantity),
+      store: formData.store ? parseInt(formData.store) : null,
+      outlet: null,
+      created_at: isoDate,
+    };
+  
+    console.log('Final Payload:', payload); // ✅ This should now show a non-null created_at
+  
+    try {
       await createInventory(payload);
       alert('Stock successfully added to Store!');
       onSuccess();
       onClose();
     } catch (err) {
       console.error('Error creating inventory:', err);
-      setError('Failed to add stock. Please check your input.');
+      setError('Failed to add stock.');
     }
   };
   
@@ -98,12 +109,15 @@ function AddToStoreModal({ open, onClose, onSuccess }) {
         <Typography id="add-to-store-modal-title" variant="h6" component="h2" gutterBottom>
           Add Stock to Store
         </Typography>
+
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {error}
           </Alert>
         )}
+
         <form onSubmit={handleSubmit}>
+          {/* Produce Selector */}
           <TextField
             select
             label="Produce"
@@ -131,6 +145,7 @@ function AddToStoreModal({ open, onClose, onSuccess }) {
             ))}
           </TextField>
 
+          {/* Store Selector */}
           <TextField
             select
             label="Store"
@@ -147,6 +162,7 @@ function AddToStoreModal({ open, onClose, onSuccess }) {
             ))}
           </TextField>
 
+          {/* Quantity Input */}
           <TextField
             type="number"
             label="Quantity"
@@ -158,6 +174,21 @@ function AddToStoreModal({ open, onClose, onSuccess }) {
             required
           />
 
+          {/* Date Picker */}
+          <TextField
+            type="date"
+            label="Creation Date"
+            name="created_at"
+            value={formData.created_at}
+            onChange={handleChange}
+            fullWidth
+            margin="normal"
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+
+          {/* Submit Buttons */}
           <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
             <Button onClick={onClose} sx={{ mr: 1 }}>
               Cancel

@@ -686,3 +686,85 @@ export const fetchStores = async () => {
     throw error;
   }
 };
+
+export const fetchSheepData = async ({ farmId }) => {
+  try {
+    const response = await API.get('sheep_app/sheep/', {
+      ...getAuthHeaders(),
+      params: farmId ? { farm_id: farmId } : {},
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching sheep data:", error);
+    throw error;
+  }
+};
+
+export const fetchSheepTypes = async () => {
+  try {
+    const response = await API.get('sheep_app/sheep-types/', getAuthHeaders());
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching sheep types:", error);
+    throw error;
+  }
+};
+
+export const fetchCropData = async ({ farmId }) => {
+  try {
+    const response = await API.get('sheep_app/crops/', {
+      ...getAuthHeaders(),
+      params: farmId ? { farm_id: farmId } : {},
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching crop data:", error);
+    throw error;
+  }
+};
+
+
+export const createSheep = async (sheepData) => {
+  try {
+    const response = await API.post('sheep_app/sheep/', sheepData, getAuthHeaders());
+    return response.data;
+  } catch (error) {
+    console.error("Error creating sheep:", error);
+    throw error;
+  }
+};
+
+export const addSheepProductionRecord = async (data) => {
+  const response = await API.post("sheep_app/sheep-production/", data, getAuthHeaders());
+  return response.data;
+};
+
+export const addSheepHealthRecord = async (data) => {
+  const response = await API.post("sheep_app/sheep-health/", data, getAuthHeaders());
+  return response.data;
+};
+
+export const updateSheepHealthRecord = async (id, data) => {
+  const response = await API.put(`sheep_app/sheep-health/${id}/`, data, getAuthHeaders());
+  return response.data;
+};
+
+export const addReproductionRecord = async (data) => {
+  const response = await API.post("sheep_app/sheep-reproduction/", data, getAuthHeaders());
+  return response.data;
+};
+
+
+export const createAnimal = async (animalData) => {
+  try {
+    const response = await API.post(
+      `animals/`,
+      animalData,
+      getAuthHeaders()
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error creating animal:", error);
+    throw error;
+  }
+};

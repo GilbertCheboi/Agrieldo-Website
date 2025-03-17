@@ -94,6 +94,11 @@ function InventoryDashboard() {
     return total;
   };
 
+  // Format display for UI and export
+  const formatStockDisplay = (quantity) => {
+    return quantity === 0 ? '-' : quantity;
+  };
+
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
     doc.text(`Inventory Report (${startDate} to ${endDate})`, 14, 15);
@@ -104,8 +109,10 @@ function InventoryDashboard() {
     produceItems.forEach((produce) => {
       const rowData = [
         produce.name,
-        getStockQuantity(produce.id),
-        ...outlets.map((outlet) => getStockQuantity(produce.id, outlet.id)),
+        formatStockDisplay(getStockQuantity(produce.id)),
+        ...outlets.map((outlet) =>
+          formatStockDisplay(getStockQuantity(produce.id, outlet.id))
+        ),
       ];
       tableRows.push(rowData);
     });
@@ -123,10 +130,10 @@ function InventoryDashboard() {
     const csvData = produceItems.map((produce) => {
       const row = {
         'Produce Item': produce.name,
-        'Store Stock': getStockQuantity(produce.id),
+        'Store Stock': formatStockDisplay(getStockQuantity(produce.id)),
       };
       outlets.forEach((outlet) => {
-        row[outlet.name] = getStockQuantity(produce.id, outlet.id);
+        row[outlet.name] = formatStockDisplay(getStockQuantity(produce.id, outlet.id));
       });
       return row;
     });
@@ -212,10 +219,10 @@ function InventoryDashboard() {
                     {produce.name}
                   </Box>
                 </TableCell>
-                <TableCell>{getStockQuantity(produce.id)}</TableCell>
+                <TableCell>{formatStockDisplay(getStockQuantity(produce.id))}</TableCell>
                 {outlets.map((outlet) => (
                   <TableCell key={outlet.id}>
-                    {getStockQuantity(produce.id, outlet.id)}
+                    {formatStockDisplay(getStockQuantity(produce.id, outlet.id))}
                   </TableCell>
                 ))}
               </TableRow>

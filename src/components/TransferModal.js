@@ -31,7 +31,9 @@ function TransferModal({ open, onClose, onSuccess, storeId }) {
     produce_id: '',
     quantity: '',
     outlet_id: '',
+    created_at: '', // ✅ NEW FIELD
   });
+
   const [produceList, setProduceList] = useState([]);
   const [outlets, setOutlets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +47,6 @@ function TransferModal({ open, onClose, onSuccess, storeId }) {
         setProduceList(produceRes);
         setOutlets(outletsRes);
 
-        // Preselect first produce and outlet if available
         setFormData(prev => ({
           ...prev,
           produce_id: produceRes.length > 0 ? produceRes[0].id : '',
@@ -72,9 +73,6 @@ function TransferModal({ open, onClose, onSuccess, storeId }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted');
-    console.log('Form data:', formData);
-    console.log('storeId:', storeId);
 
     if (
       !formData.produce_id ||
@@ -88,16 +86,18 @@ function TransferModal({ open, onClose, onSuccess, storeId }) {
 
     try {
       const payload = {
-        produce: parseInt(formData.produce_id),   // ✅ Correct field name
-        store: storeId,                           // ✅ Correct field name
-        outlet: parseInt(formData.outlet_id),     // ✅ Correct field name
+        produce: parseInt(formData.produce_id),
+        store: storeId,
+        outlet: parseInt(formData.outlet_id),
         quantity: parseFloat(formData.quantity),
       };
 
-      console.log('Sending payload:', payload);
-      await createInventory(payload);
+      // ✅ Add created_at if user selected it
+      if (formData.created_at) {
+        payload.created_at = new Date(formData.created_at).toISOString();
+      }
 
-      console.log('Transfer successful');
+      await createInventory(payload);
       onSuccess();
       onClose();
     } catch (err) {
@@ -167,6 +167,19 @@ function TransferModal({ open, onClose, onSuccess, storeId }) {
               </MenuItem>
             ))}
           </TextField>
+
+          <TextField
+            label="Date and Time (Optional)"
+            type="datetime-local"
+            name="created_at"
+            value={formData.created_at}
+            onChange={handleChange}
+            fullWidth
+            margin="normal"
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
 
           <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
             <Button onClick={onClose} sx={{ mr: 1 }}>

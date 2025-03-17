@@ -1,8 +1,7 @@
-// src/pages/AnimalProfileDashboard.js
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom"; // Added useNavigate
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell, Legend, AreaChart, Area, ScatterChart, Scatter, LineChart, Line } from "recharts";
-import { Sun, Moon, Download, ChevronLeft, ChevronRight, Info, Plus, Pen } from "lucide-react";
+import { Sun, Moon, Download, ChevronLeft, ChevronRight, Info, Plus, Pen, ArrowLeft } from "lucide-react"; // Added ArrowLeft
 import { fetchAnimalDetails, updateHealthRecord, addProductionData, addHealthRecord, addReproductiveHistory } from "../services/api";
 
 export default function AnimalProfileDashboard() {
@@ -15,6 +14,7 @@ export default function AnimalProfileDashboard() {
   const [error, setError] = useState(null);
   const [reloadTrigger, setReloadTrigger] = useState(0);
   const userType = parseInt(localStorage.getItem("user_type"), 10); // 1 = Farmer, 2 = Vet, 3 = Staff
+  const navigate = useNavigate(); // Added for navigation
 
   // Modal states
   const [isProductionModalOpen, setIsProductionModalOpen] = useState(false);
@@ -26,7 +26,7 @@ export default function AnimalProfileDashboard() {
   // Form states
   const [productionForm, setProductionForm] = useState({ 
     date: "", 
-    session: "MORNING", // Default to MORNING
+    session: "MORNING", 
     milk_yield: "", 
     scc: "", 
     feed_consumption: "", 
@@ -74,7 +74,7 @@ export default function AnimalProfileDashboard() {
         protein_percentage: parseFloat(productionForm.protein_percentage) || 0
       };
       await addProductionData(animalIdInt, newRecord);
-      setReloadTrigger(prev => prev + 1); // Trigger reload
+      setReloadTrigger(prev => prev + 1);
       setIsProductionModalOpen(false);
       setProductionForm({ 
         date: "", 
@@ -103,7 +103,7 @@ export default function AnimalProfileDashboard() {
         treatment: healthForm.treatment || ""
       };
       await addHealthRecord(animalIdInt, newRecord);
-      setReloadTrigger(prev => prev + 1); // Trigger reload
+      setReloadTrigger(prev => prev + 1);
       setIsHealthModalOpen(false);
       setHealthForm({ date: "", type: "", details: "", is_sick: false, clinical_signs: "", diagnosis: "", treatment: "" });
     } catch (err) {
@@ -123,7 +123,7 @@ export default function AnimalProfileDashboard() {
         treatment: healthForm.treatment || ""
       };
       await updateHealthRecord(editingHealthRecordId, updatedRecord);
-      setReloadTrigger(prev => prev + 1); // Trigger reload
+      setReloadTrigger(prev => prev + 1);
       setIsHealthModalOpen(false);
       setIsEditingHealth(false);
       setEditingHealthRecordId(null);
@@ -157,7 +157,7 @@ export default function AnimalProfileDashboard() {
         details: reproductionForm.details || ""
       };
       await addReproductiveHistory(animalIdInt, newRecord);
-      setReloadTrigger(prev => prev + 1); // Trigger reload
+      setReloadTrigger(prev => prev + 1);
       setIsReproductionModalOpen(false);
       setReproductionForm({ date: "", event: "AI", details: "" });
     } catch (err) {
@@ -167,6 +167,10 @@ export default function AnimalProfileDashboard() {
 
   const handleExport = () => {
     alert("Exporting profile data... (Implement PDF/CSV generation here)");
+  };
+
+  const handleBackClick = () => {
+    navigate(-1); // Go back to the previous page
   };
 
   const handleNextImage = () => setCurrentImageIndex((prev) => (prev + 1) % animalData.images.length);
@@ -188,19 +192,19 @@ export default function AnimalProfileDashboard() {
       if (!acc[date]) {
         acc[date] = {
           name: date,
-          Milk: 0, // Total milk yield for the day
-          Feed: 0, // Total feed consumption (optional for other charts)
-          SCC: 0, // Total SCC (optional for other charts)
-          Fat: 0, // Average fat percentage (optional)
-          Protein: 0, // Average protein percentage (optional)
-          sessions: [], // Store session details for tooltip
+          Milk: 0,
+          Feed: 0,
+          SCC: 0,
+          Fat: 0,
+          Protein: 0,
+          sessions: [],
         };
       }
       acc[date].Milk += record.milk_yield;
       acc[date].Feed += record.feed_consumption;
       acc[date].SCC += record.scc;
-      acc[date].Fat += record.fat_percentage; // Sum for averaging later if needed
-      acc[date].Protein += record.protein_percentage; // Sum for averaging later if needed
+      acc[date].Fat += record.fat_percentage;
+      acc[date].Protein += record.protein_percentage;
       acc[date].sessions.push({
         session: record.session,
         milk_yield: record.milk_yield,
@@ -213,9 +217,9 @@ export default function AnimalProfileDashboard() {
     }, {})
   ).map(day => ({
     ...day,
-    Fat: day.sessions.length ? day.Fat / day.sessions.length : 0, // Average fat
-    Protein: day.sessions.length ? day.Protein / day.sessions.length : 0, // Average protein
-    FCR: day.Feed ? (day.Milk / day.Feed).toFixed(2) : 0, // Calculate FCR for the day
+    Fat: day.sessions.length ? day.Fat / day.sessions.length : 0,
+    Protein: day.sessions.length ? day.Protein / day.sessions.length : 0,
+    FCR: day.Feed ? (day.Milk / day.Feed).toFixed(2) : 0,
   })).sort((a, b) => new Date(a.name) - new Date(b.name));
 
   // Custom Tooltip for Daily Milk Production
@@ -286,6 +290,14 @@ export default function AnimalProfileDashboard() {
   return (
     <div className={`min-h-screen p-6 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-black'}`}>
       <div className="fixed top-4 right-4 flex space-x-2 z-50">
+        <button
+          className="p-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition flex items-center space-x-1"
+          onClick={handleBackClick}
+          title="Back to Previous Page"
+        >
+          <ArrowLeft size={20} />
+          <span>Previous Page</span>
+        /</button>
         <button className="p-2 bg-gray-800 text-white rounded hover:bg-gray-700 transition" onClick={() => setDarkMode(!darkMode)}>
           {darkMode ? <Sun size={20} /> : <Moon size={20} />}
         </button>

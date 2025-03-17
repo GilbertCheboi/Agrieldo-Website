@@ -31,7 +31,10 @@ import AnimalList from "./pages/AnimalList";
 import InventoryDashboard from './components/InventoryDashboard';
 import OutletInventory from './components/OutletInventory';
 import Farms from "./pages/Farms";
+import FarmDashboard from "./components/FarmDashboard"; // New component we'll create
 import VetStaff from "./components/VetStaff";
+import SheepList from "./pages/SheepList";
+import SheepDetails from "./pages/SheepDetails";
 import "./index.css";
 import "./App.css";
 
@@ -76,8 +79,9 @@ const App = () => {
                 <Route path="/animal_list" element={<AnimalList />} />
                 <Route path="/farms" element={<Farms />} />
                 <Route path="/farm-vets" element={<VetStaff />} />
-
-                
+                <Route path="/dashboard/:farmId" element={<FarmDashboard />} />
+                <Route path="/sheep-list/:farmId" element={<SheepList />} />
+                <Route path="/sheep-details/:farmId/:sheepId" element={<SheepDetails />} />
 
                 
                 {/* Inventory Management Routes */}
