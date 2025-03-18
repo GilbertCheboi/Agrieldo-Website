@@ -14,6 +14,7 @@ import vetRequestsImage from "../assets/pic56.avif";
 import dairyfeeds from "../assets/pic55.jpg";
 import auctions from "../assets/pic7.jpg";
 import AIpowered from "../assets/pic16.webp";
+import { AlertTriangle, CheckCircle, Cpu} from "lucide-react";
 
 const images = [heroImage1, heroImage2, heroImage3, heroImage4, heroImage5];
 
@@ -63,6 +64,86 @@ const Home = () => {
           <FaArrowRight size={20} />
         </button>
       </div>
+{/* Problem and Solution Section */}
+<motion.div
+  initial={{ opacity: 0, y: 50 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.6 }}
+  viewport={{ once: true }}
+  className="py-20 px-6 bg-gradient-to-br from-orange-50 via-white to-orange-100"
+>
+  <div className="max-w-6xl mx-auto text-center">
+    <h2 className="text-4xl font-bold text-gray-800 mb-4 tracking-tight">
+      The Problem We're Solving
+    </h2>
+    <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-12 leading-relaxed">
+      Many farmers face daily struggles due to outdated management practices, poor record-keeping, limited access to markets and inputs, and lack of real-time insights for better decision-making.
+    </p>
+
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+      {/* Problem Highlights */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        viewport={{ once: true }}
+        className="bg-white p-8 rounded-2xl shadow-xl border border-orange-100 hover:shadow-2xl transition-all duration-300"
+      >
+        <h3 className="text-2xl font-semibold text-red-600 mb-4 flex items-center gap-2">
+          <AlertTriangle className="w-6 h-6 text-red-500" />
+          The Challenges
+        </h3>
+        <ul className="text-gray-700 text-left space-y-3 list-disc pl-5">
+          <li>Manual and inconsistent farm records</li>
+          <li>Limited access to quality veterinary services and feeds</li>
+          <li>Poor tracking of produce and weak market insights</li>
+          <li>Low visibility and poor access to markets</li>
+        </ul>
+      </motion.div>
+
+      {/* Technology as the Game-Changer */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+        viewport={{ once: true }}
+        className="bg-white p-8 rounded-2xl shadow-xl border border-blue-100 hover:shadow-2xl transition-all duration-300"
+      >
+        <h3 className="text-2xl font-semibold text-orange-500 mb-4 flex items-center gap-2">
+          <Cpu className="w-6 h-6 text-orange-500" />
+          Technology at the Heart
+        </h3>
+        <ul className="text-gray-700 text-left space-y-3 list-disc pl-5">
+          <li>Real-time farm dashboards powered by smart data</li>
+          <li>AI-based tools for health monitoring & production insights</li>
+          <li>Integrated digital marketplaces for inputs and produce</li>
+          <li>Seamless mobile access for remote farm control</li>
+        </ul>
+      </motion.div>
+
+      {/* Solution Highlights */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+        viewport={{ once: true }}
+        className="bg-white p-8 rounded-2xl shadow-xl border border-green-100 hover:shadow-2xl transition-all duration-300"
+      >
+        <h3 className="text-2xl font-semibold text-green-600 mb-4 flex items-center gap-2">
+          <CheckCircle className="w-6 h-6 text-green-500" />
+          How Agrieldo Solves This
+        </h3>
+        <ul className="text-gray-700 text-left space-y-3 list-disc pl-5">
+          <li>Digital record-keeping & smart reporting</li>
+          <li>Integrated access to feeds, vet services & equipment</li>
+          <li>Market linkages for produce & livestock sales</li>
+          <li>AI-powered advisory and data-driven decisions</li>
+        </ul>
+      </motion.div>
+    </div>
+  </div>
+</motion.div>
+
 
       {/* Mission Section */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.2 }} className="py-16 flex flex-col md:flex-row items-center justify-center text-center md:text-left">

@@ -9,23 +9,46 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    console.log("Submitting credentials:", credentials); // Log the credentials
-
+    console.log("🚀 Submitting login credentials:", credentials);
+  
     try {
       const response = await login(credentials); // Call the login API
-      console.log("Login successful, response:", response); // Log the successful response
-
-      // api.js already handles storing tokens and user_type, but we can log it here for confirmation
-      const storedUserType = localStorage.getItem("user_type");
-      console.log("User type from localStorage after login:", storedUserType);
-
+      console.log("✅ Login API call successful. Full response:", response);
+  
+      const { accessToken, refreshToken, user_type } = {
+        accessToken: localStorage.getItem("accessToken"),
+        refreshToken: localStorage.getItem("refreshToken"),
+        user_type: localStorage.getItem("user_type"),
+      };
+  
+      console.log("📦 Tokens and user type from localStorage after login:");
+      console.log("➡️ Access Token:", accessToken);
+      console.log("➡️ Refresh Token:", refreshToken);
+      console.log("➡️ User Type:", user_type);
+  
       alert("Login successful!");
-      navigate("/dashboard"); // Redirect to the dashboard page
+      navigate("/dashboard");
     } catch (error) {
-      console.error("Login failed, error:", error.response ? error.response.data : error.message);
-      setError("Invalid credentials!"); // Display error message
+      console.error("❌ Login failed!");
+  
+      if (error.response) {
+        console.error("📛 Error Response Data:", error.response.data);
+        console.error("📛 Error Status:", error.response.status);
+        console.error("📛 Error Headers:", error.response.headers);
+        setError(JSON.stringify(error.response.data));
+      } else if (error.request) {
+        console.error("📡 No response received from server. Request details:", error.request);
+        setError("Network Error: No response from server");
+      } else {
+        console.error("⚠️ Error setting up the request:", error.message);
+        setError(error.message);
+      }
+  
+      console.log("🧠 Full error object:", error);
     }
   };
+  
+  
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
