@@ -41,7 +41,7 @@ const Home = () => {
   return (
     <div className="bg-gray-50">
       {/* Hero Section */}
-      <div className="relative w-full h-[100vh] overflow-hidden">
+      <div className="relative w-full h-[80vh] overflow-hidden">
         <motion.img
           key={currentIndex}
           src={images[currentIndex]}
