@@ -146,7 +146,15 @@ const Home = () => {
   </div>
 </motion.div>
 
-
+  {/* What We Do Section */}
+  <div className="py-16 bg-[#333333] text-center">
+  <h2 className="text-3xl font-bold text-[#FFA500]">What We Do</h2>
+  <p className="mt-4 text-lg max-w-3xl mx-auto text-white">
+      At Agrieldo, we empower farmers with smart, technology-driven solutions to manage farms efficiently. 
+      From AI-powered surveillance and record-keeping to vet services and feed distribution, 
+      we help farmers optimize productivity and profitability.
+    </p>
+  </div>
       {/* Mission Section */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.2 }} className="py-16 flex flex-col md:flex-row items-center justify-center text-center md:text-left">
         <div className="md:w-1/2 px-6">
@@ -300,15 +308,7 @@ const Home = () => {
 <div className="bg-[#333333] text-white">
   {/* Existing Sections */}
   
-  {/* What We Do Section */}
-  <div className="py-16 bg-[#333333] text-center">
-  <h2 className="text-3xl font-bold text-[#FFA500]">What We Do</h2>
-  <p className="mt-4 text-lg max-w-3xl mx-auto text-white">
-      At Agrieldo, we empower farmers with smart, technology-driven solutions to manage farms efficiently. 
-      From AI-powered surveillance and record-keeping to vet services and feed distribution, 
-      we help farmers optimize productivity and profitability.
-    </p>
-  </div>
+
 </div>
 
 
