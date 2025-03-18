@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import SubscriptionForm from "./SubscriptionForm";
-import heroImage1 from "../assets/pic7.jpg";
-import heroImage2 from "../assets/pic41.webp";
-import heroImage3 from "../assets/pic33.jpg";
-import heroImage4 from "../assets/pic40.jpg";
-import heroImage5 from "../assets/pic36.jpg";
+import heroImage1 from "../assets/pic65.avif";
+import heroImage2 from "../assets/pic64.jpg";
+import heroImage3 from "../assets/pic66.avif";
+import heroImage4 from "../assets/pic60.jpg";
+import heroImage5 from "../assets/pic54.jpg";
+import heroImage6 from "../assets/pic63.jpg";
+import heroImage7 from "../assets/pic7.jpg";
 import missionImage from "../assets/pic14.jpg";
 import surveillanceImage from "../assets/pic50.jpg";
 import recordKeepingImage from "../assets/pic53.jpeg";
@@ -15,7 +17,7 @@ import dairyfeeds from "../assets/pic55.jpg";
 import auctions from "../assets/pic7.jpg";
 import AIpowered from "../assets/pic16.webp";
 
-const images = [heroImage1, heroImage2, heroImage3, heroImage4, heroImage5];
+const images = [heroImage1, heroImage2, heroImage3, heroImage4, heroImage5, heroImage6, heroImage7];
 
 const Home = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -38,7 +40,7 @@ const Home = () => {
   return (
     <div className="bg-gray-50">
       {/* Hero Section */}
-      <div className="relative w-full h-[75vh] overflow-hidden">
+      <div className="relative w-full h-[100vh] overflow-hidden">
         <motion.img
           key={currentIndex}
           src={images[currentIndex]}
@@ -162,7 +164,7 @@ const Home = () => {
         <div
         className="text-center py-16 text-white"
         style={{
-          backgroundImage: `url(${require('../assets/pic21.avif')})`,
+          backgroundImage: `url(${require('../assets/pic53.jpeg')})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -173,17 +175,22 @@ const Home = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
         >
+         <div className="mt-6 bg-[#333333]/40 text-white px-12 py-4 rounded-lg max-w-4xl mx-auto">  
         <h2 className="text-5xl font-extrabold text-white">Download Agrieldo App Today!</h2>
-        <p className="mt-4 text-lg text-white">
-           Transform your farm management experience with Agrieldo. Download now and take full control of your farm's future!
-        </p>
+        </div>
+
+<div className="mt-6 bg-[#333333]/40 text-white px-6 py-4 rounded-lg max-w-2xl mx-auto">  
+  <p className="text-lg text-white">
+    Transform your farm management experience with Agrieldo. Download now and take full control of your farm's future!
+  </p>
+</div>
 
           <div className="mt-6 flex justify-center space-x-6">
             <a
               href="https://play.google.com/store/apps/details?id=com.agrieldo"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-white text-amber-500 py-2 px-6 rounded-lg hover:bg-amber-200 transition flex items-center"
+              className="bg-white text-yellow-500 py-2 px-6 rounded-lg hover:bg-gray-200/40 transition flex items-center"
             >
               <img
                 src={require('../assets/Google_Play-Icon-Logo.wine.png')}
@@ -196,7 +203,7 @@ const Home = () => {
               href="https://apps.apple.com/us/app/agrieldo/id1234567890"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-white text-amber-500 py-2 px-6 rounded-lg hover:bg-amber-200 transition flex items-center"
+              className="bg-white text-yellow-500 py-2 px-6 rounded-lg hover:bg-gray-200/40 transition flex items-center"
             >
               <img
                 src={require('../assets/App_Store_(iOS).svg.png')}
@@ -208,6 +215,22 @@ const Home = () => {
           </div>
         </motion.div>
       </div>
+
+<div className="bg-[#333333] text-white">
+  {/* Existing Sections */}
+  
+  {/* What We Do Section */}
+  <div className="py-16 bg-[#333333] text-center">
+  <h2 className="text-3xl font-bold text-[#FFA500]">What We Do</h2>
+  <p className="mt-4 text-lg max-w-3xl mx-auto text-white">
+      At Agrieldo, we empower farmers with smart, technology-driven solutions to manage farms efficiently. 
+      From AI-powered surveillance and record-keeping to vet services and feed distribution, 
+      we help farmers optimize productivity and profitability.
+    </p>
+  </div>
+</div>
+
+
 
     </div>
   );
