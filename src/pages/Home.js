@@ -97,6 +97,8 @@ const Home = () => {
         </h3>
         <ul className="text-gray-700 text-left space-y-3 list-disc pl-5">
           <li>Manual and inconsistent farm records</li>
+          <li>Lack of data-driven insights for farm decision-making</li>
+          <li>Poor tracking of livestock performance and farm produce</li>
           <li>Limited access to quality veterinary services and feeds</li>
           <li>Poor tracking of produce and weak market insights</li>
           <li>Low visibility and poor access to markets</li>
