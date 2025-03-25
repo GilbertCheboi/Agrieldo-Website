@@ -1,7 +1,15 @@
 // src/components/SheepDetails.js
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Sun, Moon, Download, ChevronLeft, ChevronRight, Plus, Pen } from "lucide-react";
+import {
+  Sun,
+  Moon,
+  Download,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Pen,
+} from "lucide-react";
 import {
   Box,
   Button,
@@ -15,7 +23,13 @@ import {
   Fab,
 } from "@mui/material";
 import Slider from "../components/ Sidebar";
-import { fetchSheepData, addHealthRecord, addReproductionRecord, addProductionRecord, updateHealthRecord } from "../services/api";
+import {
+  fetchSheepData,
+  addHealthRecord,
+  addReproductionRecord,
+  addProductionRecord,
+  updateHealthRecord,
+} from "../services/api";
 
 const SheepDetails = () => {
   const { farmId, sheepId } = useParams();
@@ -35,9 +49,24 @@ const SheepDetails = () => {
   const [editingHealthRecordId, setEditingHealthRecordId] = useState(null);
 
   // Form states
-  const [productionForm, setProductionForm] = useState({ date: "", wool_yield: "", weight: "", shearing_date: "" });
-  const [healthForm, setHealthForm] = useState({ date: "", is_sick: false, diagnosis: "", treatment: "" });
-  const [reproductionForm, setReproductionForm] = useState({ mating_date: "", partner_tag: "", birth_date: "", offspring_count: "" });
+  const [productionForm, setProductionForm] = useState({
+    date: "",
+    wool_yield: "",
+    weight: "",
+    shearing_date: "",
+  });
+  const [healthForm, setHealthForm] = useState({
+    date: "",
+    is_sick: false,
+    diagnosis: "",
+    treatment: "",
+  });
+  const [reproductionForm, setReproductionForm] = useState({
+    mating_date: "",
+    partner_tag: "",
+    birth_date: "",
+    offspring_count: "",
+  });
 
   useEffect(() => {
     const loadSheepDetails = async () => {
@@ -67,7 +96,12 @@ const SheepDetails = () => {
       await addProductionRecord(newRecord);
       setReloadTrigger((prev) => prev + 1);
       setIsProductionModalOpen(false);
-      setProductionForm({ date: "", wool_yield: "", weight: "", shearing_date: "" });
+      setProductionForm({
+        date: "",
+        wool_yield: "",
+        weight: "",
+        shearing_date: "",
+      });
     } catch (error) {
       console.error("Failed to add production record:", error);
     }
@@ -126,7 +160,9 @@ const SheepDetails = () => {
     try {
       const newRecord = {
         sheep: parseInt(sheepId),
-        mating_date: reproductionForm.mating_date || new Date().toISOString().split("T")[0],
+        mating_date:
+          reproductionForm.mating_date ||
+          new Date().toISOString().split("T")[0],
         partner_tag: reproductionForm.partner_tag || "",
         birth_date: reproductionForm.birth_date || null,
         offspring_count: parseInt(reproductionForm.offspring_count) || 0,
@@ -134,7 +170,12 @@ const SheepDetails = () => {
       await addReproductionRecord(newRecord);
       setReloadTrigger((prev) => prev + 1);
       setIsReproductionModalOpen(false);
-      setReproductionForm({ mating_date: "", partner_tag: "", birth_date: "", offspring_count: "" });
+      setReproductionForm({
+        mating_date: "",
+        partner_tag: "",
+        birth_date: "",
+        offspring_count: "",
+      });
     } catch (error) {
       console.error("Failed to add reproduction record:", error);
     }
@@ -144,14 +185,29 @@ const SheepDetails = () => {
     alert("Exporting sheep data... (Implement PDF/CSV generation here)");
   };
 
-  const handleNextImage = () => setCurrentImageIndex((prev) => (prev + 1) % (sheep?.images.length || 1));
-  const handlePrevImage = () => setCurrentImageIndex((prev) => (prev - 1 + (sheep?.images.length || 1)) % (sheep?.images.length || 1));
+  const handleNextImage = () =>
+    setCurrentImageIndex((prev) => (prev + 1) % (sheep?.images.length || 1));
+  const handlePrevImage = () =>
+    setCurrentImageIndex(
+      (prev) =>
+        (prev - 1 + (sheep?.images.length || 1)) % (sheep?.images.length || 1)
+    );
 
-  if (loading) return <Typography className="text-center p-6">Loading...</Typography>;
-  if (!sheep) return <Typography className="text-center p-6">Sheep not found.</Typography>;
+  if (loading)
+    return <Typography className="text-center p-6">Loading...</Typography>;
+  if (!sheep)
+    return (
+      <Typography className="text-center p-6">Sheep not found.</Typography>
+    );
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: darkMode ? "gray.900" : "gray.50" }}>
+    <Box
+      sx={{
+        display: "flex",
+        minHeight: "100vh",
+        bgcolor: darkMode ? "gray.900" : "gray.50",
+      }}
+    >
       {/* Sidebar/Navbar */}
       <Slider />
 
@@ -176,19 +232,29 @@ const SheepDetails = () => {
         >
           <Button
             variant="contained"
-            sx={{ bgcolor: darkMode ? "gray.800" : "gray.700", "&:hover": { bgcolor: darkMode ? "gray.700" : "gray.600" } }}
+            sx={{
+              bgcolor: darkMode ? "gray.800" : "gray.700",
+              "&:hover": { bgcolor: darkMode ? "gray.700" : "gray.600" },
+            }}
             onClick={() => setDarkMode(!darkMode)}
           >
             {darkMode ? <Sun size={20} /> : <Moon size={20} />}
           </Button>
           <Button
             variant="contained"
-            sx={{ bgcolor: darkMode ? "gray.800" : "gray.700", "&:hover": { bgcolor: darkMode ? "gray.700" : "gray.600" } }}
+            sx={{
+              bgcolor: darkMode ? "gray.800" : "gray.700",
+              "&:hover": { bgcolor: darkMode ? "gray.700" : "gray.600" },
+            }}
             onClick={handleExport}
           >
             <Download size={20} />
           </Button>
-          <Button variant="contained" color="primary" onClick={() => navigate(`/sheep-list/${farmId}`)}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => navigate(`/sheep-list/${farmId}`)}
+          >
             Back to Sheep List
           </Button>
         </Box>
@@ -264,7 +330,8 @@ const SheepDetails = () => {
                         width: 8,
                         height: 8,
                         borderRadius: "50%",
-                        bgcolor: index === currentImageIndex ? "gray.800" : "gray.400",
+                        bgcolor:
+                          index === currentImageIndex ? "gray.800" : "gray.400",
                       }}
                     />
                   ))}
@@ -292,13 +359,25 @@ const SheepDetails = () => {
                 <Box sx={{ "& > p": { mb: 1 } }}>
                   <Typography variant="h6">{sheep.tag_number}</Typography>
                   <Typography>Date of Birth: {sheep.dob}</Typography>
-                  <Typography>Type: {sheep.sheep_type ? sheep.sheep_type.name : "None"}</Typography>
+                  <Typography>
+                    Type: {sheep.sheep_type ? sheep.sheep_type.name : "None"}
+                  </Typography>
                   <Typography>Farm ID: {farmId}</Typography>
                   <Typography>
-                    Total Wool Yield: {sheep.production_records.reduce((sum, p) => sum + p.wool_yield, 0)} kg
+                    Total Wool Yield:{" "}
+                    {sheep.production_records.reduce(
+                      (sum, p) => sum + p.wool_yield,
+                      0
+                    )}{" "}
+                    kg
                   </Typography>
                   <Typography>
-                    Total Weight: {sheep.production_records.reduce((sum, p) => sum + p.weight, 0)} kg
+                    Total Weight:{" "}
+                    {sheep.production_records.reduce(
+                      (sum, p) => sum + p.weight,
+                      0
+                    )}{" "}
+                    kg
                   </Typography>
                 </Box>
               </CardContent>
@@ -375,7 +454,9 @@ const SheepDetails = () => {
                     >
                       <ListItemText
                         primary={`Date: ${record.date}`}
-                        secondary={`Sick: ${record.is_sick ? "Yes" : "No"}, Diagnosis: ${record.diagnosis || "None"}`}
+                        secondary={`Sick: ${
+                          record.is_sick ? "Yes" : "No"
+                        }, Diagnosis: ${record.diagnosis || "None"}`}
                       />
                     </ListItem>
                   ))}
@@ -405,7 +486,9 @@ const SheepDetails = () => {
                     <ListItem key={record.id}>
                       <ListItemText
                         primary={`Mating Date: ${record.mating_date}`}
-                        secondary={`Birth: ${record.birth_date || "N/A"}, Offspring: ${record.offspring_count}`}
+                        secondary={`Birth: ${
+                          record.birth_date || "N/A"
+                        }, Offspring: ${record.offspring_count}`}
                       />
                     </ListItem>
                   ))}
@@ -430,7 +513,12 @@ const SheepDetails = () => {
             color="primary"
             onClick={() => {
               setIsEditingHealth(false);
-              setHealthForm({ date: "", is_sick: false, diagnosis: "", treatment: "" });
+              setHealthForm({
+                date: "",
+                is_sick: false,
+                diagnosis: "",
+                treatment: "",
+              });
               setIsHealthModalOpen(true);
             }}
             sx={{ position: "fixed", bottom: 140, right: 16 }}
@@ -469,13 +557,23 @@ const SheepDetails = () => {
                 <input
                   type="date"
                   value={productionForm.date}
-                  onChange={(e) => setProductionForm({ ...productionForm, date: e.target.value })}
+                  onChange={(e) =>
+                    setProductionForm({
+                      ...productionForm,
+                      date: e.target.value,
+                    })
+                  }
                   className="p-2 border border-gray-300 rounded-lg text-black"
                 />
                 <input
                   type="number"
                   value={productionForm.wool_yield}
-                  onChange={(e) => setProductionForm({ ...productionForm, wool_yield: e.target.value })}
+                  onChange={(e) =>
+                    setProductionForm({
+                      ...productionForm,
+                      wool_yield: e.target.value,
+                    })
+                  }
                   className="p-2 border border-gray-300 rounded-lg text-black"
                   placeholder="Wool Yield (kg)"
                   step="0.1"
@@ -483,7 +581,12 @@ const SheepDetails = () => {
                 <input
                   type="number"
                   value={productionForm.weight}
-                  onChange={(e) => setProductionForm({ ...productionForm, weight: e.target.value })}
+                  onChange={(e) =>
+                    setProductionForm({
+                      ...productionForm,
+                      weight: e.target.value,
+                    })
+                  }
                   className="p-2 border border-gray-300 rounded-lg text-black"
                   placeholder="Weight (kg)"
                   step="0.1"
@@ -491,14 +594,32 @@ const SheepDetails = () => {
                 <input
                   type="date"
                   value={productionForm.shearing_date}
-                  onChange={(e) => setProductionForm({ ...productionForm, shearing_date: e.target.value })}
+                  onChange={(e) =>
+                    setProductionForm({
+                      ...productionForm,
+                      shearing_date: e.target.value,
+                    })
+                  }
                   className="p-2 border border-gray-300 rounded-lg text-black"
                   placeholder="Shearing Date"
                 />
               </Box>
-              <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end", gap: 2 }}>
-                <Button onClick={() => setIsProductionModalOpen(false)}>Cancel</Button>
-                <Button variant="contained" color="primary" onClick={handleAddProduction}>
+              <Box
+                sx={{
+                  mt: 3,
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  gap: 2,
+                }}
+              >
+                <Button onClick={() => setIsProductionModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleAddProduction}
+                >
                   Save
                 </Button>
               </Box>
@@ -527,20 +648,26 @@ const SheepDetails = () => {
                 <input
                   type="date"
                   value={healthForm.date}
-                  onChange={(e) => setHealthForm({ ...healthForm, date: e.target.value })}
+                  onChange={(e) =>
+                    setHealthForm({ ...healthForm, date: e.target.value })
+                  }
                   className="p-2 border border-gray-300 rounded-lg text-black"
                 />
                 <input
                   type="text"
                   value={healthForm.diagnosis}
-                  onChange={(e) => setHealthForm({ ...healthForm, diagnosis: e.target.value })}
+                  onChange={(e) =>
+                    setHealthForm({ ...healthForm, diagnosis: e.target.value })
+                  }
                   className="p-2 border border-gray-300 rounded-lg text-black"
                   placeholder="Diagnosis"
                 />
                 <input
                   type="text"
                   value={healthForm.treatment}
-                  onChange={(e) => setHealthForm({ ...healthForm, treatment: e.target.value })}
+                  onChange={(e) =>
+                    setHealthForm({ ...healthForm, treatment: e.target.value })
+                  }
                   className="p-2 border border-gray-300 rounded-lg text-black"
                   placeholder="Treatment"
                 />
@@ -548,13 +675,25 @@ const SheepDetails = () => {
                   <input
                     type="checkbox"
                     checked={healthForm.is_sick}
-                    onChange={(e) => setHealthForm({ ...healthForm, is_sick: e.target.checked })}
+                    onChange={(e) =>
+                      setHealthForm({
+                        ...healthForm,
+                        is_sick: e.target.checked,
+                      })
+                    }
                     className="h-4 w-4"
                   />
                   <Typography>Is Sick</Typography>
                 </label>
               </Box>
-              <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end", gap: 2 }}>
+              <Box
+                sx={{
+                  mt: 3,
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  gap: 2,
+                }}
+              >
                 <Button
                   onClick={() => {
                     setIsHealthModalOpen(false);
@@ -567,7 +706,9 @@ const SheepDetails = () => {
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={isEditingHealth ? handleUpdateHealth : handleAddHealth}
+                  onClick={
+                    isEditingHealth ? handleUpdateHealth : handleAddHealth
+                  }
                 >
                   {isEditingHealth ? "Update" : "Save"}
                 </Button>
@@ -597,35 +738,68 @@ const SheepDetails = () => {
                 <input
                   type="date"
                   value={reproductionForm.mating_date}
-                  onChange={(e) => setReproductionForm({ ...reproductionForm, mating_date: e.target.value })}
+                  onChange={(e) =>
+                    setReproductionForm({
+                      ...reproductionForm,
+                      mating_date: e.target.value,
+                    })
+                  }
                   className="p-2 border border-gray-300 rounded-lg text-black"
                   placeholder="Mating Date"
                 />
                 <input
                   type="text"
                   value={reproductionForm.partner_tag}
-                  onChange={(e) => setReproductionForm({ ...reproductionForm, partner_tag: e.target.value })}
+                  onChange={(e) =>
+                    setReproductionForm({
+                      ...reproductionForm,
+                      partner_tag: e.target.value,
+                    })
+                  }
                   className="p-2 border border-gray-300 rounded-lg text-black"
                   placeholder="Partner Tag"
                 />
                 <input
                   type="date"
                   value={reproductionForm.birth_date}
-                  onChange={(e) => setReproductionForm({ ...reproductionForm, birth_date: e.target.value })}
+                  onChange={(e) =>
+                    setReproductionForm({
+                      ...reproductionForm,
+                      birth_date: e.target.value,
+                    })
+                  }
                   className="p-2 border border-gray-300 rounded-lg text-black"
                   placeholder="Birth Date"
                 />
                 <input
                   type="number"
                   value={reproductionForm.offspring_count}
-                  onChange={(e) => setReproductionForm({ ...reproductionForm, offspring_count: e.target.value })}
+                  onChange={(e) =>
+                    setReproductionForm({
+                      ...reproductionForm,
+                      offspring_count: e.target.value,
+                    })
+                  }
                   className="p-2 border border-gray-300 rounded-lg text-black"
                   placeholder="Offspring Count"
                 />
               </Box>
-              <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end", gap: 2 }}>
-                <Button onClick={() => setIsReproductionModalOpen(false)}>Cancel</Button>
-                <Button variant="contained" color="primary" onClick={handleAddReproduction}>
+              <Box
+                sx={{
+                  mt: 3,
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  gap: 2,
+                }}
+              >
+                <Button onClick={() => setIsReproductionModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleAddReproduction}
+                >
                   Save
                 </Button>
               </Box>

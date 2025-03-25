@@ -20,8 +20,7 @@ const Signup = () => {
   // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const updatedValue =
-      name === "user_type" ? parseInt(value, 10) : value; // ensure user_type is integer
+    const updatedValue = name === "user_type" ? parseInt(value, 10) : value; // ensure user_type is integer
     setFormData({ ...formData, [name]: updatedValue });
   };
 
@@ -53,7 +52,7 @@ const Signup = () => {
 
     try {
       const response = await axios.post(
-        "https://api.agrieldo.com/api/accounts/users/",
+        "https://api.agrieldo.comapi/accounts/users/",
         formDataToSend,
         {
           headers: {

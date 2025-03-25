@@ -20,7 +20,16 @@ import { useNavigate } from "react-router-dom";
 import MilkProductionChart from "./MilkProductionChart";
 import FeedManagement from "./FeedManagement";
 import { fetchAnimals, createAnimal } from "../services/api";
-import { GiCow, GiBabyBottle, GiMedicalPack, GiFemale, GiHeartBeats, GiMilkCarton, GiGrass, GiBull } from "react-icons/gi";
+import {
+  GiCow,
+  GiBabyBottle,
+  GiMedicalPack,
+  GiFemale,
+  GiHeartBeats,
+  GiMilkCarton,
+  GiGrass,
+  GiBull,
+} from "react-icons/gi";
 import { AiOutlinePlus } from "react-icons/ai";
 
 const calculateAgeInMonths = (dob) => {
@@ -119,7 +128,10 @@ const DairyDashboard = ({ farmId }) => {
             else if (animal.category === "Dry") counts.dry += 1;
           }
           if (animal.is_pregnant) counts.pregnant += 1;
-          if (animal.health_records && animal.health_records.some(record => record.is_sick)) {
+          if (
+            animal.health_records &&
+            animal.health_records.some((record) => record.is_sick)
+          ) {
             counts.sickCows += 1;
           }
         });
@@ -154,25 +166,46 @@ const DairyDashboard = ({ farmId }) => {
 
   const handleAddAnimal = async () => {
     try {
-      const animalData = { ...formData, farmId };
-      await createAnimal(animalData);
+      const payload = new FormData();
+
+      // Append standard fields
+      payload.append("tag", formData.tag);
+      payload.append("name", formData.name);
+      payload.append("breed", formData.breed);
+      payload.append("dob", formData.dob);
+      payload.append("gender", formData.gender);
+      payload.append("farm", farmId);
+      payload.append("owner", formData.owner);
+      payload.append("assigned_worker", formData.assigned_worker);
+
+      // ✅ Append caption (Fix missing caption)
+      payload.append("caption", formData.caption);
+
+      // ✅ Append images correctly
+      if (formData.images && formData.images.length > 0) {
+        formData.images.forEach((file) => {
+          payload.append("images", file); // ✅ Ensure images are correctly sent
+        });
+      }
+
+      // Debugging: Log the FormData before sending
+      for (const pair of payload.entries()) {
+        console.log(`${pair[0]}:`, pair[1]);
+      }
+
+      await createAnimal(payload);
       handleModalClose();
-      const animals = await fetchAnimals({ farmId });
-      const counts = {
-        totalCows: animals.length,
-        bulls: animals.filter(a => a.gender === "Male").length,
-        heifers: animals.filter(a => a.category === "Heifer").length,
-        calves: animals.filter(a => a.category === "Calf").length,
-        newborns: animals.filter(a => calculateAgeInMonths(a.dob) < 1).length,
-        pregnant: animals.filter(a => a.is_pregnant).length,
-        dry: animals.filter(a => a.category === "Dry").length,
-        milking: animals.filter(a => a.category === "Milking").length,
-        sickCows: animals.filter(a => a.health_records?.some(r => r.is_sick)).length,
-      };
-      setLivestockData(counts);
     } catch (error) {
       console.error("Failed to add animal:", error);
     }
+  };
+
+  const handleImageChange = (event) => {
+    const files = Array.from(event.target.files); // Convert FileList to an array
+    setFormData((prevData) => ({
+      ...prevData,
+      images: files, // Store images as an array
+    }));
   };
 
   // Debugging: Log imported components
@@ -185,144 +218,243 @@ const DairyDashboard = ({ farmId }) => {
   return (
     <Box>
       {/* Livestock Summary */}
-      <Typography variant="h6" sx={{ fontWeight: 600, color:  "#1a3c34", mb: 2 }}>
+      <Typography
+        variant="h6"
+        sx={{ fontWeight: 600, color: "#1a3c34", mb: 2 }}
+      >
         Livestock Summary
       </Typography>
       <Grid container spacing={2} sx={{ mb: 4 }}>
         <Grid item xs={6} sm={4} md={2.4}>
-          <DashboardCard 
-            title={<><GiCow color="#ffa500" size={18} /> Total Cows</>}
+          <DashboardCard
+            title={
+              <>
+                <GiCow color="#ffa500" size={18} /> Total Cows
+              </>
+            }
             onClick={() => handleCategoryClick("")}
           >
             <Typography variant="h6">{livestockData.totalCows}</Typography>
           </DashboardCard>
         </Grid>
         <Grid item xs={6} sm={4} md={2.4}>
-          <DashboardCard 
-            title={<><GiBull color="#ffa500" size={18} /> Bulls</>}
+          <DashboardCard
+            title={
+              <>
+                <GiBull color="#ffa500" size={18} /> Bulls
+              </>
+            }
             onClick={() => handleCategoryClick("category=Bull")}
           >
             <Typography variant="h6">{livestockData.bulls}</Typography>
           </DashboardCard>
         </Grid>
         <Grid item xs={6} sm={4} md={2.4}>
-          <DashboardCard 
-            title={<><GiFemale color="#ffa500" size={18} /> Heifers</>}
+          <DashboardCard
+            title={
+              <>
+                <GiFemale color="#ffa500" size={18} /> Heifers
+              </>
+            }
             onClick={() => handleCategoryClick("category=Heifer")}
           >
             <Typography variant="h6">{livestockData.heifers}</Typography>
           </DashboardCard>
         </Grid>
         <Grid item xs={6} sm={4} md={2.4}>
-          <DashboardCard 
-            title={<><GiBabyBottle color="#ffa500" size={18} /> Calves</>}
+          <DashboardCard
+            title={
+              <>
+                <GiBabyBottle color="#ffa500" size={18} /> Calves
+              </>
+            }
             onClick={() => handleCategoryClick("category=Calf")}
           >
             <Typography variant="h6">{livestockData.calves}</Typography>
           </DashboardCard>
         </Grid>
         <Grid item xs={6} sm={4} md={2.4}>
-          <DashboardCard 
-            title={<><GiBabyBottle color="#ffa500" size={18} /> Newborns</>}
+          <DashboardCard
+            title={
+              <>
+                <GiBabyBottle color="#ffa500" size={18} /> Newborns
+              </>
+            }
             onClick={() => handleCategoryClick("age=Newborn")}
           >
             <Typography variant="h6">{livestockData.newborns}</Typography>
           </DashboardCard>
         </Grid>
         <Grid item xs={6} sm={4} md={2.4}>
-          <DashboardCard 
-            title={<><GiHeartBeats color="#ffa500" size={18} /> Pregnant</>}
+          <DashboardCard
+            title={
+              <>
+                <GiHeartBeats color="#ffa500" size={18} /> Pregnant
+              </>
+            }
             onClick={() => handleCategoryClick("is_pregnant=true")}
           >
             <Typography variant="h6">{livestockData.pregnant}</Typography>
           </DashboardCard>
         </Grid>
         <Grid item xs={6} sm={4} md={2.4}>
-          <DashboardCard 
-            title={<><GiGrass color="#ffa500" size={18} /> Dry</>}
+          <DashboardCard
+            title={
+              <>
+                <GiGrass color="#ffa500" size={18} /> Dry
+              </>
+            }
             onClick={() => handleCategoryClick("category=Dry")}
           >
             <Typography variant="h6">{livestockData.dry}</Typography>
           </DashboardCard>
         </Grid>
         <Grid item xs={6} sm={4} md={2.4}>
-          <DashboardCard 
-            title={<><GiMilkCarton color="#ffa500" size={18} /> Milking</>}
+          <DashboardCard
+            title={
+              <>
+                <GiMilkCarton color="#ffa500" size={18} /> Milking
+              </>
+            }
             onClick={() => handleCategoryClick("category=Milking")}
           >
             <Typography variant="h6">{livestockData.milking}</Typography>
           </DashboardCard>
         </Grid>
         <Grid item xs={6} sm={4} md={2.4}>
-          <DashboardCard 
-            title={<><GiMedicalPack color="red" size={18} /> Sick Cows</>}
+          <DashboardCard
+            title={
+              <>
+                <GiMedicalPack color="red" size={18} /> Sick Cows
+              </>
+            }
             onClick={() => handleCategoryClick("is_sick=true")}
           >
-            <Typography variant="h6" sx={{ color: "red" }}>{livestockData.sickCows}</Typography>
+            <Typography variant="h6" sx={{ color: "red" }}>
+              {livestockData.sickCows}
+            </Typography>
           </DashboardCard>
         </Grid>
         <Grid item xs={6} sm={4} md={2.4}>
-          <DashboardCard 
-            title={<><AiOutlinePlus color="#ffa500" size={18} /> Add Animal</>}
+          <DashboardCard
+            title={
+              <>
+                <AiOutlinePlus color="#ffa500" size={18} /> Add Animal
+              </>
+            }
             onClick={handleModalOpen}
           >
-            <Typography variant="h6" sx={{ color: "#ffa500" }}>+</Typography>
+            <Typography variant="h6" sx={{ color: "#ffa500" }}>
+              +
+            </Typography>
           </DashboardCard>
         </Grid>
       </Grid>
 
-      {/* Add Animal Modal */}
+      {/* Updated Add Animal Modal with a 2x2 grid layout for the form fields */}
       <Dialog open={openModal} onClose={handleModalClose}>
         <DialogTitle>Add New Animal</DialogTitle>
         <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            name="name"
-            label="Animal Name"
-            fullWidth
-            value={formData.name}
-            onChange={handleFormChange}
-          />
-          <FormControl fullWidth margin="dense">
-            <InputLabel id="gender-label">Gender</InputLabel>
-            <Select
-              labelId="gender-label"
-              name="gender"
-              value={formData.gender}
-              onChange={handleFormChange}
-              label="Gender"
-            >
-              <MenuItem value="Female">Female</MenuItem>
-              <MenuItem value="Male">Male</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField
-            margin="dense"
-            name="dob"
-            label="Date of Birth"
-            type="date"
-            fullWidth
-            value={formData.dob}
-            onChange={handleFormChange}
-            InputLabelProps={{ shrink: true }}
-          />
-          <FormControl fullWidth margin="dense">
-            <InputLabel id="category-label">Category</InputLabel>
-            <Select
-              labelId="category-label"
-              name="category"
-              value={formData.category}
-              onChange={handleFormChange}
-              label="Category"
-            >
-              <MenuItem value="Calf">Calf</MenuItem>
-              <MenuItem value="Heifer">Heifer</MenuItem>
-              <MenuItem value="Milking">Milking</MenuItem>
-              <MenuItem value="Dry">Dry</MenuItem>
-              <MenuItem value="Bull">Bull</MenuItem>
-            </Select>
-          </FormControl>
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <TextField
+                autoFocus
+                margin="dense"
+                name="tag"
+                label="Tag"
+                fullWidth
+                value={formData.tag}
+                onChange={handleFormChange}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                margin="dense"
+                name="name"
+                label="Animal Name"
+                fullWidth
+                value={formData.name}
+                onChange={handleFormChange}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                margin="dense"
+                name="breed"
+                label="Breed"
+                fullWidth
+                value={formData.breed}
+                onChange={handleFormChange}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                margin="dense"
+                name="dob"
+                label="Date of Birth"
+                type="date"
+                fullWidth
+                value={formData.dob}
+                onChange={handleFormChange}
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <FormControl fullWidth margin="dense">
+                <InputLabel id="gender-label">Gender</InputLabel>
+                <Select
+                  labelId="gender-label"
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleFormChange}
+                  label="Gender"
+                >
+                  <MenuItem value="Female">Female</MenuItem>
+                  <MenuItem value="Male">Male</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                margin="dense"
+                name="owner"
+                label="Owner"
+                fullWidth
+                value={formData.owner}
+                onChange={handleFormChange}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                margin="dense"
+                name="assigned_worker"
+                label="Assigned Worker"
+                fullWidth
+                value={formData.assigned_worker}
+                onChange={handleFormChange}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <input
+                accept="image/*"
+                multiple
+                type="file"
+                name="images"
+                onChange={handleImageChange}
+                style={{ marginTop: "16px" }}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                margin="dense"
+                name="caption"
+                label="Image Caption"
+                fullWidth
+                value={formData.caption}
+                onChange={handleFormChange}
+              />
+            </Grid>
+          </Grid>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleModalClose}>Cancel</Button>
@@ -336,12 +468,20 @@ const DairyDashboard = ({ farmId }) => {
       <Grid container spacing={3}>
         <Grid item xs={12} sm={6}>
           <DashboardCard title="📈 Milk Production">
-            {MilkProductionChart ? <MilkProductionChart farmId={farmId} /> : <Typography>MilkProductionChart not found</Typography>}
+            {MilkProductionChart ? (
+              <MilkProductionChart farmId={farmId} />
+            ) : (
+              <Typography>MilkProductionChart not found</Typography>
+            )}
           </DashboardCard>
         </Grid>
         <Grid item xs={12} sm={6}>
           <DashboardCard title="🌾 Feed Management">
-            {FeedManagement ? <FeedManagement farmId={farmId} /> : <Typography>FeedManagement not found</Typography>}
+            {FeedManagement ? (
+              <FeedManagement farmId={farmId} />
+            ) : (
+              <Typography>FeedManagement not found</Typography>
+            )}
           </DashboardCard>
         </Grid>
       </Grid>

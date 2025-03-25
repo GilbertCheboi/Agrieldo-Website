@@ -54,7 +54,14 @@ const SheepList = () => {
       <Slider />
       <Box sx={{ flexGrow: 1, p: { xs: 2, md: 3, lg: 4 } }}>
         <Container maxWidth="xl">
-          <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Box
+            sx={{
+              mb: 4,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
             <Typography variant="h4" sx={{ fontWeight: 700, color: "#1a3c34" }}>
               Sheep List (Farm ID: {farmId})
             </Typography>
@@ -86,7 +93,15 @@ const SheepList = () => {
                         alt={`${sheep.tag_number} image`}
                       />
                     ) : (
-                      <Box sx={{ height: 140, bgcolor: "#e0e0e0", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <Box
+                        sx={{
+                          height: 140,
+                          bgcolor: "#e0e0e0",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
                         <Typography>No Image</Typography>
                       </Box>
                     )}
@@ -96,10 +111,16 @@ const SheepList = () => {
                         DOB: {sheep.dob}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Type: {sheep.sheep_type ? sheep.sheep_type.name : "None"}
+                        Type:{" "}
+                        {sheep.sheep_type ? sheep.sheep_type.name : "None"}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Wool Yield: {sheep.production_records.reduce((sum, p) => sum + p.wool_yield, 0)} kg
+                        Wool Yield:{" "}
+                        {sheep.production_records.reduce(
+                          (sum, p) => sum + p.wool_yield,
+                          0
+                        )}{" "}
+                        kg
                       </Typography>
                     </CardContent>
                   </Card>
