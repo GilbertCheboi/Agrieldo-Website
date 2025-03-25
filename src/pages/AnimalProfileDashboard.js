@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // Added useNavigate
+import { useParams } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell, Legend, AreaChart, Area, ScatterChart, Scatter, LineChart, Line } from "recharts";
-import { Sun, Moon, Download, ChevronLeft, ChevronRight, Info, Plus, Pen, ArrowLeft } from "lucide-react"; // Added ArrowLeft
+import { Sun, Moon, Download, ChevronLeft, ChevronRight, Info, Plus, Pen } from "lucide-react";
 import { fetchAnimalDetails, updateHealthRecord, addProductionData, addHealthRecord, addReproductiveHistory } from "../services/api";
 
 export default function AnimalProfileDashboard() {
@@ -14,7 +14,6 @@ export default function AnimalProfileDashboard() {
   const [error, setError] = useState(null);
   const [reloadTrigger, setReloadTrigger] = useState(0);
   const userType = parseInt(localStorage.getItem("user_type"), 10); // 1 = Farmer, 2 = Vet, 3 = Staff
-  const navigate = useNavigate(); // Added for navigation
 
   // Modal states
   const [isProductionModalOpen, setIsProductionModalOpen] = useState(false);
@@ -23,7 +22,7 @@ export default function AnimalProfileDashboard() {
   const [isEditingHealth, setIsEditingHealth] = useState(false);
   const [editingHealthRecordId, setEditingHealthRecordId] = useState(null);
 
-  // Form states
+  // Form states with cost
   const [productionForm, setProductionForm] = useState({ 
     date: "", 
     session: "MORNING", 
@@ -33,8 +32,22 @@ export default function AnimalProfileDashboard() {
     fat_percentage: "", 
     protein_percentage: "" 
   });
-  const [healthForm, setHealthForm] = useState({ date: "", type: "", details: "", is_sick: false, clinical_signs: "", diagnosis: "", treatment: "" });
-  const [reproductionForm, setReproductionForm] = useState({ date: "", event: "AI", details: "" });
+  const [healthForm, setHealthForm] = useState({ 
+    date: "", 
+    type: "", 
+    details: "", 
+    is_sick: false, 
+    clinical_signs: "", 
+    diagnosis: "", 
+    treatment: "", 
+    cost: "" 
+  });
+  const [reproductionForm, setReproductionForm] = useState({ 
+    date: "", 
+    event: "AI", 
+    details: "", 
+    cost: "" 
+  });
 
   useEffect(() => {
     const loadAnimalData = async () => {
@@ -42,6 +55,7 @@ export default function AnimalProfileDashboard() {
         setLoading(true);
         const data = await fetchAnimalDetails(animalIdInt);
         console.log("Fetched Animal Data:", data);
+        console.log("Financial Details:", data.financial_details); // Debug financial data
 
         // Sort the data by date
         const sortedData = {
@@ -100,12 +114,13 @@ export default function AnimalProfileDashboard() {
         is_sick: healthForm.is_sick,
         clinical_signs: healthForm.clinical_signs || "",
         diagnosis: healthForm.diagnosis || "",
-        treatment: healthForm.treatment || ""
+        treatment: healthForm.treatment || "",
+        cost: parseFloat(healthForm.cost) || 0
       };
       await addHealthRecord(animalIdInt, newRecord);
       setReloadTrigger(prev => prev + 1);
       setIsHealthModalOpen(false);
-      setHealthForm({ date: "", type: "", details: "", is_sick: false, clinical_signs: "", diagnosis: "", treatment: "" });
+      setHealthForm({ date: "", type: "", details: "", is_sick: false, clinical_signs: "", diagnosis: "", treatment: "", cost: "" });
     } catch (err) {
       setError("Failed to add health record: " + (err.message || "Permission denied"));
     }
@@ -120,14 +135,15 @@ export default function AnimalProfileDashboard() {
         is_sick: healthForm.is_sick,
         clinical_signs: healthForm.clinical_signs || "",
         diagnosis: healthForm.diagnosis || "",
-        treatment: healthForm.treatment || ""
+        treatment: healthForm.treatment || "",
+        cost: parseFloat(healthForm.cost) || 0
       };
       await updateHealthRecord(editingHealthRecordId, updatedRecord);
       setReloadTrigger(prev => prev + 1);
       setIsHealthModalOpen(false);
       setIsEditingHealth(false);
       setEditingHealthRecordId(null);
-      setHealthForm({ date: "", type: "", details: "", is_sick: false, clinical_signs: "", diagnosis: "", treatment: "" });
+      setHealthForm({ date: "", type: "", details: "", is_sick: false, clinical_signs: "", diagnosis: "", treatment: "", cost: "" });
     } catch (err) {
       setError("Failed to update health record: " + (err.message || "Permission denied"));
     }
@@ -141,7 +157,8 @@ export default function AnimalProfileDashboard() {
       is_sick: Boolean(record.is_sick),
       clinical_signs: record.clinical_signs || "",
       diagnosis: record.diagnosis || "",
-      treatment: record.treatment || ""
+      treatment: record.treatment || "",
+      cost: record.cost || ""
     });
     setEditingHealthRecordId(record.id);
     setIsEditingHealth(true);
@@ -154,12 +171,13 @@ export default function AnimalProfileDashboard() {
       const newRecord = {
         date: reproductionForm.date || new Date().toISOString().split('T')[0],
         event: reproductionForm.event,
-        details: reproductionForm.details || ""
+        details: reproductionForm.details || "",
+        cost: parseFloat(reproductionForm.cost) || 0
       };
       await addReproductiveHistory(animalIdInt, newRecord);
       setReloadTrigger(prev => prev + 1);
       setIsReproductionModalOpen(false);
-      setReproductionForm({ date: "", event: "AI", details: "" });
+      setReproductionForm({ date: "", event: "AI", details: "", cost: "" });
     } catch (err) {
       setError("Failed to add reproductive record: " + (err.message || "Permission denied"));
     }
@@ -167,10 +185,6 @@ export default function AnimalProfileDashboard() {
 
   const handleExport = () => {
     alert("Exporting profile data... (Implement PDF/CSV generation here)");
-  };
-
-  const handleBackClick = () => {
-    navigate(-1); // Go back to the previous page
   };
 
   const handleNextImage = () => setCurrentImageIndex((prev) => (prev + 1) % animalData.images.length);
@@ -222,7 +236,6 @@ export default function AnimalProfileDashboard() {
     FCR: day.Feed ? (day.Milk / day.Feed).toFixed(2) : 0,
   })).sort((a, b) => new Date(a.name) - new Date(b.name));
 
-  // Custom Tooltip for Daily Milk Production
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
@@ -244,11 +257,16 @@ export default function AnimalProfileDashboard() {
   };
 
   const financialChartData = [
-    { name: "Feed Costs", value: animalData.financial_details?.feed_cost_per_month || 0 },
-    { name: "Vet Expenses", value: animalData.financial_details?.vet_expenses || 0 },
-    { name: "Breeding Costs", value: animalData.financial_details?.breeding_costs || 0 },
-    { name: "Milk Revenue", value: animalData.financial_details?.revenue_from_milk || 0 },
+    { name: "Feed Costs", value: parseFloat(animalData.financial_details?.total_feed_cost || 0) },
+    { name: "Vet Expenses", value: parseFloat(animalData.financial_details?.total_vet_cost || 0) },
+    { name: "Breeding Costs", value: parseFloat(animalData.financial_details?.total_breeding_cost || 0) },
+    { name: "Milk Revenue", value: parseFloat(animalData.financial_details?.total_revenue_from_milk || 0) },
   ];
+  
+  // Calculate total cost as a number
+  const totalCost = parseFloat(animalData.financial_details?.total_cost || 0);
+  
+  // Render the fina
 
   const alerts = [];
   if (animalData.production_data.some(record => record.scc > 200)) {
@@ -290,14 +308,6 @@ export default function AnimalProfileDashboard() {
   return (
     <div className={`min-h-screen p-6 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-black'}`}>
       <div className="fixed top-4 right-4 flex space-x-2 z-50">
-        <button
-          className="p-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition flex items-center space-x-1"
-          onClick={handleBackClick}
-          title="Back to Previous Page"
-        >
-          <ArrowLeft size={20} />
-          <span>Previous Page</span>
-        /</button>
         <button className="p-2 bg-gray-800 text-white rounded hover:bg-gray-700 transition" onClick={() => setDarkMode(!darkMode)}>
           {darkMode ? <Sun size={20} /> : <Moon size={20} />}
         </button>
@@ -414,7 +424,7 @@ export default function AnimalProfileDashboard() {
           <ul className="space-y-2 text-sm">
             {animalData.reproductive_history.map((record, index) => (
               <li key={index} className="border-b border-gray-200 dark:border-gray-700 pb-2">
-                <strong>{record.date}:</strong> {record.event} {record.details ? `- ${record.details}` : ""}
+                <strong>{record.date}:</strong> {record.event} {record.details ? `- ${record.details}` : ""} (Cost: Ksh. {record.cost || 0})
               </li>
             ))}
           </ul>
@@ -442,7 +452,7 @@ export default function AnimalProfileDashboard() {
             <button
               onClick={() => {
                 setIsEditingHealth(false);
-                setHealthForm({ date: "", type: "", details: "", is_sick: false, clinical_signs: "", diagnosis: "", treatment: "" });
+                setHealthForm({ date: "", type: "", details: "", is_sick: false, clinical_signs: "", diagnosis: "", treatment: "", cost: "" });
                 setIsHealthModalOpen(true);
               }}
               className="absolute bottom-6 right-6 bg-orange-500 text-white rounded-full p-3 shadow-lg hover:bg-orange-600 transition z-10"
@@ -455,7 +465,7 @@ export default function AnimalProfileDashboard() {
             {animalData.health_records.map((record, index) => (
               <li key={index} className="border-b border-gray-200 dark:border-gray-700 pb-2 flex justify-between items-start">
                 <div>
-                  <strong>{record.date}:</strong> {record.type} - {record.details}
+                  <strong>{record.date}:</strong> {record.type} - {record.details} (Cost: Ksh. {record.cost || 0})
                   {record.clinical_signs && <p><strong>Signs:</strong> {record.clinical_signs}</p>}
                   {record.diagnosis && <p><strong>Diagnosis:</strong> {record.diagnosis}</p>}
                   {record.treatment && <p><strong>Treatment:</strong> {record.treatment}</p>}
@@ -556,25 +566,43 @@ export default function AnimalProfileDashboard() {
 
         {/* Financial Overview */}
         <div className="bg-white shadow-lg rounded-xl p-6 h-80 overflow-y-auto">
-          <h2 className="text-xl font-bold mb-4">Financial Overview</h2>
-          <PieChart width={300} height={300}>
-            <Pie
-              data={financialChartData}
-              dataKey="value"
-              nameKey="name"
-              cx="50%"
-              cy="50%"
-              outerRadius={80}
-              label={({ name, value }) => `${name}: $${value}`}
-              labelLine={true}
-            >
-              {financialChartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Legend />
-          </PieChart>
-        </div>
+  <h2 className="text-xl font-bold mb-2">Financial Overview</h2>
+  <div className="flex flex-col h-full">
+    {/* Total Cost */}
+    <div className="mb-2">
+      <p className="text-sm">
+        <strong>Total Cost:</strong> Ksh.{totalCost.toFixed(2)}
+      </p>
+    </div>
+
+    {/* Pie Chart */}
+    <div className="flex-1 flex justify-center items-center min-h-0">
+      <PieChart width={260} height={200}>
+        <Pie
+          data={financialChartData}
+          dataKey="value"
+          nameKey="name"
+          cx="50%"
+          cy="50%"
+          outerRadius={70} // Reduced to fit better
+          label={({ name, value }) => `Ksh. {name}: Ksh .${value.toFixed(2)}`}
+          labelLine={{ stroke: '#666', strokeWidth: 1 }}
+        >
+          {financialChartData.map((entry, index) => (
+            <Cell key={`cell-Ksh.{index}`} fill={COLORS[index % COLORS.length]} />
+          ))}
+        </Pie>
+        <Legend
+          layout="horizontal" // Changed to horizontal to save vertical space
+          align="center"
+          verticalAlign="bottom"
+          wrapperStyle={{ fontSize: '12px', paddingTop: '5px' }}
+        />
+        <Tooltip formatter={(value) => `Ksh.${value.toFixed(2)}`} />
+      </PieChart>
+    </div>
+  </div>
+</div>
       </div>
 
       {/* Production Modal */}
@@ -707,6 +735,14 @@ export default function AnimalProfileDashboard() {
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-black"
                 placeholder="Treatment"
               />
+              <input
+                type="number"
+                value={healthForm.cost}
+                onChange={(e) => setHealthForm({ ...healthForm, cost: e.target.value })}
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-black"
+                placeholder="Cost (Ksh.)"
+                step="0.01"
+              />
               <label className="flex items-center space-x-2">
                 <input
                   type="checkbox"
@@ -724,7 +760,7 @@ export default function AnimalProfileDashboard() {
                   setIsHealthModalOpen(false);
                   setIsEditingHealth(false);
                   setEditingHealthRecordId(null);
-                  setHealthForm({ date: "", type: "", details: "", is_sick: false, clinical_signs: "", diagnosis: "", treatment: "" });
+                  setHealthForm({ date: "", type: "", details: "", is_sick: false, clinical_signs: "", diagnosis: "", treatment: "", cost: "" });
                 }}
               >
                 Cancel
@@ -768,6 +804,14 @@ export default function AnimalProfileDashboard() {
                 onChange={(e) => setReproductionForm({ ...reproductionForm, details: e.target.value })}
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-black"
                 placeholder="Details"
+              />
+              <input
+                type="number"
+                value={reproductionForm.cost}
+                onChange={(e) => setReproductionForm({ ...reproductionForm, cost: e.target.value })}
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-black"
+                placeholder="Cost ($)"
+                step="0.01"
               />
             </div>
             <div className="mt-4 flex justify-end space-x-2">
