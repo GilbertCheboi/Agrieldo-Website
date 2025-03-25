@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   Modal,
   Box,
@@ -10,29 +10,29 @@ import {
   Avatar,
   ListItemText,
   ListItemIcon,
-} from '@mui/material';
-import { fetchProduce, fetchStores, createInventory } from '../services/api';
+} from "@mui/material";
+import { fetchProduce, fetchStores, createInventory } from "../services/api";
 
 const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
   width: 400,
-  bgcolor: 'background.paper',
+  bgcolor: "background.paper",
   boxShadow: 24,
   p: 4,
   borderRadius: 2,
 };
 
-const IMAGE_BASE_URL = 'https://api.agrieldo.com'; // Adjust in production if needed
+const IMAGE_BASE_URL = "https://api.agrieldo.com"; // Adjust in production if needed
 
 function AddToStoreModal({ open, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
-    produce: '',
-    store: '',
-    quantity: '',
-    created_at: '', // ✅ Add created_at to formData
+    produce: "",
+    store: "",
+    quantity: "",
+    created_at: "", // ✅ Add created_at to formData
   });
 
   const [produceList, setProduceList] = useState([]);
@@ -52,12 +52,12 @@ function AddToStoreModal({ open, onClose, onSuccess }) {
         setStoreList(storeRes);
         setFormData((prev) => ({
           ...prev,
-          produce: produceRes.length > 0 ? produceRes[0].id : '',
-          store: storeRes.length > 0 ? storeRes[0].id : '',
+          produce: produceRes.length > 0 ? produceRes[0].id : "",
+          store: storeRes.length > 0 ? storeRes[0].id : "",
         }));
       } catch (err) {
-        console.error('Error loading data:', err);
-        setError('Failed to load produce or store list.');
+        console.error("Error loading data:", err);
+        setError("Failed to load produce or store list.");
       } finally {
         setLoading(false);
       }
@@ -73,12 +73,12 @@ function AddToStoreModal({ open, onClose, onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    console.log('formData before submit:', formData); // Debug line
+
+    console.log("formData before submit:", formData); // Debug line
     const isoDate = formData.created_at
       ? new Date(`${formData.created_at}T00:00:00`).toISOString()
       : null;
-  
+
     const payload = {
       produce: parseInt(formData.produce),
       quantity: parseFloat(formData.quantity),
@@ -86,27 +86,35 @@ function AddToStoreModal({ open, onClose, onSuccess }) {
       outlet: null,
       created_at: isoDate,
     };
-  
-    console.log('Final Payload:', payload); // ✅ This should now show a non-null created_at
-  
+
+    console.log("Final Payload:", payload); // ✅ This should now show a non-null created_at
+
     try {
       await createInventory(payload);
-      alert('Stock successfully added to Store!');
+      alert("Stock successfully added to Store!");
       onSuccess();
       onClose();
     } catch (err) {
-      console.error('Error creating inventory:', err);
-      setError('Failed to add stock.');
+      console.error("Error creating inventory:", err);
+      setError("Failed to add stock.");
     }
   };
-  
 
   if (loading && open) return <p>Loading...</p>;
 
   return (
-    <Modal open={open} onClose={onClose} aria-labelledby="add-to-store-modal-title">
+    <Modal
+      open={open}
+      onClose={onClose}
+      aria-labelledby="add-to-store-modal-title"
+    >
       <Box sx={style}>
-        <Typography id="add-to-store-modal-title" variant="h6" component="h2" gutterBottom>
+        <Typography
+          id="add-to-store-modal-title"
+          variant="h6"
+          component="h2"
+          gutterBottom
+        >
           Add Stock to Store
         </Typography>
 
@@ -134,7 +142,9 @@ function AddToStoreModal({ open, onClose, onSuccess }) {
                     src={
                       item.image
                         ? `${IMAGE_BASE_URL}${item.image}`
-                        : `https://via.placeholder.com/40?text=${item.name.charAt(0)}`
+                        : `https://via.placeholder.com/40?text=${item.name.charAt(
+                            0
+                          )}`
                     }
                     alt={item.name}
                     sx={{ width: 32, height: 32 }}
@@ -189,7 +199,7 @@ function AddToStoreModal({ open, onClose, onSuccess }) {
           />
 
           {/* Submit Buttons */}
-          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+          <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
             <Button onClick={onClose} sx={{ mr: 1 }}>
               Cancel
             </Button>

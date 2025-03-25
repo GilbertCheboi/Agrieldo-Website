@@ -20,10 +20,10 @@ import { GiWheat } from "react-icons/gi";
 import AddIcon from "@mui/icons-material/Add";
 import { addTransaction, fetchFeeds } from "../services/api";
 
-const BASE_URL = "https://api.agrieldo.com/";
+const BASE_URL = "https://api.agrieldo.com";
 
 const getImageUrl = (imagePath) => {
-  const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
+  const cleanPath = imagePath.startsWith("/") ? imagePath.slice(1) : imagePath;
   return `${BASE_URL}${cleanPath}`;
 };
 
@@ -73,7 +73,12 @@ const FeedManagement = () => {
     <Box sx={{ position: "relative", p: 2 }}>
       <Typography
         variant="h6"
-        sx={{ fontWeight: "bold", display: "flex", alignItems: "center", gap: "10px" }}
+        sx={{
+          fontWeight: "bold",
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+        }}
       >
         <GiWheat color="#ffa500" /> Feed Management
       </Typography>
@@ -85,10 +90,24 @@ const FeedManagement = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ fontWeight: "bold", color: "#ffa500" }}>Image</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#ffa500" }}>Feed Name</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#ffa500" }} align="center">Quantity (kg)</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#ffa500" }} align="center">Actions</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#ffa500" }}>
+                  Image
+                </TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#ffa500" }}>
+                  Feed Name
+                </TableCell>
+                <TableCell
+                  sx={{ fontWeight: "bold", color: "#ffa500" }}
+                  align="center"
+                >
+                  Quantity (kg)
+                </TableCell>
+                <TableCell
+                  sx={{ fontWeight: "bold", color: "#ffa500" }}
+                  align="center"
+                >
+                  Actions
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -100,7 +119,11 @@ const FeedManagement = () => {
                         <img
                           src={getImageUrl(feed.image)}
                           alt={feed.name}
-                          style={{ maxHeight: "50px", maxWidth: "50px", objectFit: "cover" }}
+                          style={{
+                            maxHeight: "50px",
+                            maxWidth: "50px",
+                            objectFit: "cover",
+                          }}
                           onError={(e) => (e.target.style.display = "none")}
                         />
                       ) : (
@@ -135,14 +158,25 @@ const FeedManagement = () => {
 
       <Fab
         color="primary"
-        sx={{ position: "absolute", bottom: 16, right: 16, backgroundColor: "#ffa500" }}
+        sx={{
+          position: "absolute",
+          bottom: 16,
+          right: 16,
+          backgroundColor: "#ffa500",
+        }}
         onClick={handleOpen}
       >
         <AddIcon />
       </Fab>
 
-      <Modal open={open} onClose={handleClose} sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <Box sx={{ backgroundColor: "white", p: 4, borderRadius: 2, width: 400 }}>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+      >
+        <Box
+          sx={{ backgroundColor: "white", p: 4, borderRadius: 2, width: 400 }}
+        >
           <Typography variant="h6" sx={{ mb: 2 }}>
             Record Feed Transaction
           </Typography>
@@ -192,7 +226,12 @@ const FeedManagement = () => {
                 <MenuItem value="CONSUME">Consume</MenuItem>
               </TextField>
 
-              <Button type="submit" fullWidth variant="contained" sx={{ backgroundColor: "#ffa500", color: "white" }}>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{ backgroundColor: "#ffa500", color: "white" }}
+              >
                 Submit
               </Button>
             </form>

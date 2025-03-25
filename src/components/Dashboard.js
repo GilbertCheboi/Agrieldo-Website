@@ -36,7 +36,11 @@ const Dashboard = () => {
   const [farmsData, setFarmsData] = useState([]);
   const [loadingFarms, setLoadingFarms] = useState(true);
   const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState({ name: "", location: "", type: "Dairy" });
+  const [formData, setFormData] = useState({
+    name: "",
+    location: "",
+    type: "Dairy",
+  });
   const navigate = useNavigate();
 
   // Fetch profile
@@ -146,7 +150,9 @@ const Dashboard = () => {
           >
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <Avatar
-                src={profile?.image ? `${backendURL}${profile.image}` : undefined}
+                src={
+                  profile?.image ? `${backendURL}${profile.image}` : undefined
+                }
                 alt="Profile"
                 sx={{
                   width: { xs: 48, md: 64 },
@@ -158,11 +164,16 @@ const Dashboard = () => {
                   "&:hover": { transform: "scale(1.05)" },
                 }}
               >
-                {!profile?.image && (profile?.first_name ? profile.first_name[0] : "?")}
+                {!profile?.image &&
+                  (profile?.first_name ? profile.first_name[0] : "?")}
               </Avatar>
               <Typography
                 variant="h4"
-                sx={{ fontWeight: 700, color: "#1a3c34", letterSpacing: "-0.5px" }}
+                sx={{
+                  fontWeight: 700,
+                  color: "#1a3c34",
+                  letterSpacing: "-0.5px",
+                }}
               >
                 {greeting}{" "}
                 <span style={{ color: "#ffa500" }}>
@@ -174,7 +185,10 @@ const Dashboard = () => {
 
           {/* Farms Cards */}
           <Box sx={{ mb: 4 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, color: "#1a3c34", mb: 2 }}>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 600, color: "#1a3c34", mb: 2 }}
+            >
               My Farms
             </Typography>
             <Grid container spacing={2}>
@@ -199,13 +213,18 @@ const Dashboard = () => {
                       }}
                       onClick={() => handleFarmCardClick(farm.id)}
                     >
-                      <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                      <CardContent
+                        sx={{ display: "flex", alignItems: "center", gap: 2 }}
+                      >
                         <GiBarn size={24} color="#ffa500" />
                         <Box>
                           <Typography variant="body2" sx={{ color: "#666" }}>
                             {farm.name || "Unnamed Farm"}
                           </Typography>
-                          <Typography variant="h6" sx={{ fontWeight: 700, color: "#1a3c34" }}>
+                          <Typography
+                            variant="h6"
+                            sx={{ fontWeight: 700, color: "#1a3c34" }}
+                          >
                             {farm.location || "Unknown Location"}
                           </Typography>
                           <Typography variant="caption" sx={{ color: "#888" }}>
@@ -270,7 +289,11 @@ const Dashboard = () => {
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setOpen(false)}>Cancel</Button>
-              <Button onClick={handleSubmit} variant="contained" color="primary">
+              <Button
+                onClick={handleSubmit}
+                variant="contained"
+                color="primary"
+              >
                 Add Farm
               </Button>
             </DialogActions>

@@ -2,25 +2,24 @@ import axios from "axios";
 
 // Base API instance
 const API = axios.create({
-    //baseURL: "http://207.154.253.97:8000/api/", // Update the base URL to match your backend
-    baseURL: "https://api.agrieldo.com/api/", // Alternative URL commented out
-    timeout: 10000, // Try adding this
-
+  //baseURL: "http://207.154.253.97:8000/api/", // Update the base URL to match your backend
+  baseURL: "https://api.agrieldo.comapi/", // Alternative URL commented out
+  timeout: 10000, // Try adding this
 });
 
 // Add a request interceptor to include the JWT token in headers
 API.interceptors.request.use(
   (config) => {
-    console.log('Sending request to:', config.url); // Log the request URL
-    const token = localStorage.getItem('token');
+    console.log("Sending request to:", config.url); // Log the request URL
+    const token = localStorage.getItem("accessToken");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log('Using token:', token); // Log the token being used
+      console.log("Using token:", token); // Log the token being used
     }
     return config;
   },
   (error) => {
-    console.error('Request error:', error); // Log request errors
+    console.error("Request error:", error); // Log request errors
     return Promise.reject(error);
   }
 );
@@ -28,44 +27,48 @@ API.interceptors.request.use(
 // Existing auth functions (unchanged)
 export const login = async (credentials) => {
   try {
-    const response = await API.post('/accounts/api/token/', credentials, {
+    const response = await API.post("/accounts/api/token/", credentials, {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
     console.log("Login API response:", response.data); // Log the full response for debugging
 
     // Map user_type string to numeric value
     const userTypeMap = {
-      "farmer": "1",
-      "vet": "2",
-      "staff": "3"
+      farmer: "1",
+      vet: "2",
+      staff: "3",
     };
     const userType = userTypeMap[response.data.user_type.toLowerCase()] || "1"; // Default to "1" if unknown
 
-    localStorage.setItem('accessToken', response.data.access);
-    localStorage.setItem('refreshToken', response.data.refresh);
-    localStorage.setItem('user_type', userType); // Store as "1", "2", or "3"
+    localStorage.setItem("accessToken", response.data.access);
+    localStorage.setItem("refreshToken", response.data.refresh);
+    localStorage.setItem("user_type", userType); // Store as "1", "2", or "3"
     console.log("Stored user_type in localStorage:", userType);
 
     window.dispatchEvent(new Event("authChanged"));
     return response.data;
   } catch (error) {
-    console.error('Login failed:', error.response ? error.response.data : error.message);
+    console.error(
+      "Login failed:",
+      error.response ? error.response.data : error.message
+    );
     throw error;
   }
 };
 
-
 export const refreshAccessToken = async () => {
-  const refreshToken = localStorage.getItem('refreshToken');
+  const refreshToken = localStorage.getItem("refreshToken");
   try {
-    const { data } = await API.post('/accounts/api/token/refresh/', { refresh: refreshToken });
-    console.log('Token refreshed:', data);
-    localStorage.setItem('accessToken', data.access);
+    const { data } = await API.post("/accounts/api/token/refresh/", {
+      refresh: refreshToken,
+    });
+    console.log("Token refreshed:", data);
+    localStorage.setItem("accessToken", data.access);
     return data.access;
   } catch (error) {
-    console.error('Failed to refresh token:', error);
+    console.error("Failed to refresh token:", error);
     throw error;
   }
 };
@@ -89,7 +92,10 @@ export const fetchProduce = async () => {
     console.log("Fetched Produce Data:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching produce:", error.response ? error.response.data : error.message);
+    console.error(
+      "Error fetching produce:",
+      error.response ? error.response.data : error.message
+    );
     throw error;
   }
 };
@@ -104,37 +110,47 @@ export const fetchDailyInventory = async (date = null) => {
     console.log("Fetched Daily Inventory:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching daily inventory:", error.response ? error.response.data : error.message);
+    console.error(
+      "Error fetching daily inventory:",
+      error.response ? error.response.data : error.message
+    );
     throw error;
   }
 };
-
 
 export const fetchProduceDetails = async (id) => {
   try {
-    const response = await API.get(`inventory/produce/${id}/`, getAuthHeaders());
+    const response = await API.get(
+      `inventory/produce/${id}/`,
+      getAuthHeaders()
+    );
     console.log("Fetched Produce Details:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching produce details:", error.response ? error.response.data : error.message);
+    console.error(
+      "Error fetching produce details:",
+      error.response ? error.response.data : error.message
+    );
     throw error;
   }
 };
-
-
 
 export const fetchOutletDetails = async (id) => {
   try {
-    const response = await API.get(`inventory/outlets/${id}/`, getAuthHeaders());
+    const response = await API.get(
+      `inventory/outlets/${id}/`,
+      getAuthHeaders()
+    );
     console.log("Fetched Outlet Details:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching outlet details:", error.response ? error.response.data : error.message);
+    console.error(
+      "Error fetching outlet details:",
+      error.response ? error.response.data : error.message
+    );
     throw error;
   }
 };
-
-
 
 export const fetchPlateauInventory = async () => {
   try {
@@ -142,7 +158,10 @@ export const fetchPlateauInventory = async () => {
     console.log("Fetched Plateau Inventory Data:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching plateau inventory:", error.response ? error.response.data : error.message);
+    console.error(
+      "Error fetching plateau inventory:",
+      error.response ? error.response.data : error.message
+    );
     throw error;
   }
 };
@@ -156,7 +175,10 @@ export const fetchOutletInventory = async (outletId) => {
     console.log(`Fetched Inventory for Outlet ${outletId}:`, response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching outlet inventory:", error.response ? error.response.data : error.message);
+    console.error(
+      "Error fetching outlet inventory:",
+      error.response ? error.response.data : error.message
+    );
     throw error;
   }
 };
@@ -164,7 +186,11 @@ export const fetchOutletInventory = async (outletId) => {
 export const createInventory = async (inventoryData) => {
   try {
     console.log("Sending Inventory Payload:", inventoryData);
-    const response = await API.post("inventory/inventory/", inventoryData, getAuthHeaders());
+    const response = await API.post(
+      "inventory/inventory/",
+      inventoryData,
+      getAuthHeaders()
+    );
     console.log("Created Inventory Entry:", response.data);
     return response.data;
   } catch (error) {
@@ -176,11 +202,18 @@ export const createInventory = async (inventoryData) => {
 
 export const updateInventory = async (id, updatedData) => {
   try {
-    const response = await API.put(`inventory/${id}/`, updatedData, getAuthHeaders());
+    const response = await API.put(
+      `inventory/${id}/`,
+      updatedData,
+      getAuthHeaders()
+    );
     console.log("Updated Inventory Entry:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error updating inventory:", error.response ? error.response.data : error.message);
+    console.error(
+      "Error updating inventory:",
+      error.response ? error.response.data : error.message
+    );
     throw error;
   }
 };
@@ -191,7 +224,10 @@ export const deleteInventory = async (id) => {
     console.log(`Deleted Inventory Entry ${id}`);
     return { success: true };
   } catch (error) {
-    console.error("Error deleting inventory:", error.response ? error.response.data : error.message);
+    console.error(
+      "Error deleting inventory:",
+      error.response ? error.response.data : error.message
+    );
     throw error;
   }
 };
@@ -203,7 +239,10 @@ export const fetchAnimals = async () => {
     console.log("Fetched Animals Data:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching animals:", error.response ? error.response.data : error.message);
+    console.error(
+      "Error fetching animals:",
+      error.response ? error.response.data : error.message
+    );
     throw error;
   }
 };
@@ -214,29 +253,30 @@ export const fetchAnimalDetails = async (id) => {
     console.log("Fetched Animal Details:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching animal details:", error.response ? error.response.data : error.message);
+    console.error(
+      "Error fetching animal details:",
+      error.response ? error.response.data : error.message
+    );
     throw error;
   }
 };
 
-
-
 export const fetchLeads = async () => {
-  const token = localStorage.getItem('access_token');
-  return await API.get('/profiles/leads/', {
+  const token = localStorage.getItem("access_token");
+  return await API.get("/profiles/leads/", {
     headers: { Authorization: `Bearer ${token}` },
   });
 };
 
 export const createLead = async (leadData) => {
-  const token = localStorage.getItem('access_token');
-  return await API.post('/profiles/leads/', leadData, {
+  const token = localStorage.getItem("access_token");
+  return await API.post("/profiles/leads/", leadData, {
     headers: { Authorization: `Bearer ${token}` },
   });
 };
 
 export const updateLead = async (id, updatedData) => {
-  const token = localStorage.getItem('access_token');
+  const token = localStorage.getItem("access_token");
   console.log("Data being sent to API:", updatedData);
   return await API.put(`/profiles/leads/update/${id}/`, updatedData, {
     headers: { Authorization: `Bearer ${token}` },
@@ -244,7 +284,7 @@ export const updateLead = async (id, updatedData) => {
 };
 
 export const deleteLead = async (id) => {
-  const token = localStorage.getItem('access_token');
+  const token = localStorage.getItem("access_token");
   return await API.delete(`/profiles/leads/${id}/`, {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -278,7 +318,10 @@ export const fetchFeeds = async () => {
     console.log("Fetched Feeds Data:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching feeds:", error.response ? error.response.data : error.message);
+    console.error(
+      "Error fetching feeds:",
+      error.response ? error.response.data : error.message
+    );
     throw error;
   }
 };
@@ -298,16 +341,26 @@ export const addTransaction = async (transactionData) => {
   console.log("Sending Transaction Data:", transactionData);
   console.log("Headers:", headers);
   try {
-    const response = await API.post(`feed/feed-transactions/`, transactionData, headers);
+    const response = await API.post(
+      `feed/feed-transactions/`,
+      transactionData,
+      headers
+    );
     return response.data;
   } catch (error) {
-    console.error("Transaction Error:", error.response ? error.response.data : error.message);
+    console.error(
+      "Transaction Error:",
+      error.response ? error.response.data : error.message
+    );
     throw error;
   }
 };
 
 export const fetchDailyConsumption = async () => {
-  const response = await API.get(`feed/feed-transactions/daily-consumption/`, getAuthHeaders());
+  const response = await API.get(
+    `feed/feed-transactions/daily-consumption/`,
+    getAuthHeaders()
+  );
   return response.data;
 };
 
@@ -321,7 +374,10 @@ export const fetchTasks = async () => {
     const response = await API.get("tasks/tasks/", getAuthHeaders());
     return response.data;
   } catch (error) {
-    console.error("Error fetching tasks:", error.response ? error.response.data : error.message);
+    console.error(
+      "Error fetching tasks:",
+      error.response ? error.response.data : error.message
+    );
     throw error;
   }
 };
@@ -341,17 +397,27 @@ export const createTask = async (assignedTo, farmId, title, dueDate, time) => {
     );
     return response.data;
   } catch (error) {
-    console.error("Error creating task:", error.response ? error.response.data : error.message);
+    console.error(
+      "Error creating task:",
+      error.response ? error.response.data : error.message
+    );
     throw error;
   }
 };
 
 export const updateTask = async (taskId, updates) => {
   try {
-    const response = await API.patch(`tasks/tasks/${taskId}/`, updates, getAuthHeaders());
+    const response = await API.patch(
+      `tasks/tasks/${taskId}/`,
+      updates,
+      getAuthHeaders()
+    );
     return response.data;
   } catch (error) {
-    console.error("Error updating task:", error.response ? error.response.data : error.message);
+    console.error(
+      "Error updating task:",
+      error.response ? error.response.data : error.message
+    );
     throw error;
   }
 };
@@ -361,7 +427,10 @@ export const deleteTask = async (taskId) => {
     await API.delete(`tasks/tasks/${taskId}/`, getAuthHeaders());
     return { success: true };
   } catch (error) {
-    console.error("Error deleting task:", error.response ? error.response.data : error.message);
+    console.error(
+      "Error deleting task:",
+      error.response ? error.response.data : error.message
+    );
     throw error;
   }
 };
@@ -371,7 +440,10 @@ export const fetchProductionData = async () => {
     const response = await API.get(`production/records/`, getAuthHeaders());
     return response.data;
   } catch (error) {
-    console.error("Error fetching production data:", error.response?.data || error.message);
+    console.error(
+      "Error fetching production data:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 };
@@ -380,27 +452,44 @@ export const addProductionRecord = async (record) => {
   try {
     const { commodity, quantity } = record;
     console.log("Sending payload:", { commodity, quantity });
-    const response = await API.post(`production/records/`, { commodity, quantity }, getAuthHeaders());
+    const response = await API.post(
+      `production/records/`,
+      { commodity, quantity },
+      getAuthHeaders()
+    );
     return response.data;
   } catch (error) {
-    console.error("Error adding production record:", error.response?.data || error.message);
+    console.error(
+      "Error adding production record:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 };
 
 export const updateProductionRecord = async (id, updatedRecord) => {
   try {
-    const response = await API.put(`production/records/${id}/`, updatedRecord, getAuthHeaders());
+    const response = await API.put(
+      `production/records/${id}/`,
+      updatedRecord,
+      getAuthHeaders()
+    );
     return response.data;
   } catch (error) {
-    console.error("Error updating production record:", error.response?.data || error.message);
+    console.error(
+      "Error updating production record:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 };
 
 export const fetchTodaysProductionData = async () => {
   try {
-    const response = await API.get(`/production/records/today/`, getAuthHeaders());
+    const response = await API.get(
+      `/production/records/today/`,
+      getAuthHeaders()
+    );
     return response.data;
   } catch (error) {
     console.error("Error fetching today's production:", error);
@@ -410,7 +499,10 @@ export const fetchTodaysProductionData = async () => {
 
 export const fetchProductionHistory = async () => {
   try {
-    const response = await API.get(`/production/records/history/`, getAuthHeaders());
+    const response = await API.get(
+      `/production/records/history/`,
+      getAuthHeaders()
+    );
     return response.data;
   } catch (error) {
     console.error("Error fetching production history:", error);
@@ -440,7 +532,11 @@ export const getUsers = async () => {
 
 export const addFarmStaff = async (farmId, userId) => {
   try {
-    const response = await API.post(`/farms/${farmId}/add-staff/`, { user_id: userId }, getAuthHeaders());
+    const response = await API.post(
+      `/farms/${farmId}/add-staff/`,
+      { user_id: userId },
+      getAuthHeaders()
+    );
     return response.data;
   } catch (error) {
     console.error("Error adding staff:", error);
@@ -450,7 +546,10 @@ export const addFarmStaff = async (farmId, userId) => {
 
 export const removeFarmStaff = async (farmId, userId) => {
   try {
-    await API.delete(`/farms/${farmId}/remove-staff/${userId}/`, getAuthHeaders());
+    await API.delete(
+      `/farms/${farmId}/remove-staff/${userId}/`,
+      getAuthHeaders()
+    );
     return { message: "Staff member removed successfully." };
   } catch (error) {
     console.error("Error removing staff:", error);
@@ -483,7 +582,11 @@ export const getVets = async () => {
 // Assign vet to a farm
 export const addFarmVet = async (farmId, userId) => {
   try {
-    const response = await API.post(`/farms/${farmId}/add-vet/`, { user_id: userId }, getAuthHeaders());
+    const response = await API.post(
+      `/farms/${farmId}/add-vet/`,
+      { user_id: userId },
+      getAuthHeaders()
+    );
     return response.data;
   } catch (error) {
     console.error("Error assigning vet:", error);
@@ -494,15 +597,16 @@ export const addFarmVet = async (farmId, userId) => {
 // Remove vet from a farm
 export const removeFarmVet = async (farmId, userId) => {
   try {
-    await API.delete(`/farms/${farmId}/remove-vet/${userId}/`, getAuthHeaders());
+    await API.delete(
+      `/farms/${farmId}/remove-vet/${userId}/`,
+      getAuthHeaders()
+    );
     return { message: "Vet removed successfully." };
   } catch (error) {
     console.error("Error removing vet:", error);
     throw error;
   }
 };
-
-
 
 export const getFarms = async () => {
   try {
@@ -550,41 +654,55 @@ export const fetchDailyTotals = async (startDate = null, endDate = null) => {
     console.log("Fetched Daily Totals:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error fetching daily totals:", error.response ? error.response.data : error.message);
+    console.error(
+      "Error fetching daily totals:",
+      error.response ? error.response.data : error.message
+    );
     throw error;
   }
 };
 
 export const addProductionData = async (animalId, data) => {
-  return API.post('animals/production-data/', { animal: animalId, ...data }, getAuthHeaders());
+  return API.post(
+    "animals/production-data/",
+    { animal: animalId, ...data },
+    getAuthHeaders()
+  );
 };
 
 export const addHealthRecord = async (animalId, data) => {
-  return API.post('animals/health-records/', { animal: animalId, ...data }, getAuthHeaders());
+  return API.post(
+    "animals/health-records/",
+    { animal: animalId, ...data },
+    getAuthHeaders()
+  );
 };
 
 export const updateHealthRecord = async (recordId, data) => {
   const headers = getAuthHeaders();
   console.log("Auth Headers:", headers);
   try {
-      const response = await API.patch(
-          `animals/health-records/${recordId}/`, // Fixed URL
-          {
-              date: data.date,
-              type: data.type,
-              details: data.details,
-              is_sick: data.is_sick,
-              clinical_signs: data.clinical_signs,
-              diagnosis: data.diagnosis,
-              treatment: data.treatment
-          },
-          headers
-      );
-      console.log("Update health record response:", response.data);
-      return response.data;
+    const response = await API.patch(
+      `animals/health-records/${recordId}/`, // Fixed URL
+      {
+        date: data.date,
+        type: data.type,
+        details: data.details,
+        is_sick: data.is_sick,
+        clinical_signs: data.clinical_signs,
+        diagnosis: data.diagnosis,
+        treatment: data.treatment,
+      },
+      headers
+    );
+    console.log("Update health record response:", response.data);
+    return response.data;
   } catch (error) {
-      console.error("Error updating health record:", error.response ? error.response.data : error.message);
-      throw error;
+    console.error(
+      "Error updating health record:",
+      error.response ? error.response.data : error.message
+    );
+    throw error;
   }
 };
 
@@ -593,14 +711,17 @@ export const addReproductiveHistory = async (animalId, data) => {
   console.log("Reproductive History Payload:", payload); // Add this
   try {
     const response = await API.post(
-      'animals/reproductive-history/',
+      "animals/reproductive-history/",
       payload,
       getAuthHeaders()
     );
     console.log("Add reproductive history response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error adding reproductive history:", error.response ? error.response.data : error.message);
+    console.error(
+      "Error adding reproductive history:",
+      error.response ? error.response.data : error.message
+    );
     throw error;
   }
 };
@@ -615,7 +736,10 @@ export const fetchProduceItems = async () => {
 };
 
 // --- STORES (Plateau) ---
-export const fetchStoreInventory = async (start_date = null, end_date = null) => {
+export const fetchStoreInventory = async (
+  start_date = null,
+  end_date = null
+) => {
   try {
     let url = "inventory/inventory/";
 
@@ -672,10 +796,17 @@ export const fetchInventoryTransactions = async () => {
 // --- CREATE TRANSACTION (Transfer or Add to Plateau) ---
 export const createTransaction = async (payload) => {
   try {
-    const response = await API.post("inventory/transactions/", payload, getAuthHeaders());
+    const response = await API.post(
+      "inventory/transactions/",
+      payload,
+      getAuthHeaders()
+    );
     return response.data;
   } catch (error) {
-    console.error("Error creating transaction:", error.response?.data || error.message);
+    console.error(
+      "Error creating transaction:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 };
@@ -691,7 +822,7 @@ export const fetchStores = async () => {
 
 export const fetchSheepData = async ({ farmId }) => {
   try {
-    const response = await API.get('sheep_app/sheep/', {
+    const response = await API.get("sheep_app/sheep/", {
       ...getAuthHeaders(),
       params: farmId ? { farm_id: farmId } : {},
     });
@@ -704,7 +835,7 @@ export const fetchSheepData = async ({ farmId }) => {
 
 export const fetchSheepTypes = async () => {
   try {
-    const response = await API.get('sheep_app/sheep-types/', getAuthHeaders());
+    const response = await API.get("sheep_app/sheep-types/", getAuthHeaders());
     return response.data;
   } catch (error) {
     console.error("Error fetching sheep types:", error);
@@ -714,7 +845,7 @@ export const fetchSheepTypes = async () => {
 
 export const fetchCropData = async ({ farmId }) => {
   try {
-    const response = await API.get('sheep_app/crops/', {
+    const response = await API.get("sheep_app/crops/", {
       ...getAuthHeaders(),
       params: farmId ? { farm_id: farmId } : {},
     });
@@ -725,10 +856,13 @@ export const fetchCropData = async ({ farmId }) => {
   }
 };
 
-
 export const createSheep = async (sheepData) => {
   try {
-    const response = await API.post('sheep_app/sheep/', sheepData, getAuthHeaders());
+    const response = await API.post(
+      "sheep_app/sheep/",
+      sheepData,
+      getAuthHeaders()
+    );
     return response.data;
   } catch (error) {
     console.error("Error creating sheep:", error);
@@ -737,33 +871,63 @@ export const createSheep = async (sheepData) => {
 };
 
 export const addSheepProductionRecord = async (data) => {
-  const response = await API.post("sheep_app/sheep-production/", data, getAuthHeaders());
+  const response = await API.post(
+    "sheep_app/sheep-production/",
+    data,
+    getAuthHeaders()
+  );
   return response.data;
 };
 
 export const addSheepHealthRecord = async (data) => {
-  const response = await API.post("sheep_app/sheep-health/", data, getAuthHeaders());
+  const response = await API.post(
+    "sheep_app/sheep-health/",
+    data,
+    getAuthHeaders()
+  );
   return response.data;
 };
 
 export const updateSheepHealthRecord = async (id, data) => {
-  const response = await API.put(`sheep_app/sheep-health/${id}/`, data, getAuthHeaders());
+  const response = await API.put(
+    `sheep_app/sheep-health/${id}/`,
+    data,
+    getAuthHeaders()
+  );
   return response.data;
 };
 
 export const addReproductionRecord = async (data) => {
-  const response = await API.post("sheep_app/sheep-reproduction/", data, getAuthHeaders());
+  const response = await API.post(
+    "sheep_app/sheep-reproduction/",
+    data,
+    getAuthHeaders()
+  );
   return response.data;
 };
 
+// export const createAnimal = async (animalData) => {
+//   try {
+//     const response = await API.post(
+//       `animals/add/`,
+//       animalData,
+//       getAuthHeaders()
+//     );
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error creating animal:", error);
+//     throw error;
+//   }
+// };
 
 export const createAnimal = async (animalData) => {
   try {
-    const response = await API.post(
-      `animals/`,
-      animalData,
-      getAuthHeaders()
-    );
+    const authHeaders = getAuthHeaders();
+    // If animalData is a FormData instance, remove the Content-Type header so the browser sets it properly.
+    if (animalData instanceof FormData && authHeaders.headers["Content-Type"]) {
+      delete authHeaders.headers["Content-Type"];
+    }
+    const response = await API.post(`animals/add/`, animalData, authHeaders);
     return response.data;
   } catch (error) {
     console.error("Error creating animal:", error);

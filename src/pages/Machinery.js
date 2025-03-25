@@ -26,11 +26,14 @@ const Machinery = () => {
         return;
       }
 
-      const response = await axios.get("https://api.agrieldo.com/api/machinery/", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get(
+        "https://api.agrieldo.comapi/machinery/",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       console.log("Fetched Machinery Data:", response.data);
       setMachinery(response.data);
@@ -65,7 +68,7 @@ const Machinery = () => {
         return;
       }
 
-      await axios.post("https://api.agrieldo.com/api/machinery/", data, {
+      await axios.post("https://api.agrieldo.comapi/machinery/", data, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
@@ -86,10 +89,12 @@ const Machinery = () => {
       {/* Machinery Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {machinery.map((item) => {
-          const imageUrl = item.image.startsWith("http") ? item.image : `https://api.agrieldo.com${item.image}`;
+          const imageUrl = item.image.startsWith("http")
+            ? item.image
+            : `https://api.agrieldo.com${item.image}`;
           return (
-            <div 
-              key={item.id} 
+            <div
+              key={item.id}
               className="border rounded-lg shadow-lg p-4 bg-white cursor-pointer"
               onClick={() => navigate(`/machinery/${item.id}`)}
             >
@@ -109,9 +114,15 @@ const Machinery = () => {
                 </div>
               )}
               <h3 className="text-lg font-bold mt-2">{item.name}</h3>
-              <p className="text-sm text-gray-600">Model: {item.model || "N/A"}</p>
-              <p className="text-sm text-gray-600">Purchase Date: {item.purchase_date}</p>
-              <p className="text-sm text-gray-600">Condition: {item.condition}</p>
+              <p className="text-sm text-gray-600">
+                Model: {item.model || "N/A"}
+              </p>
+              <p className="text-sm text-gray-600">
+                Purchase Date: {item.purchase_date}
+              </p>
+              <p className="text-sm text-gray-600">
+                Condition: {item.condition}
+              </p>
             </div>
           );
         })}
@@ -181,7 +192,10 @@ const Machinery = () => {
                 >
                   Cancel
                 </button>
-                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded"
+                >
                   Save
                 </button>
               </div>

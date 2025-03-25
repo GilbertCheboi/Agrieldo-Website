@@ -25,9 +25,12 @@ const MachineryDetails = () => {
   const fetchMachineryDetails = async () => {
     try {
       const token = localStorage.getItem("accessToken");
-      const response = await axios.get(`https://api.agrieldo.com/api/machinery/${id}/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        `https://api.agrieldo.comapi/machinery/${id}/`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setMachinery(response.data);
     } catch (error) {
       console.error("Error fetching machinery details:", error);
@@ -37,9 +40,12 @@ const MachineryDetails = () => {
   const fetchLogs = async (logType) => {
     try {
       const token = localStorage.getItem("accessToken");
-      const response = await axios.get(`https://api.agrieldo.com/api/machinery/${id}/${logType}/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        `https://api.agrieldo.comapi/machinery/${id}/${logType}/`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       if (logType === "usageLogs") setUsageLogs(response.data);
       if (logType === "maintenanceLogs") setMaintenanceLogs(response.data);
       if (logType === "fuelLogs") setFuelLogs(response.data);
@@ -72,19 +78,35 @@ const MachineryDetails = () => {
       </div>
 
       <div className="mt-6 space-y-2 text-gray-800">
-        <p><strong>Model:</strong> {machinery.model || "N/A"}</p>
-        <p><strong>Purchase Date:</strong> {machinery.purchase_date || "N/A"}</p>
-        <p><strong>Condition:</strong> {machinery.condition || "Unknown"}</p>
+        <p>
+          <strong>Model:</strong> {machinery.model || "N/A"}
+        </p>
+        <p>
+          <strong>Purchase Date:</strong> {machinery.purchase_date || "N/A"}
+        </p>
+        <p>
+          <strong>Condition:</strong> {machinery.condition || "Unknown"}
+        </p>
       </div>
 
       <div className="flex space-x-4 mt-6 border-b pb-2">
-        {["usageLogs", "maintenanceLogs", "fuelLogs", "spareParts", "alerts"].map((key) => (
+        {[
+          "usageLogs",
+          "maintenanceLogs",
+          "fuelLogs",
+          "spareParts",
+          "alerts",
+        ].map((key) => (
           <button
             key={key}
-            className={`px-4 py-2 font-semibold ${activeTab === key ? "border-b-2 border-orange-500 text-orange-500" : "text-gray-600"}`}
+            className={`px-4 py-2 font-semibold ${
+              activeTab === key
+                ? "border-b-2 border-orange-500 text-orange-500"
+                : "text-gray-600"
+            }`}
             onClick={() => setActiveTab(key)}
           >
-            {key.replace(/([A-Z])/g, ' $1').trim()}
+            {key.replace(/([A-Z])/g, " $1").trim()}
           </button>
         ))}
       </div>
@@ -92,14 +114,27 @@ const MachineryDetails = () => {
       <div className="mt-4 text-gray-700 relative">
         {activeTab === "usageLogs" && (
           <div>
-            <button className="fixed bottom-16 right-10 bg-orange-500 text-white p-4 rounded-full shadow-md" onClick={() => console.log("Add usage log")}> <Plus size={24} /> </button>
+            <button
+              className="fixed bottom-16 right-10 bg-orange-500 text-white p-4 rounded-full shadow-md"
+              onClick={() => console.log("Add usage log")}
+            >
+              {" "}
+              <Plus size={24} />{" "}
+            </button>
             <ul className="list-disc pl-6">
               {usageLogs.length > 0 ? (
                 usageLogs.map((log) => (
                   <li key={log.id} className="border-b py-2">
-                    <p><strong>Date:</strong> {log.date}</p>
-                    <p><strong>Usage:</strong> {log.usage_hours} hours</p>
-                    <p><strong>Description:</strong> {log.description || "No details provided"}</p>
+                    <p>
+                      <strong>Date:</strong> {log.date}
+                    </p>
+                    <p>
+                      <strong>Usage:</strong> {log.usage_hours} hours
+                    </p>
+                    <p>
+                      <strong>Description:</strong>{" "}
+                      {log.description || "No details provided"}
+                    </p>
                   </li>
                 ))
               ) : (
@@ -111,13 +146,23 @@ const MachineryDetails = () => {
 
         {activeTab === "maintenanceLogs" && (
           <div>
-            <button className="fixed bottom-16 right-10 bg-orange-500 text-white p-4 rounded-full shadow-md" onClick={() => console.log("Add maintenance log")}> <Plus size={24} /> </button>
+            <button
+              className="fixed bottom-16 right-10 bg-orange-500 text-white p-4 rounded-full shadow-md"
+              onClick={() => console.log("Add maintenance log")}
+            >
+              {" "}
+              <Plus size={24} />{" "}
+            </button>
             <ul className="list-disc pl-6">
               {maintenanceLogs.length > 0 ? (
                 maintenanceLogs.map((log) => (
                   <li key={log.id} className="border-b py-2">
-                    <p><strong>Date:</strong> {log.date}</p>
-                    <p><strong>Details:</strong> {log.details}</p>
+                    <p>
+                      <strong>Date:</strong> {log.date}
+                    </p>
+                    <p>
+                      <strong>Details:</strong> {log.details}
+                    </p>
                   </li>
                 ))
               ) : (

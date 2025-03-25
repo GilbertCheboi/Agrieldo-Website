@@ -63,13 +63,21 @@ export default function AnimalList() {
     // Apply URL filters first (override Slider filter if present)
     if (category) return animal.category === category;
     if (isPregnant === "true") return animal.is_pregnant;
-    if (isSick === "true") return animal.health_records && animal.health_records.some(record => record.is_sick);
+    if (isSick === "true")
+      return (
+        animal.health_records &&
+        animal.health_records.some((record) => record.is_sick)
+      );
     if (age === "Newborn") return calculateAgeInMonths(animal.dob) < 1;
 
     // Fallback to Slider filter if no URL params
     if (filter === "All") return true;
     if (filter === "Pregnant") return animal.is_pregnant;
-    if (filter === "Sick") return animal.health_records && animal.health_records.some(record => record.is_sick);
+    if (filter === "Sick")
+      return (
+        animal.health_records &&
+        animal.health_records.some((record) => record.is_sick)
+      );
     if (filter === "Newborn") return calculateAgeInMonths(animal.dob) < 1;
     return animal.category === filter;
   });
@@ -82,7 +90,11 @@ export default function AnimalList() {
   if (error) return <div>{error}</div>;
 
   return (
-    <div className={`min-h-screen p-6 ${darkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-black"}`}>
+    <div
+      className={`min-h-screen p-6 ${
+        darkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-black"
+      }`}
+    >
       <Slider onFilterChange={handleFilterChange} />
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">My Animals</h1>
@@ -112,28 +124,57 @@ export default function AnimalList() {
             to={`/animal/${animal.id}`}
             className="bg-white shadow-md rounded-2xl p-4 h-80 flex transition-transform hover:scale-105 hover:shadow-lg cursor-pointer"
           >
-            <div className="flex-shrink-0">
-              <img
-                src={animal.images[0]?.image || "https://via.placeholder.com/128"}
-                alt={animal.tag}
-                className="w-32 h-32 object-cover rounded-lg mr-4"
-                onError={(e) => console.log(`Failed to load image for ${animal.tag}:`, e)}
-              />
+            {/* Images - Arranged Vertically */}
+            <div className="flex-shrink-0 flex flex-col gap-2">
+              {animal.images.slice(0, 2).map((img, index) => (
+                <img
+                  key={index}
+                  src={img.image || "https://via.placeholder.com/128"}
+                  alt={animal.tag}
+                  className="w-32 h-32 object-cover rounded-lg"
+                  onError={(e) =>
+                    console.log(`Failed to load image for ${animal.tag}:`, e)
+                  }
+                />
+              ))}
             </div>
-            <div className="flex flex-col flex-grow justify-between">
+
+            {/* Animal Details */}
+            <div className="flex flex-col flex-grow justify-between ml-4">
               <div>
                 <h2 className="text-xl font-bold text-gray-800 mb-2">
                   {animal.tag} - {animal.name || "Unnamed"}
                 </h2>
                 <div className="text-sm text-gray-600 space-y-1">
-                  <p><strong>Breed:</strong> {animal.breed}</p>
-                  <p><strong>Farm ID:</strong> {animal.farm?.farm_id || "N/A"}</p>
-                  <p><strong>Lactation:</strong> {animal.lactation_status?.lactation_number || 0}</p>
-                  <p><strong>DIM:</strong> {animal.lactation_status?.days_in_milk || 0}</p>
-                  <p><strong>Milking:</strong> {animal.lactation_status?.is_milking ? "Yes" : "No"}</p>
-                  <p><strong>Pregnant:</strong> {animal.is_pregnant ? "Yes" : "No"}</p>
-                  <p><strong>Latest Milk:</strong> {animal.latest_milk_yield} L</p>
-                  <p><strong>EDC:</strong> {animal.lactation_status?.expected_calving_date || "N/A"}</p>
+                  <p>
+                    <strong>Breed:</strong> {animal.breed}
+                  </p>
+                  <p>
+                    <strong>Farm ID:</strong> {animal.farm?.farm_id || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Lactation:</strong>{" "}
+                    {animal.lactation_status?.lactation_number || 0}
+                  </p>
+                  <p>
+                    <strong>DIM:</strong>{" "}
+                    {animal.lactation_status?.days_in_milk || 0}
+                  </p>
+                  <p>
+                    <strong>Milking:</strong>{" "}
+                    {animal.lactation_status?.is_milking ? "Yes" : "No"}
+                  </p>
+                  <p>
+                    <strong>Pregnant:</strong>{" "}
+                    {animal.is_pregnant ? "Yes" : "No"}
+                  </p>
+                  <p>
+                    <strong>Latest Milk:</strong> {animal.latest_milk_yield} L
+                  </p>
+                  <p>
+                    <strong>EDC:</strong>{" "}
+                    {animal.lactation_status?.expected_calving_date || "N/A"}
+                  </p>
                 </div>
               </div>
             </div>
