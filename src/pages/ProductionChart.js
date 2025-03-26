@@ -2,27 +2,7 @@ import React from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { Plus } from "lucide-react";
 
-const ProductionChart = ({ productionChartData, darkMode, userType, setIsProductionModalOpen, formatXAxis }) => {
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="bg-white dark:bg-gray-800 p-3 border border-gray-300 dark:border-gray-700 rounded shadow-lg text-black dark:text-white">
-          <p className="font-bold">{`Date: ${formatXAxis(label)}`}</p>
-          <p>{`Total Milk: ${data.Milk.toFixed(1)} L`}</p>
-          <hr className="my-1 border-gray-300 dark:border-gray-600" />
-          <p className="font-semibold">Sessions:</p>
-          {data.sessions.map((session, index) => (
-            <div key={index} className="text-sm">
-              <p>{`${session.session}: ${session.milk_yield.toFixed(1)} L`}</p>
-            </div>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
-
+const ProductionChart = ({ productionChartData, darkMode, userType, setIsProductionModalOpen, formatXAxis, CustomTooltip }) => {
   return (
     <div className="bg-white shadow-lg rounded-xl p-6 h-80 overflow-x-auto overflow-y-hidden relative">
       <h2 className="text-xl font-bold mb-4">Daily Milk Production</h2>

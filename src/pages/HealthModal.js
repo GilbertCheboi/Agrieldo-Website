@@ -52,6 +52,14 @@ const HealthModal = ({ isOpen, setIsOpen, healthForm, setHealthForm, handleAddHe
             className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-black"
             placeholder="Treatment"
           />
+          <input
+            type="number"
+            value={healthForm.cost}
+            onChange={(e) => setHealthForm({ ...healthForm, cost: e.target.value })}
+            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-black"
+            placeholder="Cost (Ksh.)"
+            step="0.01"
+          />
           <label className="flex items-center space-x-2">
             <input
               type="checkbox"
@@ -69,7 +77,7 @@ const HealthModal = ({ isOpen, setIsOpen, healthForm, setHealthForm, handleAddHe
               setIsOpen(false);
               setIsEditingHealth(false);
               setEditingHealthRecordId(null);
-              setHealthForm({ date: "", type: "", details: "", is_sick: false, clinical_signs: "", diagnosis: "", treatment: "" });
+              setHealthForm({ date: "", type: "", details: "", is_sick: false, clinical_signs: "", diagnosis: "", treatment: "", cost: "" });
             }}
           >
             Cancel

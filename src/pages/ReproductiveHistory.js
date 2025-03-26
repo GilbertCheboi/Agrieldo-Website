@@ -22,7 +22,7 @@ const ReproductiveHistory = ({ reproductiveHistory, darkMode, userType, setIsRep
       <ul className="space-y-2 text-sm">
         {reproductiveHistory.map((record, index) => (
           <li key={index} className="border-b border-gray-200 dark:border-gray-700 pb-2">
-            <strong>{record.date}:</strong> {record.event} {record.details ? `- ${record.details}` : ""}
+            <strong>{record.date}:</strong> {record.event} {record.details ? `- ${record.details}` : ""} (Cost: Ksh. {record.cost || 0})
           </li>
         ))}
       </ul>

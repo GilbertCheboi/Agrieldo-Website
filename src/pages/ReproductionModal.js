@@ -31,6 +31,14 @@ const ReproductionModal = ({ isOpen, setIsOpen, reproductionForm, setReproductio
             className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-black"
             placeholder="Details"
           />
+          <input
+            type="number"
+            value={reproductionForm.cost}
+            onChange={(e) => setReproductionForm({ ...reproductionForm, cost: e.target.value })}
+            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-black"
+            placeholder="Cost (Ksh.)"
+            step="0.01"
+          />
         </div>
         <div className="mt-4 flex justify-end space-x-2">
           <button

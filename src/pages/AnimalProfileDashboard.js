@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { Sun, Moon, Download, ArrowLeft } from "lucide-react";
+import { useParams } from "react-router-dom";
+import { Sun, Moon, Download } from "lucide-react";
 import { fetchAnimalDetails, updateHealthRecord, addProductionData, addHealthRecord, addReproductiveHistory } from "../services/api";
 
 // Import components
@@ -30,7 +30,6 @@ export default function AnimalProfileDashboard() {
   const [error, setError] = useState(null);
   const [reloadTrigger, setReloadTrigger] = useState(0);
   const userType = parseInt(localStorage.getItem("user_type"), 10); // 1 = Farmer, 2 = Vet, 3 = Staff
-  const navigate = useNavigate();
 
   // Modal states
   const [isProductionModalOpen, setIsProductionModalOpen] = useState(false);
@@ -39,7 +38,7 @@ export default function AnimalProfileDashboard() {
   const [isEditingHealth, setIsEditingHealth] = useState(false);
   const [editingHealthRecordId, setEditingHealthRecordId] = useState(null);
 
-  // Form states
+  // Form states with cost
   const [productionForm, setProductionForm] = useState({ 
     date: "", 
     session: "MORNING", 
@@ -49,8 +48,22 @@ export default function AnimalProfileDashboard() {
     fat_percentage: "", 
     protein_percentage: "" 
   });
-  const [healthForm, setHealthForm] = useState({ date: "", type: "", details: "", is_sick: false, clinical_signs: "", diagnosis: "", treatment: "" });
-  const [reproductionForm, setReproductionForm] = useState({ date: "", event: "AI", details: "" });
+  const [healthForm, setHealthForm] = useState({ 
+    date: "", 
+    type: "", 
+    details: "", 
+    is_sick: false, 
+    clinical_signs: "", 
+    diagnosis: "", 
+    treatment: "", 
+    cost: "" 
+  });
+  const [reproductionForm, setReproductionForm] = useState({ 
+    date: "", 
+    event: "AI", 
+    details: "", 
+    cost: "" 
+  });
 
   useEffect(() => {
     const loadAnimalData = async () => {
@@ -58,6 +71,7 @@ export default function AnimalProfileDashboard() {
         setLoading(true);
         const data = await fetchAnimalDetails(animalIdInt);
         console.log("Fetched Animal Data:", data);
+        console.log("Financial Details:", data.financial_details);
 
         const sortedData = {
           ...data,
@@ -115,12 +129,13 @@ export default function AnimalProfileDashboard() {
         is_sick: healthForm.is_sick,
         clinical_signs: healthForm.clinical_signs || "",
         diagnosis: healthForm.diagnosis || "",
-        treatment: healthForm.treatment || ""
+        treatment: healthForm.treatment || "",
+        cost: parseFloat(healthForm.cost) || 0
       };
       await addHealthRecord(animalIdInt, newRecord);
       setReloadTrigger(prev => prev + 1);
       setIsHealthModalOpen(false);
-      setHealthForm({ date: "", type: "", details: "", is_sick: false, clinical_signs: "", diagnosis: "", treatment: "" });
+      setHealthForm({ date: "", type: "", details: "", is_sick: false, clinical_signs: "", diagnosis: "", treatment: "", cost: "" });
     } catch (err) {
       setError("Failed to add health record: " + (err.message || "Permission denied"));
     }
@@ -135,14 +150,15 @@ export default function AnimalProfileDashboard() {
         is_sick: healthForm.is_sick,
         clinical_signs: healthForm.clinical_signs || "",
         diagnosis: healthForm.diagnosis || "",
-        treatment: healthForm.treatment || ""
+        treatment: healthForm.treatment || "",
+        cost: parseFloat(healthForm.cost) || 0
       };
       await updateHealthRecord(editingHealthRecordId, updatedRecord);
       setReloadTrigger(prev => prev + 1);
       setIsHealthModalOpen(false);
       setIsEditingHealth(false);
       setEditingHealthRecordId(null);
-      setHealthForm({ date: "", type: "", details: "", is_sick: false, clinical_signs: "", diagnosis: "", treatment: "" });
+      setHealthForm({ date: "", type: "", details: "", is_sick: false, clinical_signs: "", diagnosis: "", treatment: "", cost: "" });
     } catch (err) {
       setError("Failed to update health record: " + (err.message || "Permission denied"));
     }
@@ -156,7 +172,8 @@ export default function AnimalProfileDashboard() {
       is_sick: Boolean(record.is_sick),
       clinical_signs: record.clinical_signs || "",
       diagnosis: record.diagnosis || "",
-      treatment: record.treatment || ""
+      treatment: record.treatment || "",
+      cost: record.cost || ""
     });
     setEditingHealthRecordId(record.id);
     setIsEditingHealth(true);
@@ -168,12 +185,13 @@ export default function AnimalProfileDashboard() {
       const newRecord = {
         date: reproductionForm.date || new Date().toISOString().split('T')[0],
         event: reproductionForm.event,
-        details: reproductionForm.details || ""
+        details: reproductionForm.details || "",
+        cost: parseFloat(reproductionForm.cost) || 0
       };
       await addReproductiveHistory(animalIdInt, newRecord);
       setReloadTrigger(prev => prev + 1);
       setIsReproductionModalOpen(false);
-      setReproductionForm({ date: "", event: "AI", details: "" });
+      setReproductionForm({ date: "", event: "AI", details: "", cost: "" });
     } catch (err) {
       setError("Failed to add reproductive record: " + (err.message || "Permission denied"));
     }
@@ -183,13 +201,29 @@ export default function AnimalProfileDashboard() {
     alert("Exporting profile data... (Implement PDF/CSV generation here)");
   };
 
-  const handleBackClick = () => {
-    navigate(-1);
-  };
-
   const formatXAxis = (tickItem) => {
     const date = new Date(tickItem);
     return `${date.getMonth() + 1}/${date.getDate()}`;
+  };
+
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-white dark:bg-gray-800 p-3 border border-gray-300 dark:border-gray-700 rounded shadow-lg text-black dark:text-white">
+          <p className="font-bold">{`Date: ${formatXAxis(label)}`}</p>
+          <p>{`Total Milk: ${data.Milk.toFixed(1)} L`}</p>
+          <hr className="my-1 border-gray-300 dark:border-gray-600" />
+          <p className="font-semibold">Sessions:</p>
+          {data.sessions.map((session, index) => (
+            <div key={index} className="text-sm">
+              <p>{`${session.session}: ${session.milk_yield.toFixed(1)} L`}</p>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    return null;
   };
 
   if (loading) return <div className="text-center p-6">Loading...</div>;
@@ -233,11 +267,13 @@ export default function AnimalProfileDashboard() {
   })).sort((a, b) => new Date(a.name) - new Date(b.name));
 
   const financialChartData = [
-    { name: "Feed Costs", value: animalData.financial_details?.feed_cost_per_month || 0 },
-    { name: "Vet Expenses", value: animalData.financial_details?.vet_expenses || 0 },
-    { name: "Breeding Costs", value: animalData.financial_details?.breeding_costs || 0 },
-    { name: "Milk Revenue", value: animalData.financial_details?.revenue_from_milk || 0 },
+    { name: "Feed Costs", value: parseFloat(animalData.financial_details?.total_feed_cost || 0) },
+    { name: "Vet Expenses", value: parseFloat(animalData.financial_details?.total_vet_cost || 0) },
+    { name: "Breeding Costs", value: parseFloat(animalData.financial_details?.total_breeding_cost || 0) },
+    { name: "Milk Revenue", value: parseFloat(animalData.financial_details?.total_revenue_from_milk || 0) },
   ];
+
+  const totalCost = parseFloat(animalData.financial_details?.total_cost || 0);
 
   const alerts = [];
   if (animalData.production_data.some(record => record.scc > 200)) {
@@ -269,14 +305,6 @@ export default function AnimalProfileDashboard() {
   return (
     <div className={`min-h-screen p-6 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-black'}`}>
       <div className="fixed top-4 right-4 flex space-x-2 z-50">
-        <button
-          className="p-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition flex items-center space-x-1"
-          onClick={handleBackClick}
-          title="Back to Previous Page"
-        >
-          <ArrowLeft size={20} />
-          <span>Previous Page</span>
-        </button>
         <button className="p-2 bg-gray-800 text-white rounded hover:bg-gray-700 transition" onClick={() => setDarkMode(!darkMode)}>
           {darkMode ? <Sun size={20} /> : <Moon size={20} />}
         </button>
@@ -288,7 +316,14 @@ export default function AnimalProfileDashboard() {
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         <ImageGallery images={animalData.images} currentImageIndex={currentImageIndex} setCurrentImageIndex={setCurrentImageIndex} darkMode={darkMode} />
         <ProfileCard animalData={animalData} darkMode={darkMode} />
-        <ProductionChart productionChartData={productionChartData} darkMode={darkMode} userType={userType} setIsProductionModalOpen={setIsProductionModalOpen} formatXAxis={formatXAxis} />
+        <ProductionChart 
+          productionChartData={productionChartData} 
+          darkMode={darkMode} 
+          userType={userType} 
+          setIsProductionModalOpen={setIsProductionModalOpen} 
+          formatXAxis={formatXAxis} 
+          CustomTooltip={CustomTooltip} 
+        />
         <ReproductiveHistory reproductiveHistory={animalData.reproductive_history} darkMode={darkMode} userType={userType} setIsReproductionModalOpen={setIsReproductionModalOpen} />
         <Alerts alerts={alerts} darkMode={darkMode} />
         <HealthRecords 
@@ -306,7 +341,7 @@ export default function AnimalProfileDashboard() {
         <FeedEfficiencyChart productionChartData={productionChartData} darkMode={darkMode} formatXAxis={formatXAxis} />
         <LifetimePerformance lifetimeStats={animalData.lifetime_stats} darkMode={darkMode} />
         <GestationTracking animalData={animalData} darkMode={darkMode} />
-        <FinancialOverview financialChartData={financialChartData} darkMode={darkMode} />
+        <FinancialOverview financialChartData={financialChartData} totalCost={totalCost} darkMode={darkMode} />
       </div>
 
       <ProductionModal 

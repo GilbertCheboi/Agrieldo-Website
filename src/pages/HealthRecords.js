@@ -14,7 +14,7 @@ const HealthRecords = ({ healthRecords, darkMode, userType, setIsHealthModalOpen
         <button
           onClick={() => {
             setIsEditingHealth(false);
-            setHealthForm({ date: "", type: "", details: "", is_sick: false, clinical_signs: "", diagnosis: "", treatment: "" });
+            setHealthForm({ date: "", type: "", details: "", is_sick: false, clinical_signs: "", diagnosis: "", treatment: "", cost: "" });
             setIsHealthModalOpen(true);
           }}
           className="absolute bottom-6 right-6 bg-orange-500 text-white rounded-full p-3 shadow-lg hover:bg-orange-600 transition z-10"
@@ -27,7 +27,7 @@ const HealthRecords = ({ healthRecords, darkMode, userType, setIsHealthModalOpen
         {healthRecords.map((record, index) => (
           <li key={index} className="border-b border-gray-200 dark:border-gray-700 pb-2 flex justify-between items-start">
             <div>
-              <strong>{record.date}:</strong> {record.type} - {record.details}
+              <strong>{record.date}:</strong> {record.type} - {record.details} (Cost: Ksh. {record.cost || 0})
               {record.clinical_signs && <p><strong>Signs:</strong> {record.clinical_signs}</p>}
               {record.diagnosis && <p><strong>Diagnosis:</strong> {record.diagnosis}</p>}
               {record.treatment && <p><strong>Treatment:</strong> {record.treatment}</p>}
