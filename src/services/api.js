@@ -2,8 +2,8 @@ import axios from "axios";
 
 // Base API instance
 const API = axios.create({
-    //baseURL: "http://207.154.253.97:8000/api/", // Update the base URL to match your backend
-    baseURL: "https://api.agrieldo.com/api/", // Alternative URL commented out
+    baseURL: "http://207.154.253.97:8000/api/", // Update the base URL to match your backend
+    //baseURL: "https://api.agrieldo.com/api/", // Alternative URL commented out
     timeout: 10000, // Try adding this
 
 });
@@ -588,6 +588,10 @@ export const updateHealthRecord = async (recordId, data) => {
   }
 };
 
+export const addLactationRecord = async (animalId, data) => {
+  return API.post(`animals/lactation/${animalId}/`, data, getAuthHeaders());
+};
+
 export const addReproductiveHistory = async (animalId, data) => {
   const payload = { animal: animalId, ...data };
   console.log("Reproductive History Payload:", payload); // Add this
@@ -769,4 +773,21 @@ export const createAnimal = async (animalData) => {
     console.error("Error creating animal:", error);
     throw error;
   }
+};
+
+export const addFeedToStore = async (data) => {
+  const response = await API.post('feed/feeds/', data, getAuthHeaders() );
+  return response.data;
+};
+
+// Feed animals in a category
+export const feedAnimals = async (data) => {
+  const response = await API.post('feed/feed-animals/', data,  getAuthHeaders() );
+  return response.data;
+};
+
+// Bonus: Get the list of feeds (optional, if needed separately)
+export const getFeeds = async () => {
+  const response = await API.get('feed/feeds/', getAuthHeaders() );
+  return response.data;
 };

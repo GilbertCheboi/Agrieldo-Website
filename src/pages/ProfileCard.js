@@ -2,6 +2,11 @@ import React from "react";
 import { Info } from "lucide-react";
 
 const ProfileCard = ({ animalData, darkMode }) => {
+  // Get the latest lactation period (most recent calving)
+  const currentLactation = animalData.lactation_periods?.sort(
+    (a, b) => new Date(b.last_calving_date) - new Date(a.last_calving_date)
+  )[0] || {};
+
   return (
     <div className="bg-white shadow-lg rounded-xl p-6 h-80 overflow-y-auto col-span-1 md:col-span-2 lg:col-span-1">
       <h2 className="text-xl font-bold mb-4 flex items-center">
@@ -19,7 +24,9 @@ const ProfileCard = ({ animalData, darkMode }) => {
         <p><strong>Gender:</strong> {animalData.gender}</p>
         <p><strong>Farm ID:</strong> {animalData.farm?.farm_id || "N/A"}</p>
         <p><strong>Owner:</strong> {animalData.owner}</p>
-        <p><strong>Lactation:</strong> {animalData.lactation_status?.lactation_number || 0} (DIM: {animalData.lactation_status?.days_in_milk || 0})</p>
+        <p>
+          <strong>Lactation:</strong> {currentLactation.lactation_number || 0} (DIM: {currentLactation.days_in_milk || 0})
+        </p>
         <p><strong>Behavior Notes:</strong> {animalData.behavior_notes || "N/A"}</p>
       </div>
     </div>

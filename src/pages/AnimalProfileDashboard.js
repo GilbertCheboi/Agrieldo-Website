@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Sun, Moon, Download } from "lucide-react";
-import { fetchAnimalDetails, updateHealthRecord, addProductionData, addHealthRecord, addReproductiveHistory } from "../services/api";
+import { fetchAnimalDetails, updateHealthRecord, addProductionData, addHealthRecord, addReproductiveHistory, addLactationRecord } from "../services/api";
 
 // Import components
 import ImageGallery from "./ImageGallery";
@@ -19,6 +19,7 @@ import FinancialOverview from "./FinancialOverview";
 import ProductionModal from "./ProductionModal";
 import HealthModal from "./HealthModal";
 import ReproductionModal from "./ReproductionModal";
+import LactationModal from "./LactationModal";
 
 export default function AnimalProfileDashboard() {
   const { id: animalId } = useParams();
@@ -35,6 +36,7 @@ export default function AnimalProfileDashboard() {
   const [isProductionModalOpen, setIsProductionModalOpen] = useState(false);
   const [isHealthModalOpen, setIsHealthModalOpen] = useState(false);
   const [isReproductionModalOpen, setIsReproductionModalOpen] = useState(false);
+  const [isLactationModalOpen, setIsLactationModalOpen] = useState(false); // New lactation modal state
   const [isEditingHealth, setIsEditingHealth] = useState(false);
   const [editingHealthRecordId, setEditingHealthRecordId] = useState(null);
 
@@ -63,6 +65,12 @@ export default function AnimalProfileDashboard() {
     event: "AI", 
     details: "", 
     cost: "" 
+  });
+  const [lactationForm, setLactationForm] = useState({
+    lactation_number: "",
+    last_calving_date: "",
+    is_milking: true, // Default to true for new lactation
+    expected_calving_date: ""
   });
 
   useEffect(() => {
@@ -197,6 +205,28 @@ export default function AnimalProfileDashboard() {
     }
   };
 
+  const handleAddLactation = async () => {
+    try {
+      const newRecord = {
+        lactation_number: parseInt(lactationForm.lactation_number, 10) || 
+          (animalData.lactation_periods.length + 1), // Auto-increment based on existing records
+        last_calving_date: lactationForm.last_calving_date || new Date().toISOString().split('T')[0],
+        is_milking: lactationForm.is_milking,
+        expected_calving_date: lactationForm.expected_calving_date || null
+      };
+      await addLactationRecord(animalIdInt, newRecord); // POST request
+      setReloadTrigger(prev => prev + 1);
+      setIsLactationModalOpen(false);
+      setLactationForm({
+        lactation_number: "",
+        last_calving_date: "",
+        is_milking: true,
+        expected_calving_date: ""
+      });
+    } catch (err) {
+      setError("Failed to add lactation record: " + (err.message || "Permission denied"));
+    }
+  };
   const handleExport = () => {
     alert("Exporting profile data... (Implement PDF/CSV generation here)");
   };
@@ -340,7 +370,12 @@ export default function AnimalProfileDashboard() {
         <MilkQualityChart productionChartData={productionChartData} darkMode={darkMode} formatXAxis={formatXAxis} />
         <FeedEfficiencyChart productionChartData={productionChartData} darkMode={darkMode} formatXAxis={formatXAxis} />
         <LifetimePerformance lifetimeStats={animalData.lifetime_stats} darkMode={darkMode} />
-        <GestationTracking animalData={animalData} darkMode={darkMode} />
+        <GestationTracking 
+          animalData={animalData} 
+          darkMode={darkMode} 
+          userType={userType} 
+          setIsLactationModalOpen={setIsLactationModalOpen} // Pass new prop
+        />
         <FinancialOverview financialChartData={financialChartData} totalCost={totalCost} darkMode={darkMode} />
       </div>
 
@@ -368,6 +403,13 @@ export default function AnimalProfileDashboard() {
         reproductionForm={reproductionForm} 
         setReproductionForm={setReproductionForm} 
         handleAddReproduction={handleAddReproduction} 
+      />
+      <LactationModal // New lactation modal
+        isOpen={isLactationModalOpen} 
+        setIsOpen={setIsLactationModalOpen} 
+        lactationForm={lactationForm} 
+        setLactationForm={setLactationForm} 
+        handleAddLactation={handleAddLactation} 
       />
     </div>
   );

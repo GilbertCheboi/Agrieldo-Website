@@ -1,4 +1,3 @@
-// src/components/DairyDashboard.js
 import React, { useState, useEffect } from "react";
 import {
   Grid,
@@ -25,7 +24,7 @@ import { AiOutlinePlus } from "react-icons/ai";
 
 const calculateAgeInMonths = (dob) => {
   const birthDate = new Date(dob);
-  const today = new Date("2025-03-14");
+  const today = new Date(); // Dynamic date instead of "2025-03-14"
   const diffMs = today - birthDate;
   return Math.floor(diffMs / (1000 * 60 * 60 * 24 * 30));
 };
@@ -75,10 +74,16 @@ const DairyDashboard = ({ farmId }) => {
     bulls: 0,
     heifers: 0,
     calves: 0,
-    newborns: 0,
-    pregnant: 0,
+    weanerStage1: 0,
+    weanerStage2: 0,
+    yearlings: 0,
+    bulling: 0,
+    inCalf: 0,
+    steaming: 0,
+    earlyLactating: 0,
+    midLactating: 0,
+    lateLactating: 0,
     dry: 0,
-    milking: 0,
     sickCows: 0,
   });
   const [loading, setLoading] = useState(true);
@@ -87,7 +92,7 @@ const DairyDashboard = ({ farmId }) => {
     name: "",
     gender: "Female",
     dob: "",
-    category: "Calf",
+    category: "Calf (0-3 months)", // Updated default
   });
   const navigate = useNavigate();
 
@@ -100,28 +105,64 @@ const DairyDashboard = ({ farmId }) => {
           bulls: 0,
           heifers: 0,
           calves: 0,
-          newborns: 0,
-          pregnant: 0,
+          weanerStage1: 0,
+          weanerStage2: 0,
+          yearlings: 0,
+          bulling: 0,
+          inCalf: 0,
+          steaming: 0,
+          earlyLactating: 0,
+          midLactating: 0,
+          lateLactating: 0,
           dry: 0,
-          milking: 0,
           sickCows: 0,
         };
 
         animals.forEach((animal) => {
-          const ageInMonths = calculateAgeInMonths(animal.dob);
-          if (animal.gender === "Male") {
-            counts.bulls += 1;
-          } else {
-            if (ageInMonths < 1) counts.newborns += 1;
-            else if (animal.category === "Calf") counts.calves += 1;
-            else if (animal.category === "Heifer") counts.heifers += 1;
-            else if (animal.category === "Milking") counts.milking += 1;
-            else if (animal.category === "Dry") counts.dry += 1;
+          switch (animal.category) {
+            case "Bull":
+              counts.bulls += 1;
+              break;
+            case "Heifer":
+              counts.heifers += 1;
+              break;
+            case "Calf (0-3 months)":
+              counts.calves += 1;
+              break;
+            case "Weaner Stage 1 (3-6 months)":
+              counts.weanerStage1 += 1;
+              break;
+            case "Weaner Stage 2 (6-9 months)":
+              counts.weanerStage2 += 1;
+              break;
+            case "Yearling (9-12 months)":
+              counts.yearlings += 1;
+              break;
+            case "Bulling (12-15 months)":
+              counts.bulling += 1;
+              break;
+            case "In-Calf":
+              counts.inCalf += 1;
+              break;
+            case "Steaming":
+              counts.steaming += 1;
+              break;
+            case "Early Lactating":
+              counts.earlyLactating += 1;
+              break;
+            case "Mid Lactating":
+              counts.midLactating += 1;
+              break;
+            case "Late Lactating":
+              counts.lateLactating += 1;
+              break;
+            case "Dry":
+              counts.dry += 1;
+              break;
+            default:
+              break;
           }
-          if (animal.is_pregnant) counts.pregnant += 1;
-          if (animal.health_records && animal.health_records.some(record => record.is_sick)) {
-            counts.sickCows += 1;
-          }
+          if (animal.is_sick) counts.sickCows += 1;
         });
 
         setLivestockData(counts);
@@ -142,7 +183,7 @@ const DairyDashboard = ({ farmId }) => {
   const handleModalOpen = () => setOpenModal(true);
   const handleModalClose = () => {
     setOpenModal(false);
-    setFormData({ name: "", gender: "Female", dob: "", category: "Calf" });
+    setFormData({ name: "", gender: "Female", dob: "", category: "Calf (0-3 months)" });
   };
 
   const handleFormChange = (e) => {
@@ -154,20 +195,26 @@ const DairyDashboard = ({ farmId }) => {
 
   const handleAddAnimal = async () => {
     try {
-      const animalData = { ...formData, farmId };
+      const animalData = { ...formData, farm: farmId }; // Changed farmId to farm for API consistency
       await createAnimal(animalData);
       handleModalClose();
       const animals = await fetchAnimals({ farmId });
       const counts = {
         totalCows: animals.length,
-        bulls: animals.filter(a => a.gender === "Male").length,
+        bulls: animals.filter(a => a.category === "Bull").length,
         heifers: animals.filter(a => a.category === "Heifer").length,
-        calves: animals.filter(a => a.category === "Calf").length,
-        newborns: animals.filter(a => calculateAgeInMonths(a.dob) < 1).length,
-        pregnant: animals.filter(a => a.is_pregnant).length,
+        calves: animals.filter(a => a.category === "Calf (0-3 months)").length,
+        weanerStage1: animals.filter(a => a.category === "Weaner Stage 1 (3-6 months)").length,
+        weanerStage2: animals.filter(a => a.category === "Weaner Stage 2 (6-9 months)").length,
+        yearlings: animals.filter(a => a.category === "Yearling (9-12 months)").length,
+        bulling: animals.filter(a => a.category === "Bulling (12-15 months)").length,
+        inCalf: animals.filter(a => a.category === "In-Calf").length,
+        steaming: animals.filter(a => a.category === "Steaming").length,
+        earlyLactating: animals.filter(a => a.category === "Early Lactating").length,
+        midLactating: animals.filter(a => a.category === "Mid Lactating").length,
+        lateLactating: animals.filter(a => a.category === "Late Lactating").length,
         dry: animals.filter(a => a.category === "Dry").length,
-        milking: animals.filter(a => a.category === "Milking").length,
-        sickCows: animals.filter(a => a.health_records?.some(r => r.is_sick)).length,
+        sickCows: animals.filter(a => a.is_sick).length,
       };
       setLivestockData(counts);
     } catch (error) {
@@ -175,30 +222,23 @@ const DairyDashboard = ({ farmId }) => {
     }
   };
 
-  // Debugging: Log imported components
-  console.log({
-    MilkProductionChart,
-    FeedManagement,
-    DashboardCard: typeof DashboardCard,
-  });
-
   return (
     <Box>
       {/* Livestock Summary */}
-      <Typography variant="h6" sx={{ fontWeight: 600, color:  "#1a3c34", mb: 2 }}>
+      <Typography variant="h6" sx={{ fontWeight: 600, color: "#1a3c34", mb: 2 }}>
         Livestock Summary
       </Typography>
       <Grid container spacing={2} sx={{ mb: 4 }}>
         <Grid item xs={6} sm={4} md={2.4}>
-          <DashboardCard 
-            title={<><GiCow color="#ffa500" size={18} /> Total Cows</>}
+          <DashboardCard
+            title={<><GiCow color="#ffa500" size={18} /> Total Animals</>}
             onClick={() => handleCategoryClick("")}
           >
             <Typography variant="h6">{livestockData.totalCows}</Typography>
           </DashboardCard>
         </Grid>
         <Grid item xs={6} sm={4} md={2.4}>
-          <DashboardCard 
+          <DashboardCard
             title={<><GiBull color="#ffa500" size={18} /> Bulls</>}
             onClick={() => handleCategoryClick("category=Bull")}
           >
@@ -206,7 +246,7 @@ const DairyDashboard = ({ farmId }) => {
           </DashboardCard>
         </Grid>
         <Grid item xs={6} sm={4} md={2.4}>
-          <DashboardCard 
+          <DashboardCard
             title={<><GiFemale color="#ffa500" size={18} /> Heifers</>}
             onClick={() => handleCategoryClick("category=Heifer")}
           >
@@ -214,31 +254,87 @@ const DairyDashboard = ({ farmId }) => {
           </DashboardCard>
         </Grid>
         <Grid item xs={6} sm={4} md={2.4}>
-          <DashboardCard 
-            title={<><GiBabyBottle color="#ffa500" size={18} /> Calves</>}
-            onClick={() => handleCategoryClick("category=Calf")}
+          <DashboardCard
+            title={<><GiBabyBottle color="#ffa500" size={18} /> Calves (0-3)</>}
+            onClick={() => handleCategoryClick("category=Calf (0-3 months)")}
           >
             <Typography variant="h6">{livestockData.calves}</Typography>
           </DashboardCard>
         </Grid>
         <Grid item xs={6} sm={4} md={2.4}>
-          <DashboardCard 
-            title={<><GiBabyBottle color="#ffa500" size={18} /> Newborns</>}
-            onClick={() => handleCategoryClick("age=Newborn")}
+          <DashboardCard
+            title={<><GiBabyBottle color="#ffa500" size={18} /> Weaner 1 (3-6)</>}
+            onClick={() => handleCategoryClick("category=Weaner Stage 1 (3-6 months)")}
           >
-            <Typography variant="h6">{livestockData.newborns}</Typography>
+            <Typography variant="h6">{livestockData.weanerStage1}</Typography>
           </DashboardCard>
         </Grid>
         <Grid item xs={6} sm={4} md={2.4}>
-          <DashboardCard 
-            title={<><GiHeartBeats color="#ffa500" size={18} /> Pregnant</>}
-            onClick={() => handleCategoryClick("is_pregnant=true")}
+          <DashboardCard
+            title={<><GiBabyBottle color="#ffa500" size={18} /> Weaner 2 (6-9)</>}
+            onClick={() => handleCategoryClick("category=Weaner Stage 2 (6-9 months)")}
           >
-            <Typography variant="h6">{livestockData.pregnant}</Typography>
+            <Typography variant="h6">{livestockData.weanerStage2}</Typography>
           </DashboardCard>
         </Grid>
         <Grid item xs={6} sm={4} md={2.4}>
-          <DashboardCard 
+          <DashboardCard
+            title={<><GiFemale color="#ffa500" size={18} /> Yearlings (9-12)</>}
+            onClick={() => handleCategoryClick("category=Yearling (9-12 months)")}
+          >
+            <Typography variant="h6">{livestockData.yearlings}</Typography>
+          </DashboardCard>
+        </Grid>
+        <Grid item xs={6} sm={4} md={2.4}>
+          <DashboardCard
+            title={<><GiFemale color="#ffa500" size={18} /> Bulling (12-15)</>}
+            onClick={() => handleCategoryClick("category=Bulling (12-15 months)")}
+          >
+            <Typography variant="h6">{livestockData.bulling}</Typography>
+          </DashboardCard>
+        </Grid>
+        <Grid item xs={6} sm={4} md={2.4}>
+          <DashboardCard
+            title={<><GiHeartBeats color="#ffa500" size={18} /> In-Calf</>}
+            onClick={() => handleCategoryClick("category=In-Calf")}
+          >
+            <Typography variant="h6">{livestockData.inCalf}</Typography>
+          </DashboardCard>
+        </Grid>
+        <Grid item xs={6} sm={4} md={2.4}>
+          <DashboardCard
+            title={<><GiHeartBeats color="#ffa500" size={18} /> Steaming</>}
+            onClick={() => handleCategoryClick("category=Steaming")}
+          >
+            <Typography variant="h6">{livestockData.steaming}</Typography>
+          </DashboardCard>
+        </Grid>
+        <Grid item xs={6} sm={4} md={2.4}>
+          <DashboardCard
+            title={<><GiMilkCarton color="#ffa500" size={18} /> Early Lactating</>}
+            onClick={() => handleCategoryClick("category=Early Lactating")}
+          >
+            <Typography variant="h6">{livestockData.earlyLactating}</Typography>
+          </DashboardCard>
+        </Grid>
+        <Grid item xs={6} sm={4} md={2.4}>
+          <DashboardCard
+            title={<><GiMilkCarton color="#ffa500" size={18} /> Mid Lactating</>}
+            onClick={() => handleCategoryClick("category=Mid Lactating")}
+          >
+            <Typography variant="h6">{livestockData.midLactating}</Typography>
+          </DashboardCard>
+        </Grid>
+        <Grid item xs={6} sm={4} md={2.4}>
+          <DashboardCard
+            title={<><GiMilkCarton color="#ffa500" size={18} /> Late Lactating</>}
+            onClick={() => handleCategoryClick("category=Late Lactating")}
+          >
+            <Typography variant="h6">{livestockData.lateLactating}</Typography>
+          </DashboardCard>
+        </Grid>
+        <Grid item xs={6} sm={4} md={2.4}>
+          <DashboardCard
             title={<><GiGrass color="#ffa500" size={18} /> Dry</>}
             onClick={() => handleCategoryClick("category=Dry")}
           >
@@ -246,23 +342,15 @@ const DairyDashboard = ({ farmId }) => {
           </DashboardCard>
         </Grid>
         <Grid item xs={6} sm={4} md={2.4}>
-          <DashboardCard 
-            title={<><GiMilkCarton color="#ffa500" size={18} /> Milking</>}
-            onClick={() => handleCategoryClick("category=Milking")}
-          >
-            <Typography variant="h6">{livestockData.milking}</Typography>
-          </DashboardCard>
-        </Grid>
-        <Grid item xs={6} sm={4} md={2.4}>
-          <DashboardCard 
-            title={<><GiMedicalPack color="red" size={18} /> Sick Cows</>}
+          <DashboardCard
+            title={<><GiMedicalPack color="red" size={18} /> Sick Animals</>}
             onClick={() => handleCategoryClick("is_sick=true")}
           >
             <Typography variant="h6" sx={{ color: "red" }}>{livestockData.sickCows}</Typography>
           </DashboardCard>
         </Grid>
         <Grid item xs={6} sm={4} md={2.4}>
-          <DashboardCard 
+          <DashboardCard
             title={<><AiOutlinePlus color="#ffa500" size={18} /> Add Animal</>}
             onClick={handleModalOpen}
           >
@@ -316,9 +404,17 @@ const DairyDashboard = ({ farmId }) => {
               onChange={handleFormChange}
               label="Category"
             >
-              <MenuItem value="Calf">Calf</MenuItem>
+              <MenuItem value="Calf (0-3 months)">Calf (0-3 months)</MenuItem>
+              <MenuItem value="Weaner Stage 1 (3-6 months)">Weaner Stage 1 (3-6 months)</MenuItem>
+              <MenuItem value="Weaner Stage 2 (6-9 months)">Weaner Stage 2 (6-9 months)</MenuItem>
+              <MenuItem value="Yearling (9-12 months)">Yearling (9-12 months)</MenuItem>
+              <MenuItem value="Bulling (12-15 months)">Bulling (12-15 months)</MenuItem>
               <MenuItem value="Heifer">Heifer</MenuItem>
-              <MenuItem value="Milking">Milking</MenuItem>
+              <MenuItem value="In-Calf">In-Calf</MenuItem>
+              <MenuItem value="Steaming">Steaming</MenuItem>
+              <MenuItem value="Early Lactating">Early Lactating</MenuItem>
+              <MenuItem value="Mid Lactating">Mid Lactating</MenuItem>
+              <MenuItem value="Late Lactating">Late Lactating</MenuItem>
               <MenuItem value="Dry">Dry</MenuItem>
               <MenuItem value="Bull">Bull</MenuItem>
             </Select>

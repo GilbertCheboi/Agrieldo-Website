@@ -35,6 +35,7 @@ import FarmDashboard from "./components/FarmDashboard"; // New component we'll c
 import VetStaff from "./components/VetStaff";
 import SheepList from "./pages/SheepList";
 import SheepDetails from "./pages/SheepDetails";
+import FeedStore from './components/FeedStore';
 import "./index.css";
 import "./App.css";
 
@@ -82,6 +83,8 @@ const App = () => {
                 <Route path="/dashboard/:farmId" element={<FarmDashboard />} />
                 <Route path="/sheep-list/:farmId" element={<SheepList />} />
                 <Route path="/sheep-details/:farmId/:sheepId" element={<SheepDetails />} />
+                <Route path="/feed_store" element={<FeedStore />} />
+
 
                 
                 {/* Inventory Management Routes */}

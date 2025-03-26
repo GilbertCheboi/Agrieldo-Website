@@ -60,9 +60,9 @@ const Slider = () => {
             <ListItemText primary="Machinery" />
           </ListItem>
 
-          <ListItem button component={Link} to="/daily-consumption" onClick={toggleDrawer}>
+          <ListItem button component={Link} to="/feed_store" onClick={toggleDrawer}>
             <ListItemIcon><Fastfood /></ListItemIcon>
-            <ListItemText primary="Daily Feed Consumption" />
+            <ListItemText primary="Feed Store" />
           </ListItem>
 
           <Divider />
