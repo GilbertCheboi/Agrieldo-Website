@@ -1,9 +1,10 @@
 import axios from "axios";
+import { toast } from "react-toastify";
 
 // Base API instance
 const API = axios.create({
   //baseURL: "http://207.154.253.97:8000/api/", // Update the base URL to match your backend
-  baseURL: "https://api.agrieldo.comapi/", // Alternative URL commented out
+  baseURL: "https://api.agrieldo.com/api/", // Alternative URL commented out
   timeout: 10000, // Try adding this
 });
 
@@ -530,6 +531,19 @@ export const getUsers = async () => {
   }
 };
 
+export const getUserById = async (userId) => {
+  try {
+    const response = await API.get(
+      `accounts/list_users/${userId}/`,
+      getAuthHeaders()
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    throw error;
+  }
+};
+
 export const addFarmStaff = async (farmId, userId) => {
   try {
     const response = await API.post(
@@ -928,9 +942,13 @@ export const createAnimal = async (animalData) => {
       delete authHeaders.headers["Content-Type"];
     }
     const response = await API.post(`animals/add/`, animalData, authHeaders);
+    // ✅ Show success toast
+    toast.success("Animal added successfully!");
     return response.data;
   } catch (error) {
     console.error("Error creating animal:", error);
+    // ✅ Show error toast
+    toast.error("Failed to add animal. Please try again.");
     throw error;
   }
 };

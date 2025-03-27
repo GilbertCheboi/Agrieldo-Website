@@ -19,7 +19,12 @@ import {
 import { useNavigate } from "react-router-dom";
 import MilkProductionChart from "./MilkProductionChart";
 import FeedManagement from "./FeedManagement";
-import { fetchAnimals, createAnimal } from "../services/api";
+import {
+  fetchAnimals,
+  createAnimal,
+  getUserById,
+  getFarms,
+} from "../services/api";
 import {
   GiCow,
   GiBabyBottle,
@@ -31,6 +36,7 @@ import {
   GiBull,
 } from "react-icons/gi";
 import { AiOutlinePlus } from "react-icons/ai";
+import { jwtDecode } from "jwt-decode";
 
 const calculateAgeInMonths = (dob) => {
   const birthDate = new Date(dob);
@@ -97,6 +103,7 @@ const DairyDashboard = ({ farmId }) => {
     gender: "Female",
     dob: "",
     category: "Calf",
+    farms: [], // This ensures it's defined from the start
   });
   const navigate = useNavigate();
 
@@ -154,14 +161,59 @@ const DairyDashboard = ({ farmId }) => {
   const handleModalOpen = () => setOpenModal(true);
   const handleModalClose = () => {
     setOpenModal(false);
-    setFormData({ name: "", gender: "Female", dob: "", category: "Calf" });
+    setFormData({
+      name: "",
+      gender: "Female",
+      dob: "",
+      category: "Calf",
+      farms: [], // This ensures it's defined from the start
+    });
   };
 
-  const handleFormChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+  useEffect(() => {
+    getFarms()
+      .then((data) => {
+        setFormData((prevState) => ({
+          ...prevState,
+          farms: data, // Ensure data is an array of { id, name }
+        }));
+      })
+      .catch((error) => console.error("Error fetching farms:", error));
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      try {
+        // Decode token to get user_id
+        const decoded = jwtDecode(token);
+        const userId = decoded.user_id;
+        console.log("Decoded userId:", userId);
+
+        // Fetch user data using the service function
+        getUserById(userId)
+          .then((data) => {
+            console.log("Fetched user data:", data);
+            setFormData((prevState) => ({
+              ...prevState,
+              ownerId: userId, // Pass user_id to the backend
+              ownerDisplay: data.username, // Display username on the frontend
+            }));
+          })
+          .catch((error) => {
+            console.error("Error fetching user data:", error);
+          });
+      } catch (error) {
+        console.error("Error decoding token:", error);
+      }
+    }
+  }, []);
+
+  const handleFormChange = (event) => {
+    setFormData({
+      ...formData,
+      [event.target.name]: event.target.value,
+    });
   };
 
   const handleAddAnimal = async () => {
@@ -174,13 +226,9 @@ const DairyDashboard = ({ farmId }) => {
       payload.append("breed", formData.breed);
       payload.append("dob", formData.dob);
       payload.append("gender", formData.gender);
-      payload.append("farm", farmId);
-      payload.append("owner", formData.owner);
-      payload.append("assigned_worker", formData.assigned_worker);
-
-      // ✅ Append caption (Fix missing caption)
-      payload.append("caption", formData.caption);
-
+      payload.append("farm", formData.farm);
+      payload.append("owner", formData.ownerId);
+      // payload.append("assigned_worker", formData.assigned_worker);
       // ✅ Append images correctly
       if (formData.images && formData.images.length > 0) {
         formData.images.forEach((file) => {
@@ -420,11 +468,38 @@ const DairyDashboard = ({ farmId }) => {
                 name="owner"
                 label="Owner"
                 fullWidth
-                value={formData.owner}
+                value={formData.ownerDisplay}
                 onChange={handleFormChange}
+                InputProps={{
+                  readOnly: true, // Make the field read-only
+                }}
               />
             </Grid>
+            {/* Farm dropdown select */}
             <Grid item xs={6}>
+              <FormControl fullWidth margin="dense">
+                <InputLabel id="farm-select-label">Farm</InputLabel>
+                <Select
+                  labelId="farm-select-label"
+                  id="farm"
+                  name="farm"
+                  value={formData.farm || ""} // Store farm ID in formData.farm
+                  onChange={(e) =>
+                    setFormData((prevState) => ({
+                      ...prevState,
+                      farm: e.target.value, // Store farm ID
+                    }))
+                  }
+                >
+                  {formData.farms.map((farm) => (
+                    <MenuItem key={farm.id} value={farm.id}>
+                      {farm.name} {/* Display farm name */}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            {/* <Grid item xs={6}>
               <TextField
                 margin="dense"
                 name="assigned_worker"
@@ -433,7 +508,7 @@ const DairyDashboard = ({ farmId }) => {
                 value={formData.assigned_worker}
                 onChange={handleFormChange}
               />
-            </Grid>
+            </Grid> */}
             <Grid item xs={6}>
               <input
                 accept="image/*"
@@ -442,16 +517,6 @@ const DairyDashboard = ({ farmId }) => {
                 name="images"
                 onChange={handleImageChange}
                 style={{ marginTop: "16px" }}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="dense"
-                name="caption"
-                label="Image Caption"
-                fullWidth
-                value={formData.caption}
-                onChange={handleFormChange}
               />
             </Grid>
           </Grid>

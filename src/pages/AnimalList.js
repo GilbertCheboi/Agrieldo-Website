@@ -126,17 +126,16 @@ export default function AnimalList() {
           >
             {/* Images - Arranged Vertically */}
             <div className="flex-shrink-0 flex flex-col gap-2">
-              {animal.images.slice(0, 2).map((img, index) => (
-                <img
-                  key={index}
-                  src={img.image || "https://via.placeholder.com/128"}
-                  alt={animal.tag}
-                  className="w-32 h-32 object-cover rounded-lg"
-                  onError={(e) =>
-                    console.log(`Failed to load image for ${animal.tag}:`, e)
-                  }
-                />
-              ))}
+              <img
+                src={
+                  animal.images[0]?.image || "https://via.placeholder.com/128"
+                }
+                alt={animal.tag}
+                className="w-32 h-32 object-cover rounded-lg"
+                onError={(e) =>
+                  console.log(`Failed to load image for ${animal.tag}:`, e)
+                }
+              />
             </div>
 
             {/* Animal Details */}
