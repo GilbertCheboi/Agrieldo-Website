@@ -1,7 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Fab, Container, List, ListItem, ListItemText } from '@mui/material';
+import {
+  Fab,
+  Container,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
+} from '@mui/material';
 import { Add as AddIcon, Restaurant as FeedIcon } from '@mui/icons-material';
-import { getFeeds } from "../services/api";
+import { getFeeds } from '../services/api';
 import AddFeedModal from './AddFeedModal';
 import FeedAnimalsModal from './FeedAnimalsModal';
 
@@ -34,26 +45,40 @@ const FeedStore = () => {
     fetchFeeds();
   };
 
-  if (loading) return <p>Loading feeds...</p>;
+  if (loading) return <Typography>Loading feeds...</Typography>;
 
   return (
     <Container>
-      <h2>Feed Store</h2>
+      <Typography variant="h4" gutterBottom>
+        Feed Store
+      </Typography>
       {feeds.length === 0 ? (
-        <p>No feeds in store</p>
+        <Typography>No feeds in store</Typography>
       ) : (
-        <List>
-          {feeds.map((feed) => (
-            <ListItem key={feed.id}>
-              <ListItemText
-                primary={`${feed.name} - ${feed.quantity_kg} kg`}
-                secondary={`$${feed.price_per_kg}/kg`}
-              />
-
-
-            </ListItem>
-          ))}
-        </List>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Name</TableCell>
+                <TableCell align="right">Quantity (kg)</TableCell>
+                <TableCell align="right">Price per kg ($)</TableCell>
+                <TableCell align="right">Total Cost ($)</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {feeds.map((feed) => (
+                <TableRow key={feed.id}>
+                  <TableCell>{feed.name}</TableCell>
+                  <TableCell align="right">{feed.quantity_kg}</TableCell>
+                  <TableCell align="right">{feed.price_per_kg.toFixed(2)}</TableCell>
+                  <TableCell align="right">
+                    {(feed.quantity_kg * feed.price_per_kg).toFixed(2)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
       <Fab
         color="primary"

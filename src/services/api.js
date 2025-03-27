@@ -375,12 +375,63 @@ export const fetchProductionData = async () => {
     throw error;
   }
 };
+export const addMilkProductionRecords = async (records) => {
+  try {
+    console.log("🚀 Sending payload:", JSON.stringify(records, null, 2));
+    const response = await API.post(`animals/production/milk/`, records, getAuthHeaders()); // No "records" wrapper
+    return response.data;
+  } catch (error) {
+    console.error("❌ Error adding milk production records:", error.response?.data || error.message);
+    throw error;
+  }
+};
 
+
+export const updateMilkProductionRecord = async (id, updatedRecord) => {
+  try {
+    const response = await API.put(`production/milk/${id}/`, updatedRecord, getAuthHeaders());
+    return response.data;
+  } catch (error) {
+    console.error("Error updating milk production record:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const fetchTodaysMilkProduction = async () => {
+  try {
+    const response = await API.get(`/production/milk/today/`, getAuthHeaders());
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching today's milk production:", error);
+    return [];
+  }
+};
+
+export const fetchDailyMilkProductionSummary = async () => {
+  try {
+    const response = await API.get(`animals/production/daily-summary/`, getAuthHeaders());
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching daily milk production summary:", error);
+    return [];
+  }
+};
+
+
+export const fetchLactatingAnimals = async () => {
+  try {
+    const response = await API.get(`animals/production/milk/lactating-animals/`, getAuthHeaders());
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching lactating animals:", error);
+    return [];
+  }
+};
 export const addProductionRecord = async (record) => {
   try {
     const { commodity, quantity } = record;
     console.log("Sending payload:", { commodity, quantity });
-    const response = await API.post(`production/records/`, { commodity, quantity }, getAuthHeaders());
+    const response = await API.post(`animals/production/milk/`, { commodity, quantity }, getAuthHeaders());
     return response.data;
   } catch (error) {
     console.error("Error adding production record:", error.response?.data || error.message);

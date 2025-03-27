@@ -32,6 +32,14 @@ const ProductionModal = ({ isOpen, setIsOpen, productionForm, setProductionForm,
             placeholder="Milk Yield (L)"
             step="0.1"
           />
+                    <input
+            type="number"
+            value={productionForm.milk_price_per_liter}
+            onChange={(e) => setProductionForm({ ...productionForm, milk_price_per_liter: e.target.value })}
+            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-black"
+            placeholder="Milk Price Per Liter"
+            step="0.1"
+          />
           <input
             type="number"
             value={productionForm.scc}
