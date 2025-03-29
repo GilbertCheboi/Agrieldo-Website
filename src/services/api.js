@@ -720,6 +720,10 @@ export const updateHealthRecord = async (recordId, data) => {
   }
 };
 
+export const addLactationRecord = async (animalId, data) => {
+  return API.post(`animals/lactation/${animalId}/`, data, getAuthHeaders());
+};
+
 export const addReproductiveHistory = async (animalId, data) => {
   const payload = { animal: animalId, ...data };
   console.log("Reproductive History Payload:", payload); // Add this
@@ -951,4 +955,21 @@ export const createAnimal = async (animalData) => {
     toast.error("Failed to add animal. Please try again.");
     throw error;
   }
+};
+
+export const addFeedToStore = async (data) => {
+  const response = await API.post("feed/feeds/", data, getAuthHeaders());
+  return response.data;
+};
+
+// Feed animals in a category
+export const feedAnimals = async (data) => {
+  const response = await API.post("feed/feed-animals/", data, getAuthHeaders());
+  return response.data;
+};
+
+// Bonus: Get the list of feeds (optional, if needed separately)
+export const getFeeds = async () => {
+  const response = await API.get("feed/feeds/", getAuthHeaders());
+  return response.data;
 };
