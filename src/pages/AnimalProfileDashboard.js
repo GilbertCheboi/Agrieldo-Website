@@ -105,6 +105,8 @@ export default function AnimalProfileDashboard() {
         date: productionForm.date || new Date().toISOString().split('T')[0],
         session: productionForm.session,
         milk_yield: parseFloat(productionForm.milk_yield) || 0,
+        milk_price_per_liter: parseFloat(productionForm.milk_price_per_liter) || 0,
+
         scc: parseInt(productionForm.scc, 10) || 0,
         feed_consumption: parseFloat(productionForm.feed_consumption) || 0,
         fat_percentage: parseFloat(productionForm.fat_percentage) || 0,
@@ -117,6 +119,7 @@ export default function AnimalProfileDashboard() {
         date: "", 
         session: "MORNING", 
         milk_yield: "", 
+        milk_price_per_liter: "",
         scc: "", 
         feed_consumption: "", 
         fat_percentage: "", 
