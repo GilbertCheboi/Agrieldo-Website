@@ -2,9 +2,9 @@ import axios from "axios";
 
 // Base API instance
 const API = axios.create({
-    //baseURL: "http://207.154.253.97:8000/api/", // Update the base URL to match your backend
-    baseURL: "https://api.agrieldo.com/api/", // Alternative URL commented out
-    timeout: 10000, // Try adding this
+    baseURL: "http://207.154.253.97:8000/api/", // Update the base URL to match your backend
+    //baseURL: "https://api.agrieldo.com/api/", // Alternative URL commented out
+ 
 
 });
 
@@ -827,8 +827,14 @@ export const createAnimal = async (animalData) => {
 };
 
 export const addFeedToStore = async (data) => {
-  const response = await API.post('feed/feeds/', data, getAuthHeaders() );
-  return response.data;
+  try {
+    const response = await API.post('feed/feeds/', data, getAuthHeaders());
+    console.log(response); // Log the full response to inspect its structure
+    return response.data; // Ensure this contains the expected feed data
+  } catch (error) {
+    console.error('API Error:', error);
+    throw error; // Optionally throw the error if you want to handle it further up the call chain
+  }
 };
 
 // Feed animals in a category

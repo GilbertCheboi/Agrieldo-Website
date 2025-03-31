@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Modal, Box, TextField, Button, Typography } from '@mui/material';
-import { addFeedToStore } from '../services/api';
+// components/AddFeedModal.js
+import React, { useState, useEffect } from 'react';
+import { Modal, Box, TextField, Button, Typography, Autocomplete } from '@mui/material';
+import { addFeedToStore, getFeeds } from '../services/api';
 
 const style = {
   position: 'absolute',
@@ -19,11 +20,46 @@ const AddFeedModal = ({ open, onClose, onFeedAdded }) => {
     quantity_kg: '',
     price_per_kg: '',
   });
+  const [feeds, setFeeds] = useState([]);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      const fetchFeeds = async () => {
+        setLoading(true);
+        try {
+          const data = await getFeeds();
+          setFeeds(Array.isArray(data) ? data : []);
+        } catch (err) {
+          console.error('Error fetching feeds:', err);
+          setFeeds([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchFeeds();
+    }
+  }, [open]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError('');
+    setSuccess('');
+  };
+
+  // Handle selection from dropdown
+  const handleFeedNameChange = (event, newValue) => {
+    const name = typeof newValue === 'object' && newValue ? newValue.name : newValue || '';
+    setFormData({ ...formData, name });
+    setError('');
+    setSuccess('');
+  };
+
+  // Handle manual typing
+  const handleFeedNameInputChange = (event, newInputValue) => {
+    setFormData({ ...formData, name: newInputValue });
     setError('');
     setSuccess('');
   };
@@ -36,7 +72,7 @@ const AddFeedModal = ({ open, onClose, onFeedAdded }) => {
     const dataToSend = {
       name: formData.name.trim(),
       quantity_kg: parseFloat(formData.quantity_kg) || 0,
-      price_per_kg: formData.price_per_kg ? parseFloat(formData.price_per_kg) : undefined, // Send undefined if blank
+      price_per_kg: formData.price_per_kg ? parseFloat(formData.price_per_kg) : undefined,
     };
 
     if (!dataToSend.name) {
@@ -50,18 +86,20 @@ const AddFeedModal = ({ open, onClose, onFeedAdded }) => {
 
     console.log('Sending to API:', dataToSend);
     try {
-      const response = await addFeedToStore(dataToSend);
-      const newFeed = response.data; // Full feed object from API
-      const isNew = response.status === 201; // 201 for new, 200 for top-up
+      const newFeed = await addFeedToStore(dataToSend);
+      console.log('Received Feed Data:', newFeed);
+
+      if (!newFeed || typeof newFeed !== 'object' || !newFeed.id) {
+        throw new Error('Invalid or missing feed data in API response');
+      }
+
       onFeedAdded(newFeed);
-      setSuccess(`Successfully ${isNew ? 'added' : 'topped up'} ${dataToSend.name} with ${dataToSend.quantity_kg} kg`);
+      setSuccess(`Successfully added or topped up ${dataToSend.name} with ${dataToSend.quantity_kg} kg`);
       setFormData({ name: '', quantity_kg: '', price_per_kg: '' });
-      setTimeout(() => {
-        onClose();
-      }, 1000); // Close after 1 second to show success
+      setTimeout(() => onClose(), 1000);
     } catch (error) {
-      setError(error.response?.data?.error || 'Failed to add or top up feed');
-      console.error('API Error:', error.response);
+      console.error('API Error:', error.response || error);
+      setError(error.response?.data?.error || error.message || 'Failed to add or top up feed');
     }
   };
 
@@ -72,15 +110,26 @@ const AddFeedModal = ({ open, onClose, onFeedAdded }) => {
           Add Feed to Store
         </Typography>
         <form onSubmit={handleSubmit}>
-          <TextField
-            label="Feed Name"
-            name="name"
+          <Autocomplete
+            options={feeds}
+            getOptionLabel={(option) => (typeof option === 'string' ? option : option.name)}
+            freeSolo
+            loading={loading}
             value={formData.name}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-            variant="outlined"
+            onChange={handleFeedNameChange}          // For dropdown selection
+            onInputChange={handleFeedNameInputChange} // For manual typing
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Feed Name"
+                name="name"
+                fullWidth
+                margin="normal"
+                required
+                variant="outlined"
+                helperText="Select an existing feed or type a new name"
+              />
+            )}
           />
           <TextField
             label="Quantity (kg)"
@@ -112,6 +161,7 @@ const AddFeedModal = ({ open, onClose, onFeedAdded }) => {
             color="primary"
             fullWidth
             sx={{ mt: 2 }}
+            disabled={loading}
           >
             Add or Top Up Feed
           </Button>

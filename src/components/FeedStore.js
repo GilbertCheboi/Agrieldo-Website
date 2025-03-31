@@ -1,3 +1,4 @@
+// components/FeedStore.js
 import React, { useState, useEffect } from 'react';
 import {
   Fab,
@@ -25,9 +26,10 @@ const FeedStore = () => {
   const fetchFeeds = async () => {
     try {
       const data = await getFeeds();
-      setFeeds(data);
+      setFeeds(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching feeds:', error);
+      setFeeds([]);
     } finally {
       setLoading(false);
     }
@@ -38,11 +40,21 @@ const FeedStore = () => {
   }, []);
 
   const handleFeedAdded = (newFeed) => {
-    setFeeds([...feeds, newFeed]);
+    setFeeds((prevFeeds) => {
+      const existingFeedIndex = prevFeeds.findIndex((feed) => feed.id === newFeed.id);
+      if (existingFeedIndex !== -1) {
+        // Update existing feed (top-up)
+        const updatedFeeds = [...prevFeeds];
+        updatedFeeds[existingFeedIndex] = newFeed;
+        return updatedFeeds;
+      }
+      // Add new feed
+      return [...prevFeeds, newFeed];
+    });
   };
 
   const handleFeedUpdated = () => {
-    fetchFeeds();
+    fetchFeeds();  // Refresh feed list after feeding animals
   };
 
   if (loading) return <Typography>Loading feeds...</Typography>;
@@ -53,7 +65,7 @@ const FeedStore = () => {
         Feed Store
       </Typography>
       {feeds.length === 0 ? (
-        <Typography>No feeds in store</Typography>
+        <Typography>No feeds in store. Please add a feed.</Typography>
       ) : (
         <TableContainer component={Paper}>
           <Table>
@@ -66,16 +78,23 @@ const FeedStore = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {feeds.map((feed) => (
-                <TableRow key={feed.id}>
-                  <TableCell>{feed.name}</TableCell>
-                  <TableCell align="right">{feed.quantity_kg}</TableCell>
-                  <TableCell align="right">{feed.price_per_kg.toFixed(2)}</TableCell>
-                  <TableCell align="right">
-                    {(feed.quantity_kg * feed.price_per_kg).toFixed(2)}
-                  </TableCell>
-                </TableRow>
-              ))}
+              {feeds.map((feed) => {
+                if (!feed || !feed.name) return null;  // Skip invalid feeds
+                return (
+                  <TableRow key={feed.id}>
+                    <TableCell>{feed.name}</TableCell>
+                    <TableCell align="right">{feed.quantity_kg}</TableCell>
+                    <TableCell align="right">
+                      {feed.price_per_kg ? feed.price_per_kg.toFixed(2) : 'N/A'}
+                    </TableCell>
+                    <TableCell align="right">
+                      {feed.quantity_kg && feed.price_per_kg
+                        ? (feed.quantity_kg * feed.price_per_kg).toFixed(2)
+                        : 'N/A'}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>
