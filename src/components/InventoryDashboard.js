@@ -48,6 +48,15 @@ function InventoryDashboard() {
         fetchProduce(),
       ]);
 
+      console.log('Fetched storeStock with dates:', storeRes.map(item => ({
+        id: item.id,
+        produce: item.produce,
+        store: item.store,
+        outlet: item.outlet,
+        quantity: item.quantity,
+        created_at: item.created_at,
+      })));
+
       setStoreStock(storeRes);
       if (storeRes.length > 0) {
         setStoreId(storeRes[0].store?.id || storeRes[0].store);
@@ -63,6 +72,7 @@ function InventoryDashboard() {
   };
 
   useEffect(() => {
+    console.log('Fetching data with startDate:', startDate, 'endDate:', endDate);
     fetchData();
   }, [startDate, endDate]);
 
@@ -71,8 +81,46 @@ function InventoryDashboard() {
   const handleOpenAddToStore = () => setOpenAddToStore(true);
   const handleCloseAddToStore = () => setOpenAddToStore(false);
 
-  const handleSuccess = () => {
-    fetchData();
+  const handleSuccess = async (updatedInventory) => {
+    console.log('Transfer response with date:', {
+      id: updatedInventory.id,
+      produce: updatedInventory.produce,
+      store: updatedInventory.store,
+      outlet: updatedInventory.outlet,
+      quantity: updatedInventory.quantity,
+      created_at: updatedInventory.created_at,
+    });
+
+    setStoreStock((prevStock) => {
+      const existingIndex = prevStock.findIndex(
+        (item) =>
+          item.produce === updatedInventory.produce &&
+          item.store === updatedInventory.store &&
+          item.outlet === updatedInventory.outlet
+      );
+      let newStock;
+      if (existingIndex >= 0) {
+        newStock = [...prevStock];
+        newStock[existingIndex] = updatedInventory;
+      } else {
+        newStock = [...prevStock, updatedInventory];
+      }
+      console.log('Updated storeStock before fetch:', newStock.map(item => ({
+        id: item.id,
+        outlet: item.outlet,
+        quantity: item.quantity,
+        created_at: item.created_at,
+      })));
+      return newStock;
+    });
+
+    await fetchData();
+    console.log('Final storeStock after fetch:', storeStock.map(item => ({
+      id: item.id,
+      outlet: item.outlet,
+      quantity: item.quantity,
+      created_at: item.created_at,
+    })));
     handleCloseTransfer();
     handleCloseAddToStore();
   };
@@ -83,18 +131,24 @@ function InventoryDashboard() {
       const isProduceMatch = itemProduceId === produceId;
 
       if (outletId !== null) {
-        const itemOutletId = item.outlet?.id || item.outlet;
+        const itemOutletId = item.outlet?.id || item.outlet || null;
+        console.log(`Checking produce ${produceId}, outlet ${outletId}: itemOutletId=${itemOutletId}, match=${itemOutletId === outletId}`);
         return isProduceMatch && itemOutletId === outletId;
       } else {
-        return isProduceMatch && (!item.outlet || item.outlet === null);
+        return isProduceMatch && (item.outlet === null || item.outlet === undefined);
       }
     });
 
+    console.log(`getStockQuantity for produce ${produceId}, outlet ${outletId}:`, filtered.map(item => ({
+      id: item.id,
+      outlet: item.outlet,
+      quantity: item.quantity,
+      created_at: item.created_at,
+    })));
     const total = filtered.reduce((sum, i) => sum + i.quantity, 0);
     return total;
   };
 
-  // Format display for UI and export
   const formatStockDisplay = (quantity) => {
     return quantity === 0 ? '-' : quantity;
   };
@@ -172,7 +226,6 @@ function InventoryDashboard() {
         />
       </Box>
 
-      {/* Download Buttons */}
       <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
         <Button
           variant="contained"
@@ -231,7 +284,6 @@ function InventoryDashboard() {
         </Table>
       </Paper>
 
-      {/* Floating Action Buttons */}
       <Box
         sx={{
           position: 'fixed',
@@ -254,7 +306,6 @@ function InventoryDashboard() {
         </Tooltip>
       </Box>
 
-      {/* Modals */}
       <TransferModal
         open={openTransfer}
         onClose={handleCloseTransfer}

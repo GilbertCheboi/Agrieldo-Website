@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import MilkProductionChart from "./MilkProductionChart";
-import FeedManagement from "./FeedManagement";
+import FeedVsMilkRevenueChart from "./FeedVsMilkRevenueChart";
 import { fetchAnimals, createAnimal } from "../services/api";
 import { GiCow, GiBabyBottle, GiMedicalPack, GiFemale, GiHeartBeats, GiMilkCarton, GiGrass, GiBull } from "react-icons/gi";
 import { AiOutlinePlus } from "react-icons/ai";
@@ -428,7 +428,7 @@ const DairyDashboard = ({ farmId }) => {
         </DialogActions>
       </Dialog>
 
-      {/* Retained Components: MilkProductionChart and FeedManagement */}
+      {/* Retained Components: MilkProductionChart and FeedVsMilkRevenueChart */}
       <Grid container spacing={3}>
         <Grid item xs={12} sm={6}>
           <DashboardCard title="📈 Milk Production">
@@ -436,8 +436,8 @@ const DairyDashboard = ({ farmId }) => {
           </DashboardCard>
         </Grid>
         <Grid item xs={12} sm={6}>
-          <DashboardCard title="🌾 Feed Management">
-            {FeedManagement ? <FeedManagement farmId={farmId} /> : <Typography>FeedManagement not found</Typography>}
+          <DashboardCard title="📈 Milk vs Feed">
+            {FeedVsMilkRevenueChart ? <FeedVsMilkRevenueChart farmId={farmId} /> : <Typography>FeedVsMilkRevenueChart not found</Typography>}
           </DashboardCard>
         </Grid>
       </Grid>
