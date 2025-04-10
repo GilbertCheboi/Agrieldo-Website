@@ -5,7 +5,6 @@ import { toast } from "react-toastify";
 const API = axios.create({
   //baseURL: "http://207.154.253.97:8000/api/", // Update the base URL to match your backend
   baseURL: "https://api.agrieldo.com/api/", // Alternative URL commented out
-  timeout: 10000, // Try adding this
 });
 
 // Add a request interceptor to include the JWT token in headers
@@ -1065,8 +1064,14 @@ export const createAnimal = async (animalData) => {
 };
 
 export const addFeedToStore = async (data) => {
-  const response = await API.post("feed/feeds/", data, getAuthHeaders());
-  return response.data;
+  try {
+    const response = await API.post("feed/feeds/", data, getAuthHeaders());
+    console.log(response); // Log the full response to inspect its structure
+    return response.data; // Ensure this contains the expected feed data
+  } catch (error) {
+    console.error("API Error:", error);
+    throw error; // Optionally throw the error if you want to handle it further up the call chain
+  }
 };
 
 // Feed animals in a category
@@ -1079,4 +1084,52 @@ export const feedAnimals = async (data) => {
 export const getFeeds = async () => {
   const response = await API.get("feed/feeds/", getAuthHeaders());
   return response.data;
+};
+
+export const getFeedingPlans = async () => {
+  const response = await API.get("feed/feeding-plans/", getAuthHeaders());
+  return response.data;
+};
+
+export const createFeedingPlan = async (data) => {
+  try {
+    const response = await API.post(
+      "feed/feeding-plans/",
+      data,
+      getAuthHeaders()
+    );
+    console.log("Create Feeding Plan Response:", response.data); // Debugging
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error creating feeding plan:",
+      error.response?.data || error.message
+    );
+    throw error; // Let caller handle the error
+  }
+};
+
+export const fetchDailyFeedVsMilkRevenue = async (
+  farmId,
+  startDate = null,
+  endDate = null
+) => {
+  try {
+    // Build query string if dates are provided
+    const params = {};
+    if (startDate) params.start_date = startDate;
+    if (endDate) params.end_date = endDate;
+
+    const response = await API.get(
+      `animals/farms/${farmId}/daily-feed-vs-milk/`,
+      {
+        ...getAuthHeaders(),
+        params: Object.keys(params).length ? params : undefined,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching daily feed vs milk revenue:", error);
+    return [];
+  }
 };
