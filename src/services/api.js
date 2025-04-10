@@ -136,6 +136,43 @@ export const fetchProduceDetails = async (id) => {
   }
 };
 
+export const fetchPackages = async () => {
+  try {
+    const response = await API.get("subscriptions/packages/", getAuthHeaders());
+
+    if (!Array.isArray(response.data)) {
+      throw new Error("Expected an array of packages from API.");
+    }
+
+    console.log("Fetched packages:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching packages:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+export const addSubscription = async (subscriptionData) => {
+  try {
+    const response = await API.post(
+      "subscriptions/add/",
+      subscriptionData,
+      getAuthHeaders()
+    );
+    console.log("Subscription added:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error adding subscription:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
 export const fetchOutletDetails = async (id) => {
   try {
     const response = await API.get(
