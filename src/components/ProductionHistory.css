@@ -1,0 +1,86 @@
+.production-history {
+    padding: 20px;
+    text-align: center;
+    max-width: 900px;
+    margin: auto;
+}
+
+.production-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.production-table th, .production-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: center;
+    font-size: 16px;
+}
+
+.production-table th {
+    background-color: #ffa500;
+    color: white;
+    font-weight: bold;
+}
+
+.production-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Floating Action Button */
+.fab {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #ffa500;
+    color: white;
+    border: none;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    transition: 0.3s;
+    z-index: 1000;  /* Ensure it's above other elements */
+}
+
+.fab:hover {
+    background-color: #e69500;
+    transform: scale(1.1);
+}
+
+
+/* Pagination */
+.pagination {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    align-items: center;
+}
+
+.pagination button {
+    background-color: #ffa500;
+    border: none;
+    color: white;
+    padding: 10px 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.pagination button:hover {
+    background-color: #e69500;
+}
+
+.pagination button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}

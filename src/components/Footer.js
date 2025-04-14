@@ -3,7 +3,7 @@ import React from "react";
 const Footer = () => {
   return (
     <footer className="bg-gray-800 text-white py-6 text-center">
-      <p>© 2024 Agrieldo. All rights reserved.</p>
+      <p>© 2025 Agrieldo. All rights reserved.</p>
     </footer>
   );
 };

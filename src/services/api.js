@@ -1,7 +1,9 @@
 import axios from "axios";
+import { toast } from "react-toastify";
 
 // Base API instance
 const API = axios.create({
+
 
     baseURL: "http://207.154.253.97:8000/api/", // Update the base URL to match your backend
     //baseURL: "https://api.agrieldo.com/api/", // Alternative URL commented out
@@ -136,6 +138,43 @@ export const fetchProduceDetails = async (id) => {
     console.error(
       "Error fetching produce details:",
       error.response ? error.response.data : error.message
+    );
+    throw error;
+  }
+};
+
+export const fetchPackages = async () => {
+  try {
+    const response = await API.get("subscriptions/packages/", getAuthHeaders());
+
+    if (!Array.isArray(response.data)) {
+      throw new Error("Expected an array of packages from API.");
+    }
+
+    console.log("Fetched packages:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching packages:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+export const addSubscription = async (subscriptionData) => {
+  try {
+    const response = await API.post(
+      "subscriptions/add/",
+      subscriptionData,
+      getAuthHeaders()
+    );
+    console.log("Subscription added:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error adding subscription:",
+      error.response?.data || error.message
     );
     throw error;
   }
@@ -453,7 +492,76 @@ export const fetchProductionData = async () => {
     throw error;
   }
 };
+export const addMilkProductionRecords = async (records) => {
+  try {
+    console.log("🚀 Sending payload:", JSON.stringify(records, null, 2));
+    const response = await API.post(
+      `animals/production/milk/`,
+      records,
+      getAuthHeaders()
+    ); // No "records" wrapper
+    return response.data;
+  } catch (error) {
+    console.error(
+      "❌ Error adding milk production records:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
 
+export const updateMilkProductionRecord = async (id, updatedRecord) => {
+  try {
+    const response = await API.put(
+      `production/milk/${id}/`,
+      updatedRecord,
+      getAuthHeaders()
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error updating milk production record:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+export const fetchTodaysMilkProduction = async () => {
+  try {
+    const response = await API.get(`/production/milk/today/`, getAuthHeaders());
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching today's milk production:", error);
+    return [];
+  }
+};
+
+export const fetchDailyMilkProductionSummary = async () => {
+  try {
+    const response = await API.get(
+      `animals/production/daily-summary/`,
+      getAuthHeaders()
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching daily milk production summary:", error);
+    return [];
+  }
+};
+
+export const fetchLactatingAnimals = async () => {
+  try {
+    const response = await API.get(
+      `animals/production/milk/lactating-animals/`,
+      getAuthHeaders()
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching lactating animals:", error);
+    return [];
+  }
+};
 export const addProductionRecord = async (record) => {
   try {
     const { commodity, quantity } = record;
@@ -463,6 +571,7 @@ export const addProductionRecord = async (record) => {
       { commodity, quantity },
       getAuthHeaders()
     );
+    // const response = await API.post(`animals/production/milk/`, { commodity, quantity }, getAuthHeaders());
     return response.data;
   } catch (error) {
     console.error(
@@ -532,6 +641,19 @@ export const getUsers = async () => {
     return response.data;
   } catch (error) {
     console.error("Error fetching users:", error);
+    throw error;
+  }
+};
+
+export const getUserById = async (userId) => {
+  try {
+    const response = await API.get(
+      `accounts/list_users/${userId}/`,
+      getAuthHeaders()
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user data:", error);
     throw error;
   }
 };
@@ -748,6 +870,10 @@ export const getFinancialDetails = async (animalId) => {
     console.error("Error fetching financial details:", error.response ? error.response.data : error.message);
     throw error;
   }
+};
+
+export const addLactationRecord = async (animalId, data) => {
+  return API.post(`animals/lactation/${animalId}/`, data, getAuthHeaders());
 };
 
 export const addReproductiveHistory = async (animalId, data) => {
@@ -972,9 +1098,84 @@ export const createAnimal = async (animalData) => {
       delete authHeaders.headers["Content-Type"];
     }
     const response = await API.post(`animals/add/`, animalData, authHeaders);
+    // ✅ Show success toast
+    toast.success("Animal added successfully!");
     return response.data;
   } catch (error) {
     console.error("Error creating animal:", error);
+    // ✅ Show error toast
+    toast.error("Failed to add animal. Please try again.");
     throw error;
+  }
+};
+
+export const addFeedToStore = async (data) => {
+  try {
+    const response = await API.post("feed/feeds/", data, getAuthHeaders());
+    console.log(response); // Log the full response to inspect its structure
+    return response.data; // Ensure this contains the expected feed data
+  } catch (error) {
+    console.error("API Error:", error);
+    throw error; // Optionally throw the error if you want to handle it further up the call chain
+  }
+};
+
+// Feed animals in a category
+export const feedAnimals = async (data) => {
+  const response = await API.post("feed/feed-animals/", data, getAuthHeaders());
+  return response.data;
+};
+
+// Bonus: Get the list of feeds (optional, if needed separately)
+export const getFeeds = async () => {
+  const response = await API.get("feed/feeds/", getAuthHeaders());
+  return response.data;
+};
+
+export const getFeedingPlans = async () => {
+  const response = await API.get("feed/feeding-plans/", getAuthHeaders());
+  return response.data;
+};
+
+export const createFeedingPlan = async (data) => {
+  try {
+    const response = await API.post(
+      "feed/feeding-plans/",
+      data,
+      getAuthHeaders()
+    );
+    console.log("Create Feeding Plan Response:", response.data); // Debugging
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error creating feeding plan:",
+      error.response?.data || error.message
+    );
+    throw error; // Let caller handle the error
+  }
+};
+
+export const fetchDailyFeedVsMilkRevenue = async (
+  farmId,
+  startDate = null,
+  endDate = null
+) => {
+  try {
+    // Build query string if dates are provided
+    const params = {};
+    if (startDate) params.start_date = startDate;
+    if (endDate) params.end_date = endDate;
+
+    const response = await API.get(
+      `animals/farms/${farmId}/daily-feed-vs-milk/`,
+      {
+        ...getAuthHeaders(),
+        params: Object.keys(params).length ? params : undefined,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching daily feed vs milk revenue:", error);
+    return [];
   }
 };

@@ -1,4 +1,3 @@
-// src/components/DairyDashboard.js
 import React, { useState, useEffect } from "react";
 import {
   Grid,
@@ -18,7 +17,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import MilkProductionChart from "./MilkProductionChart";
-import FeedManagement from "./FeedManagement";
+import FeedVsMilkRevenueChart from "./FeedVsMilkRevenueChart";
 import { fetchAnimals, createAnimal } from "../services/api";
 import {
   GiCow,
@@ -31,10 +30,11 @@ import {
   GiBull,
 } from "react-icons/gi";
 import { AiOutlinePlus } from "react-icons/ai";
+import { jwtDecode } from "jwt-decode";
 
 const calculateAgeInMonths = (dob) => {
   const birthDate = new Date(dob);
-  const today = new Date("2025-03-14");
+  const today = new Date(); // Dynamic date instead of "2025-03-14"
   const diffMs = today - birthDate;
   return Math.floor(diffMs / (1000 * 60 * 60 * 24 * 30));
 };
@@ -84,10 +84,16 @@ const DairyDashboard = ({ farmId }) => {
     bulls: 0,
     heifers: 0,
     calves: 0,
-    newborns: 0,
-    pregnant: 0,
+    weanerStage1: 0,
+    weanerStage2: 0,
+    yearlings: 0,
+    bulling: 0,
+    inCalf: 0,
+    steaming: 0,
+    earlyLactating: 0,
+    midLactating: 0,
+    lateLactating: 0,
     dry: 0,
-    milking: 0,
     sickCows: 0,
   });
   const [loading, setLoading] = useState(true);
@@ -96,7 +102,8 @@ const DairyDashboard = ({ farmId }) => {
     name: "",
     gender: "Female",
     dob: "",
-    category: "Calf",
+    category: "Calf (0-3 months)",
+    farms: [], // This ensures it's defined from the start
   });
   const navigate = useNavigate();
 
@@ -109,31 +116,64 @@ const DairyDashboard = ({ farmId }) => {
           bulls: 0,
           heifers: 0,
           calves: 0,
-          newborns: 0,
-          pregnant: 0,
+          weanerStage1: 0,
+          weanerStage2: 0,
+          yearlings: 0,
+          bulling: 0,
+          inCalf: 0,
+          steaming: 0,
+          earlyLactating: 0,
+          midLactating: 0,
+          lateLactating: 0,
           dry: 0,
-          milking: 0,
           sickCows: 0,
         };
 
         animals.forEach((animal) => {
-          const ageInMonths = calculateAgeInMonths(animal.dob);
-          if (animal.gender === "Male") {
-            counts.bulls += 1;
-          } else {
-            if (ageInMonths < 1) counts.newborns += 1;
-            else if (animal.category === "Calf") counts.calves += 1;
-            else if (animal.category === "Heifer") counts.heifers += 1;
-            else if (animal.category === "Milking") counts.milking += 1;
-            else if (animal.category === "Dry") counts.dry += 1;
+          switch (animal.category) {
+            case "Bull":
+              counts.bulls += 1;
+              break;
+            case "Heifer":
+              counts.heifers += 1;
+              break;
+            case "Calf (0-3 months)":
+              counts.calves += 1;
+              break;
+            case "Weaner Stage 1 (3-6 months)":
+              counts.weanerStage1 += 1;
+              break;
+            case "Weaner Stage 2 (6-9 months)":
+              counts.weanerStage2 += 1;
+              break;
+            case "Yearling (9-12 months)":
+              counts.yearlings += 1;
+              break;
+            case "Bulling (12-15 months)":
+              counts.bulling += 1;
+              break;
+            case "In-Calf":
+              counts.inCalf += 1;
+              break;
+            case "Steaming":
+              counts.steaming += 1;
+              break;
+            case "Early Lactating":
+              counts.earlyLactating += 1;
+              break;
+            case "Mid Lactating":
+              counts.midLactating += 1;
+              break;
+            case "Late Lactating":
+              counts.lateLactating += 1;
+              break;
+            case "Dry":
+              counts.dry += 1;
+              break;
+            default:
+              break;
           }
-          if (animal.is_pregnant) counts.pregnant += 1;
-          if (
-            animal.health_records &&
-            animal.health_records.some((record) => record.is_sick)
-          ) {
-            counts.sickCows += 1;
-          }
+          if (animal.is_sick) counts.sickCows += 1;
         });
 
         setLivestockData(counts);
@@ -154,14 +194,59 @@ const DairyDashboard = ({ farmId }) => {
   const handleModalOpen = () => setOpenModal(true);
   const handleModalClose = () => {
     setOpenModal(false);
-    setFormData({ name: "", gender: "Female", dob: "", category: "Calf" });
+    setFormData({
+      name: "",
+      gender: "Female",
+      dob: "",
+      category: "Calf (0-3 months)",
+      farms: [],
+    });
   };
 
-  const handleFormChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+  useEffect(() => {
+    getFarms()
+      .then((data) => {
+        setFormData((prevState) => ({
+          ...prevState,
+          farms: data, // Ensure data is an array of { id, name }
+        }));
+      })
+      .catch((error) => console.error("Error fetching farms:", error));
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      try {
+        // Decode token to get user_id
+        const decoded = jwtDecode(token);
+        const userId = decoded.user_id;
+        console.log("Decoded userId:", userId);
+
+        // Fetch user data using the service function
+        getUserById(userId)
+          .then((data) => {
+            console.log("Fetched user data:", data);
+            setFormData((prevState) => ({
+              ...prevState,
+              ownerId: userId, // Pass user_id to the backend
+              ownerDisplay: data.username, // Display username on the frontend
+            }));
+          })
+          .catch((error) => {
+            console.error("Error fetching user data:", error);
+          });
+      } catch (error) {
+        console.error("Error decoding token:", error);
+      }
+    }
+  }, []);
+
+  const handleFormChange = (event) => {
+    setFormData({
+      ...formData,
+      [event.target.name]: event.target.value,
+    });
   };
 
   const handleAddAnimal = async () => {
@@ -174,13 +259,9 @@ const DairyDashboard = ({ farmId }) => {
       payload.append("breed", formData.breed);
       payload.append("dob", formData.dob);
       payload.append("gender", formData.gender);
-      payload.append("farm", farmId);
-      payload.append("owner", formData.owner);
-      payload.append("assigned_worker", formData.assigned_worker);
-
-      // ✅ Append caption (Fix missing caption)
-      payload.append("caption", formData.caption);
-
+      payload.append("farm", formData.farm);
+      payload.append("owner", formData.ownerId);
+      // payload.append("assigned_worker", formData.assigned_worker);
       // ✅ Append images correctly
       if (formData.images && formData.images.length > 0) {
         formData.images.forEach((file) => {
@@ -229,7 +310,7 @@ const DairyDashboard = ({ farmId }) => {
           <DashboardCard
             title={
               <>
-                <GiCow color="#ffa500" size={18} /> Total Cows
+                <GiCow color="#ffa500" size={18} /> Total Animals
               </>
             }
             onClick={() => handleCategoryClick("")}
@@ -265,10 +346,10 @@ const DairyDashboard = ({ farmId }) => {
           <DashboardCard
             title={
               <>
-                <GiBabyBottle color="#ffa500" size={18} /> Calves
+                <GiBabyBottle color="#ffa500" size={18} /> Calves (0-3)
               </>
             }
-            onClick={() => handleCategoryClick("category=Calf")}
+            onClick={() => handleCategoryClick("category=Calf (0-3 months)")}
           >
             <Typography variant="h6">{livestockData.calves}</Typography>
           </DashboardCard>
@@ -277,24 +358,116 @@ const DairyDashboard = ({ farmId }) => {
           <DashboardCard
             title={
               <>
-                <GiBabyBottle color="#ffa500" size={18} /> Newborns
+                <GiBabyBottle color="#ffa500" size={18} /> Weaner 1 (3-6)
               </>
             }
-            onClick={() => handleCategoryClick("age=Newborn")}
+            onClick={() =>
+              handleCategoryClick("category=Weaner Stage 1 (3-6 months)")
+            }
           >
-            <Typography variant="h6">{livestockData.newborns}</Typography>
+            <Typography variant="h6">{livestockData.weanerStage1}</Typography>
           </DashboardCard>
         </Grid>
         <Grid item xs={6} sm={4} md={2.4}>
           <DashboardCard
             title={
               <>
-                <GiHeartBeats color="#ffa500" size={18} /> Pregnant
+                <GiBabyBottle color="#ffa500" size={18} /> Weaner 2 (6-9)
               </>
             }
-            onClick={() => handleCategoryClick("is_pregnant=true")}
+            onClick={() =>
+              handleCategoryClick("category=Weaner Stage 2 (6-9 months)")
+            }
           >
-            <Typography variant="h6">{livestockData.pregnant}</Typography>
+            <Typography variant="h6">{livestockData.weanerStage2}</Typography>
+          </DashboardCard>
+        </Grid>
+        <Grid item xs={6} sm={4} md={2.4}>
+          <DashboardCard
+            title={
+              <>
+                <GiFemale color="#ffa500" size={18} /> Yearlings (9-12)
+              </>
+            }
+            onClick={() =>
+              handleCategoryClick("category=Yearling (9-12 months)")
+            }
+          >
+            <Typography variant="h6">{livestockData.yearlings}</Typography>
+          </DashboardCard>
+        </Grid>
+        <Grid item xs={6} sm={4} md={2.4}>
+          <DashboardCard
+            title={
+              <>
+                <GiFemale color="#ffa500" size={18} /> Bulling (12-15)
+              </>
+            }
+            onClick={() =>
+              handleCategoryClick("category=Bulling (12-15 months)")
+            }
+          >
+            <Typography variant="h6">{livestockData.bulling}</Typography>
+          </DashboardCard>
+        </Grid>
+        <Grid item xs={6} sm={4} md={2.4}>
+          <DashboardCard
+            title={
+              <>
+                <GiHeartBeats color="#ffa500" size={18} /> In-Calf
+              </>
+            }
+            onClick={() => handleCategoryClick("category=In-Calf")}
+          >
+            <Typography variant="h6">{livestockData.inCalf}</Typography>
+          </DashboardCard>
+        </Grid>
+        <Grid item xs={6} sm={4} md={2.4}>
+          <DashboardCard
+            title={
+              <>
+                <GiHeartBeats color="#ffa500" size={18} /> Steaming
+              </>
+            }
+            onClick={() => handleCategoryClick("category=Steaming")}
+          >
+            <Typography variant="h6">{livestockData.steaming}</Typography>
+          </DashboardCard>
+        </Grid>
+        <Grid item xs={6} sm={4} md={2.4}>
+          <DashboardCard
+            title={
+              <>
+                <GiMilkCarton color="#ffa500" size={18} /> Early Lactating
+              </>
+            }
+            onClick={() => handleCategoryClick("category=Early Lactating")}
+          >
+            <Typography variant="h6">{livestockData.earlyLactating}</Typography>
+          </DashboardCard>
+        </Grid>
+        <Grid item xs={6} sm={4} md={2.4}>
+          <DashboardCard
+            title={
+              <>
+                <GiMilkCarton color="#ffa500" size={18} /> Mid Lactating
+              </>
+            }
+            onClick={() => handleCategoryClick("category=Mid Lactating")}
+          >
+            <Typography variant="h6">{livestockData.midLactating}</Typography>
+          </DashboardCard>
+        </Grid>
+        <Grid item xs={6} sm={4} md={2.4}>
+          <DashboardCard
+            title={
+              <>
+                <GiMilkCarton color="#ffa500" size={18} /> Late Lactating
+              </>
+            }
+            onClick={() => handleCategoryClick("category=Late Lactating")}
+          >
+            <Typography variant="h6">{livestockData.lateLactating}</Typography>
           </DashboardCard>
         </Grid>
         <Grid item xs={6} sm={4} md={2.4}>
@@ -313,19 +486,7 @@ const DairyDashboard = ({ farmId }) => {
           <DashboardCard
             title={
               <>
-                <GiMilkCarton color="#ffa500" size={18} /> Milking
-              </>
-            }
-            onClick={() => handleCategoryClick("category=Milking")}
-          >
-            <Typography variant="h6">{livestockData.milking}</Typography>
-          </DashboardCard>
-        </Grid>
-        <Grid item xs={6} sm={4} md={2.4}>
-          <DashboardCard
-            title={
-              <>
-                <GiMedicalPack color="red" size={18} /> Sick Cows
+                <GiMedicalPack color="red" size={18} /> Sick Animals
               </>
             }
             onClick={() => handleCategoryClick("is_sick=true")}
@@ -355,106 +516,70 @@ const DairyDashboard = ({ farmId }) => {
       <Dialog open={openModal} onClose={handleModalClose}>
         <DialogTitle>Add New Animal</DialogTitle>
         <DialogContent>
-          <Grid container spacing={2}>
-            <Grid item xs={6}>
-              <TextField
-                autoFocus
-                margin="dense"
-                name="tag"
-                label="Tag"
-                fullWidth
-                value={formData.tag}
-                onChange={handleFormChange}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="dense"
-                name="name"
-                label="Animal Name"
-                fullWidth
-                value={formData.name}
-                onChange={handleFormChange}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="dense"
-                name="breed"
-                label="Breed"
-                fullWidth
-                value={formData.breed}
-                onChange={handleFormChange}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="dense"
-                name="dob"
-                label="Date of Birth"
-                type="date"
-                fullWidth
-                value={formData.dob}
-                onChange={handleFormChange}
-                InputLabelProps={{ shrink: true }}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <FormControl fullWidth margin="dense">
-                <InputLabel id="gender-label">Gender</InputLabel>
-                <Select
-                  labelId="gender-label"
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleFormChange}
-                  label="Gender"
-                >
-                  <MenuItem value="Female">Female</MenuItem>
-                  <MenuItem value="Male">Male</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="dense"
-                name="owner"
-                label="Owner"
-                fullWidth
-                value={formData.owner}
-                onChange={handleFormChange}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="dense"
-                name="assigned_worker"
-                label="Assigned Worker"
-                fullWidth
-                value={formData.assigned_worker}
-                onChange={handleFormChange}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <input
-                accept="image/*"
-                multiple
-                type="file"
-                name="images"
-                onChange={handleImageChange}
-                style={{ marginTop: "16px" }}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="dense"
-                name="caption"
-                label="Image Caption"
-                fullWidth
-                value={formData.caption}
-                onChange={handleFormChange}
-              />
-            </Grid>
-          </Grid>
+          <TextField
+            autoFocus
+            margin="dense"
+            name="name"
+            label="Animal Name"
+            fullWidth
+            value={formData.name}
+            onChange={handleFormChange}
+          />
+          <FormControl fullWidth margin="dense">
+            <InputLabel id="gender-label">Gender</InputLabel>
+            <Select
+              labelId="gender-label"
+              name="gender"
+              value={formData.gender}
+              onChange={handleFormChange}
+              label="Gender"
+            >
+              <MenuItem value="Female">Female</MenuItem>
+              <MenuItem value="Male">Male</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField
+            margin="dense"
+            name="dob"
+            label="Date of Birth"
+            type="date"
+            fullWidth
+            value={formData.dob}
+            onChange={handleFormChange}
+            InputLabelProps={{ shrink: true }}
+          />
+          <FormControl fullWidth margin="dense">
+            <InputLabel id="category-label">Category</InputLabel>
+            <Select
+              labelId="category-label"
+              name="category"
+              value={formData.category}
+              onChange={handleFormChange}
+              label="Category"
+            >
+              <MenuItem value="Calf (0-3 months)">Calf (0-3 months)</MenuItem>
+              <MenuItem value="Weaner Stage 1 (3-6 months)">
+                Weaner Stage 1 (3-6 months)
+              </MenuItem>
+              <MenuItem value="Weaner Stage 2 (6-9 months)">
+                Weaner Stage 2 (6-9 months)
+              </MenuItem>
+              <MenuItem value="Yearling (9-12 months)">
+                Yearling (9-12 months)
+              </MenuItem>
+              <MenuItem value="Bulling (12-15 months)">
+                Bulling (12-15 months)
+              </MenuItem>
+              <MenuItem value="Heifer">Heifer</MenuItem>
+              <MenuItem value="In-Calf">In-Calf</MenuItem>
+              <MenuItem value="Steaming">Steaming</MenuItem>
+              <MenuItem value="Early Lactating">Early Lactating</MenuItem>
+              <MenuItem value="Mid Lactating">Mid Lactating</MenuItem>
+              <MenuItem value="Late Lactating">Late Lactating</MenuItem>
+              <MenuItem value="Dry">Dry</MenuItem>
+              <MenuItem value="Bull">Bull</MenuItem>
+            </Select>
+          </FormControl>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleModalClose}>Cancel</Button>
@@ -464,7 +589,7 @@ const DairyDashboard = ({ farmId }) => {
         </DialogActions>
       </Dialog>
 
-      {/* Retained Components: MilkProductionChart and FeedManagement */}
+      {/* Retained Components: MilkProductionChart and FeedVsMilkRevenueChart */}
       <Grid container spacing={3}>
         <Grid item xs={12} sm={6}>
           <DashboardCard title="📈 Milk Production">
@@ -476,11 +601,11 @@ const DairyDashboard = ({ farmId }) => {
           </DashboardCard>
         </Grid>
         <Grid item xs={12} sm={6}>
-          <DashboardCard title="🌾 Feed Management">
-            {FeedManagement ? (
-              <FeedManagement farmId={farmId} />
+          <DashboardCard title="📈 Milk vs Feed">
+            {FeedVsMilkRevenueChart ? (
+              <FeedVsMilkRevenueChart farmId={farmId} />
             ) : (
-              <Typography>FeedManagement not found</Typography>
+              <Typography>FeedVsMilkRevenueChart not found</Typography>
             )}
           </DashboardCard>
         </Grid>

@@ -1,8 +1,31 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+<<<<<<< HEAD
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell, Legend, AreaChart, Area, ScatterChart, Scatter, LineChart, Line } from "recharts";
 import { Sun, Moon, Download, ChevronLeft, ChevronRight, Info, Plus, Pen } from "lucide-react";
 import { fetchAnimalDetails, updateHealthRecord, addProductionData, addHealthRecord, addReproductiveHistory } from "../services/api";
+=======
+import { Sun, Moon, Download } from "lucide-react";
+import { fetchAnimalDetails, updateHealthRecord, addProductionData, addHealthRecord, addReproductiveHistory, addLactationRecord } from "../services/api";
+
+// Import components
+import ImageGallery from "./ImageGallery";
+import ProfileCard from "./ProfileCard";
+import ProductionChart from "./ProductionChart";
+import ReproductiveHistory from "./ReproductiveHistory";
+import Alerts from "./Alerts";
+import HealthRecords from "./HealthRecords";
+import ProductionVsFeedChart from "./ProductionVsFeedChart";
+import MilkQualityChart from "./MilkQualityChart";
+import FeedEfficiencyChart from "./FeedEfficiencyChart";
+import LifetimePerformance from "./LifetimePerformance";
+import GestationTracking from "./GestationTracking";
+import FinancialOverview from "./FinancialOverview";
+import ProductionModal from "./ProductionModal";
+import HealthModal from "./HealthModal";
+import ReproductionModal from "./ReproductionModal";
+import LactationModal from "./LactationModal";
+>>>>>>> 689b73ae06dcb4ede4eb9f6f124424dbd49635e2
 
 export default function AnimalProfileDashboard() {
   const { id: animalId } = useParams();
@@ -19,6 +42,7 @@ export default function AnimalProfileDashboard() {
   const [isProductionModalOpen, setIsProductionModalOpen] = useState(false);
   const [isHealthModalOpen, setIsHealthModalOpen] = useState(false);
   const [isReproductionModalOpen, setIsReproductionModalOpen] = useState(false);
+  const [isLactationModalOpen, setIsLactationModalOpen] = useState(false); // New lactation modal state
   const [isEditingHealth, setIsEditingHealth] = useState(false);
   const [editingHealthRecordId, setEditingHealthRecordId] = useState(null);
 
@@ -48,6 +72,15 @@ export default function AnimalProfileDashboard() {
     details: "", 
     cost: "" 
   });
+<<<<<<< HEAD
+=======
+  const [lactationForm, setLactationForm] = useState({
+    lactation_number: "",
+    last_calving_date: "",
+    is_milking: true, // Default to true for new lactation
+    expected_calving_date: ""
+  });
+>>>>>>> 689b73ae06dcb4ede4eb9f6f124424dbd49635e2
 
   useEffect(() => {
     const loadAnimalData = async () => {
@@ -55,9 +88,12 @@ export default function AnimalProfileDashboard() {
         setLoading(true);
         const data = await fetchAnimalDetails(animalIdInt);
         console.log("Fetched Animal Data:", data);
+<<<<<<< HEAD
         console.log("Financial Details:", data.financial_details); // Debug financial data
+=======
+        console.log("Financial Details:", data.financial_details);
+>>>>>>> 689b73ae06dcb4ede4eb9f6f124424dbd49635e2
 
-        // Sort the data by date
         const sortedData = {
           ...data,
           production_data: [...data.production_data].sort((a, b) => new Date(a.date) - new Date(b.date)),
@@ -82,6 +118,8 @@ export default function AnimalProfileDashboard() {
         date: productionForm.date || new Date().toISOString().split('T')[0],
         session: productionForm.session,
         milk_yield: parseFloat(productionForm.milk_yield) || 0,
+        milk_price_per_liter: parseFloat(productionForm.milk_price_per_liter) || 0,
+
         scc: parseInt(productionForm.scc, 10) || 0,
         feed_consumption: parseFloat(productionForm.feed_consumption) || 0,
         fat_percentage: parseFloat(productionForm.fat_percentage) || 0,
@@ -94,6 +132,7 @@ export default function AnimalProfileDashboard() {
         date: "", 
         session: "MORNING", 
         milk_yield: "", 
+        milk_price_per_liter: "",
         scc: "", 
         feed_consumption: "", 
         fat_percentage: "", 
@@ -166,7 +205,6 @@ export default function AnimalProfileDashboard() {
   };
 
   const handleAddReproduction = async () => {
-    console.log("Animal ID:", animalIdInt);
     try {
       const newRecord = {
         date: reproductionForm.date || new Date().toISOString().split('T')[0],
@@ -183,23 +221,67 @@ export default function AnimalProfileDashboard() {
     }
   };
 
+  const handleAddLactation = async () => {
+    try {
+      const newRecord = {
+        lactation_number: parseInt(lactationForm.lactation_number, 10) || 
+          (animalData.lactation_periods.length + 1), // Auto-increment based on existing records
+        last_calving_date: lactationForm.last_calving_date || new Date().toISOString().split('T')[0],
+        is_milking: lactationForm.is_milking,
+        expected_calving_date: lactationForm.expected_calving_date || null
+      };
+      await addLactationRecord(animalIdInt, newRecord); // POST request
+      setReloadTrigger(prev => prev + 1);
+      setIsLactationModalOpen(false);
+      setLactationForm({
+        lactation_number: "",
+        last_calving_date: "",
+        is_milking: true,
+        expected_calving_date: ""
+      });
+    } catch (err) {
+      setError("Failed to add lactation record: " + (err.message || "Permission denied"));
+    }
+  };
   const handleExport = () => {
     alert("Exporting profile data... (Implement PDF/CSV generation here)");
   };
 
+<<<<<<< HEAD
   const handleNextImage = () => setCurrentImageIndex((prev) => (prev + 1) % animalData.images.length);
   const handlePrevImage = () => setCurrentImageIndex((prev) => (prev - 1 + animalData.images.length) % animalData.images.length);
 
+=======
+>>>>>>> 689b73ae06dcb4ede4eb9f6f124424dbd49635e2
   const formatXAxis = (tickItem) => {
     const date = new Date(tickItem);
     return `${date.getMonth() + 1}/${date.getDate()}`;
+  };
+
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-white dark:bg-gray-800 p-3 border border-gray-300 dark:border-gray-700 rounded shadow-lg text-black dark:text-white">
+          <p className="font-bold">{`Date: ${formatXAxis(label)}`}</p>
+          <p>{`Total Milk: ${data.Milk.toFixed(1)} L`}</p>
+          <hr className="my-1 border-gray-300 dark:border-gray-600" />
+          <p className="font-semibold">Sessions:</p>
+          {data.sessions.map((session, index) => (
+            <div key={index} className="text-sm">
+              <p>{`${session.session}: ${session.milk_yield.toFixed(1)} L`}</p>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    return null;
   };
 
   if (loading) return <div className="text-center p-6">Loading...</div>;
   if (error) return <div className="text-center p-6 text-red-600">{error}</div>;
   if (!animalData) return <div className="text-center p-6">No data available</div>;
 
-  // Aggregate production data by date for totals, with session details for tooltip
   const productionChartData = Object.values(
     animalData.production_data.reduce((acc, record) => {
       const date = record.date;
@@ -236,6 +318,7 @@ export default function AnimalProfileDashboard() {
     FCR: day.Feed ? (day.Milk / day.Feed).toFixed(2) : 0,
   })).sort((a, b) => new Date(a.name) - new Date(b.name));
 
+<<<<<<< HEAD
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
@@ -256,6 +339,8 @@ export default function AnimalProfileDashboard() {
     return null;
   };
 
+=======
+>>>>>>> 689b73ae06dcb4ede4eb9f6f124424dbd49635e2
   const financialChartData = [
     { name: "Feed Costs", value: parseFloat(animalData.financial_details?.total_feed_cost || 0) },
     { name: "Vet Expenses", value: parseFloat(animalData.financial_details?.total_vet_cost || 0) },
@@ -267,6 +352,8 @@ export default function AnimalProfileDashboard() {
   const totalCost = parseFloat(animalData.financial_details?.total_cost || 0);
   
   // Render the fina
+
+  const totalCost = parseFloat(animalData.financial_details?.total_cost || 0);
 
   const alerts = [];
   if (animalData.production_data.some(record => record.scc > 200)) {
@@ -295,16 +382,6 @@ export default function AnimalProfileDashboard() {
     }
   }
 
-  const COLORS = ["#FF8042", "#FFBB28", "#00C49F", "#0088FE"];
-  const CHART_COLORS = { Milk: "#ffa500", Feed: "#00C49F", SCC: "#0088FE", Fat: "#FFBB28", Protein: "#FF8042", FCR: "#FF8042" };
-
-  const latestBreeding = animalData.reproductive_history.find(r => r.event === "AI" || r.event === "Natural Breeding");
-  const isPregnant = latestBreeding && !animalData.reproductive_history.some(r => r.event === "Calving" && new Date(r.date) > new Date(latestBreeding.date));
-  const expectedCalvingDate = latestBreeding?.expected_calving_date;
-  const dryPeriodStart = expectedCalvingDate ? new Date(expectedCalvingDate) - (60 * 24 * 60 * 60 * 1000) : null;
-  const today = new Date();
-  const isInDryPeriod = dryPeriodStart && today >= dryPeriodStart && today <= new Date(expectedCalvingDate);
-
   return (
     <div className={`min-h-screen p-6 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-black'}`}>
       <div className="fixed top-4 right-4 flex space-x-2 z-50">
@@ -317,6 +394,7 @@ export default function AnimalProfileDashboard() {
       </div>
 
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+<<<<<<< HEAD
         {/* Image Gallery Card */}
         <div className="bg-white shadow-lg rounded-xl p-6 h-80 relative col-span-1 md:col-span-2 lg:col-span-1 overflow-hidden">
           <div className="w-full h-full relative">
@@ -831,6 +909,75 @@ export default function AnimalProfileDashboard() {
           </div>
         </div>
       )}
+=======
+        <ImageGallery images={animalData.images} currentImageIndex={currentImageIndex} setCurrentImageIndex={setCurrentImageIndex} darkMode={darkMode} />
+        <ProfileCard animalData={animalData} darkMode={darkMode} />
+        <ProductionChart 
+          productionChartData={productionChartData} 
+          darkMode={darkMode} 
+          userType={userType} 
+          setIsProductionModalOpen={setIsProductionModalOpen} 
+          formatXAxis={formatXAxis} 
+          CustomTooltip={CustomTooltip} 
+        />
+        <ReproductiveHistory reproductiveHistory={animalData.reproductive_history} darkMode={darkMode} userType={userType} setIsReproductionModalOpen={setIsReproductionModalOpen} />
+        <Alerts alerts={alerts} darkMode={darkMode} />
+        <HealthRecords 
+          healthRecords={animalData.health_records} 
+          darkMode={darkMode} 
+          userType={userType} 
+          setIsHealthModalOpen={setIsHealthModalOpen} 
+          setIsEditingHealth={setIsEditingHealth} 
+          setHealthForm={setHealthForm} 
+          setEditingHealthRecordId={setEditingHealthRecordId} 
+          handleEditHealth={handleEditHealth} 
+        />
+        <ProductionVsFeedChart productionChartData={productionChartData} darkMode={darkMode} formatXAxis={formatXAxis} />
+        <MilkQualityChart productionChartData={productionChartData} darkMode={darkMode} formatXAxis={formatXAxis} />
+        <FeedEfficiencyChart productionChartData={productionChartData} darkMode={darkMode} formatXAxis={formatXAxis} />
+        <LifetimePerformance lifetimeStats={animalData.lifetime_stats} darkMode={darkMode} />
+        <GestationTracking 
+          animalData={animalData} 
+          darkMode={darkMode} 
+          userType={userType} 
+          setIsLactationModalOpen={setIsLactationModalOpen} // Pass new prop
+        />
+        <FinancialOverview financialChartData={financialChartData} totalCost={totalCost} darkMode={darkMode} />
+      </div>
+
+      <ProductionModal 
+        isOpen={isProductionModalOpen} 
+        setIsOpen={setIsProductionModalOpen} 
+        productionForm={productionForm} 
+        setProductionForm={setProductionForm} 
+        handleAddProduction={handleAddProduction} 
+      />
+      <HealthModal 
+        isOpen={isHealthModalOpen} 
+        setIsOpen={setIsHealthModalOpen} 
+        healthForm={healthForm} 
+        setHealthForm={setHealthForm} 
+        handleAddHealth={handleAddHealth} 
+        handleUpdateHealth={handleUpdateHealth} 
+        isEditingHealth={isEditingHealth} 
+        setIsEditingHealth={setIsEditingHealth} 
+        setEditingHealthRecordId={setEditingHealthRecordId} 
+      />
+      <ReproductionModal 
+        isOpen={isReproductionModalOpen} 
+        setIsOpen={setIsReproductionModalOpen} 
+        reproductionForm={reproductionForm} 
+        setReproductionForm={setReproductionForm} 
+        handleAddReproduction={handleAddReproduction} 
+      />
+      <LactationModal // New lactation modal
+        isOpen={isLactationModalOpen} 
+        setIsOpen={setIsLactationModalOpen} 
+        lactationForm={lactationForm} 
+        setLactationForm={setLactationForm} 
+        handleAddLactation={handleAddLactation} 
+      />
+>>>>>>> 689b73ae06dcb4ede4eb9f6f124424dbd49635e2
     </div>
   );
 }
