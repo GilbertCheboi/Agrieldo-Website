@@ -10,7 +10,7 @@
     justify-content: center;
     align-items: center;
     z-index: 1000;
-    backdrop-filter: blur(3px); /* Slight blur for better contrast */
+    backdrop-filter: blur(3px);
 }
 
 /* Modal Content */
@@ -22,6 +22,9 @@
     max-width: 850px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
     animation: fadeIn 0.3s ease-in-out;
+    max-height: 80vh; /* Limit modal height to 80% of viewport height */
+    display: flex;
+    flex-direction: column;
 }
 
 /* Heading */
@@ -58,11 +61,18 @@ h2 {
     width: 160px;
 }
 
+/* Scrollable Table Container */
+.table-container {
+    max-height: 50vh; /* Limit table height to allow scrolling */
+    overflow-y: auto; /* Enable vertical scrolling */
+    margin-top: 15px;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on mobile */
+}
+
 /* Table */
 .milk-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 15px;
 }
 
 .milk-table th, .milk-table td {
@@ -75,6 +85,9 @@ h2 {
     background-color: #ffa500;
     color: white;
     font-weight: bold;
+    position: sticky; /* Keep headers fixed at the top */
+    top: 0;
+    z-index: 1; /* Ensure headers stay above table content */
 }
 
 /* Table Input Fields */
@@ -128,6 +141,7 @@ h2 {
         width: 95%;
         max-width: 600px;
         padding: 15px;
+        max-height: 85vh; /* Slightly taller on smaller screens */
     }
 
     .global-controls {
@@ -138,6 +152,10 @@ h2 {
     .global-controls select, 
     .global-controls input {
         width: 100%;
+    }
+
+    .table-container {
+        max-height: 45vh; /* Adjust for smaller screens */
     }
 
     .milk-table th, .milk-table td {
