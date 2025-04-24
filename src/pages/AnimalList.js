@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Sun, Moon, ArrowLeft } from "lucide-react";
-import Slider from "../components/ Sidebar";
+import Slider from "../components/ Sidebar"
 import { fetchAnimals } from "../services/api";
+import LivestockSummary from "../components/LivestockSummary";
 
 const calculateAgeInMonths = (dob) => {
   const birthDate = new Date(dob);
@@ -20,11 +21,19 @@ export default function AnimalList() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Extract farmId from URL query parameters
+  const params = new URLSearchParams(location.search);
+  const farmId = params.get("farmId");
+
   useEffect(() => {
+    // Redirect to dashboard if farmId is missing
+    if (!farmId) {
+      navigate("/dashboard");
+      return;
+    }
+
     const loadAnimals = async () => {
       try {
-        const params = new URLSearchParams(location.search);
-        const farmId = params.get("farmId");
         const data = await fetchAnimals({ farmId });
         console.log("Fetched Animals:", data);
         setAnimals(data);
@@ -40,26 +49,25 @@ export default function AnimalList() {
         else if (isSick === "true") setFilter("Sick");
       } catch (error) {
         console.error("Failed to load animals:", error);
-        setError("Failed to load animals");
+        setError("Failed to load animals. Please try again.");
         setLoading(false);
       }
     };
     loadAnimals();
-  }, [location.search]);
+  }, [location.search, farmId, navigate]);
 
   const handleFilterChange = (selectedFilter) => {
     setFilter(selectedFilter);
   };
 
   const filteredAnimals = animals.filter((animal) => {
-    const params = new URLSearchParams(location.search);
     const category = params.get("category");
     const isPregnant = params.get("is_pregnant");
     const isSick = params.get("is_sick");
 
     // Apply URL filters first (override Slider filter if present)
     if (category) return animal.category === category;
-    if (isPregnant === "true") return animal.is_pregnant; // Shows "In-Calf", "Steaming"
+    if (isPregnant === "true") return animal.is_pregnant;
     if (isSick === "true") return animal.is_sick;
 
     // Fallback to Slider filter if no URL params
@@ -73,11 +81,11 @@ export default function AnimalList() {
   });
 
   const handleBackClick = () => {
-    navigate(-1); // Go back to the previous page
+    navigate(-1);
   };
 
   if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
 
   return (
     <div
@@ -86,6 +94,16 @@ export default function AnimalList() {
       }`}
     >
       <Slider onFilterChange={handleFilterChange} />
+
+      {/* Render LivestockSummary */}
+      <div
+        className={`mb-6 p-4 rounded-2xl shadow-md ${
+          darkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+        }`}
+      >
+        <LivestockSummary farmId={farmId} navigate={navigate} />
+      </div>
+
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">My Animals</h1>
         <div className="flex space-x-2">
@@ -109,7 +127,6 @@ export default function AnimalList() {
 
       <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {filteredAnimals.map((animal) => {
-          // Get the latest lactation period
           const currentLactation =
             animal.lactation_periods?.sort(
               (a, b) =>
