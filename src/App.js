@@ -39,6 +39,7 @@ import FeedStore from "./components/FeedStore";
 import "./index.css";
 import "./App.css";
 import Packages from "./pages/packages";
+import LivestockSummary from "./components/LivestockSummary";
 
 // MUI Theme for FABs and Modals
 const theme = createTheme({
@@ -94,7 +95,7 @@ const App = () => {
                   path="/animal/:id"
                   element={<AnimalProfileDashboard />}
                 />
-                <Route path="/animal_list" element={<AnimalList />} />
+                <Route path="/animal_list" element={<LivestockSummary />} />
                 <Route path="/farms" element={<Farms />} />
                 <Route path="/farm-vets" element={<VetStaff />} />
                 <Route path="/dashboard/:farmId" element={<FarmDashboard />} />

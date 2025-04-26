@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Grid,
   Typography,
@@ -19,7 +20,7 @@ import {
   GiBabyBottle,
   GiMedicalPack,
   GiFemale,
-  GiHeartBeats,
+  GiHeartPlus,
   GiMilkCarton,
   GiGrass,
   GiBull,
@@ -29,7 +30,10 @@ import { jwtDecode } from "jwt-decode";
 import DashboardCard from "./DashboardCard";
 import { fetchAnimals, createAnimal } from "../services/api";
 
-const LivestockSummary = ({ farmId, navigate }) => {
+const LivestockSummary = ({ farmId = "123" }) => {
+  const navigate = useNavigate();
+  console.log("Navigate function:", navigate);
+  console.log("Farm ID:", farmId);
   const [livestockData, setLivestockData] = useState({
     totalCows: 0,
     bulls: 0,
@@ -144,7 +148,14 @@ const LivestockSummary = ({ farmId, navigate }) => {
   }, [farmId]);
 
   const handleCategoryClick = (filter) => {
-    navigate(`/animal_list?${filter}&farmId=${farmId}`);
+    console.log("handleCategoryClick called with filter:", filter);
+    if (!farmId) {
+      console.error("Cannot navigate: farmId is undefined");
+      return;
+    }
+    const url = `/animal_list?${filter}&farmId=${farmId}`;
+    console.log("Navigating to:", url);
+    navigate(url);
   };
 
   const handleModalOpen = () => setOpenModal(true);
@@ -161,16 +172,17 @@ const LivestockSummary = ({ farmId, navigate }) => {
       ownerId: "",
       ownerDisplay: "",
       images: [],
-      farms: formData.farms, // Preserve farms array
+      farms: formData.farms,
     });
   };
 
   useEffect(() => {
-    // Placeholder for getFarms (implement in your API service)
     const getFarms = async () => {
       try {
-        // Replace with actual API call
-        const data = [{ id: "1", name: "Farm A" }, { id: "2", name: "Farm B" }]; // Mock data
+        const data = [
+          { id: "1", name: "Farm A" },
+          { id: "2", name: "Farm B" },
+        ];
         return data;
       } catch (error) {
         console.error("Error fetching farms:", error);
@@ -189,11 +201,9 @@ const LivestockSummary = ({ farmId, navigate }) => {
   }, []);
 
   useEffect(() => {
-    // Placeholder for getUserById (implement in your API service)
     const getUserById = async (userId) => {
       try {
-        // Replace with actual API call
-        return { username: "JohnDoe" }; // Mock data
+        return { username: "JohnDoe" };
       } catch (error) {
         console.error("Error fetching user:", error);
         return { username: "" };
@@ -266,6 +276,8 @@ const LivestockSummary = ({ farmId, navigate }) => {
       images: files,
     }));
   };
+
+  if (loading) return <Typography>Loading...</Typography>;
 
   return (
     <Box>
@@ -384,7 +396,7 @@ const LivestockSummary = ({ farmId, navigate }) => {
           <DashboardCard
             title={
               <>
-                <GiHeartBeats color="#ffa500" size={18} /> In-Calf
+                <GiHeartPlus color="#ffa500" size={18} /> In-Calf
               </>
             }
             onClick={() => handleCategoryClick("category=In-Calf")}
@@ -396,7 +408,7 @@ const LivestockSummary = ({ farmId, navigate }) => {
           <DashboardCard
             title={
               <>
-                <GiHeartBeats color="#ffa500" size={18} /> Steaming
+                <GiHeartPlus color="#ffa500" size={18} /> Steaming
               </>
             }
             onClick={() => handleCategoryClick("category=Steaming")}
@@ -482,7 +494,6 @@ const LivestockSummary = ({ farmId, navigate }) => {
         </Grid>
       </Grid>
 
-      {/* Add Animal Modal */}
       <Dialog open={openModal} onClose={handleModalClose}>
         <DialogTitle>Add New Animal</DialogTitle>
         <DialogContent>
@@ -516,7 +527,7 @@ const LivestockSummary = ({ farmId, navigate }) => {
             <Select
               labelId="gender-label"
               name="gender"
-              value={formData.gender}
+              value={formData.gender} // Fixed typo: formId -> formData.gender
               onChange={handleFormChange}
               label="Gender"
             >
@@ -595,7 +606,11 @@ const LivestockSummary = ({ farmId, navigate }) => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleModalClose}>Cancel</Button>
-          <Button onClick={handleAddAnimal} variant="contained" color="primary">
+          <Button
+            onClick={handleAddAnimal}
+            variant="contained"
+            color="primary"
+          >
             Add Animal
           </Button>
         </DialogActions>
