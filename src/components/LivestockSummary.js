@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import {
   Grid,
@@ -14,6 +15,7 @@ import {
   InputLabel,
   FormControl,
   Button,
+  CircularProgress,
 } from "@mui/material";
 import {
   GiCow,
@@ -28,12 +30,10 @@ import {
 import { AiOutlinePlus } from "react-icons/ai";
 import { jwtDecode } from "jwt-decode";
 import DashboardCard from "./DashboardCard";
-import { fetchAnimals, createAnimal } from "../services/api";
+import { fetchAnimals, createAnimal, getFarms } from "../services/api";
 
-const LivestockSummary = ({ farmId = "123" }) => {
+const LivestockSummary = ({ farmId }) => {
   const navigate = useNavigate();
-  console.log("Navigate function:", navigate);
-  console.log("Farm ID:", farmId);
   const [livestockData, setLivestockData] = useState({
     totalCows: 0,
     bulls: 0,
@@ -60,153 +60,121 @@ const LivestockSummary = ({ farmId = "123" }) => {
     category: "Calf (0-3 months)",
     tag: "",
     breed: "",
-    farm: "",
+    farm: farmId,
     ownerId: "",
     ownerDisplay: "",
     images: [],
     farms: [],
   });
+  const [formErrors, setFormErrors] = useState({});
 
-  useEffect(() => {
-    const loadLivestockData = async () => {
-      try {
-        const animals = await fetchAnimals({ farmId });
-        const counts = {
-          totalCows: animals.length,
-          bulls: 0,
-          heifers: 0,
-          calves: 0,
-          weanerStage1: 0,
-          weanerStage2: 0,
-          yearlings: 0,
-          bulling: 0,
-          inCalf: 0,
-          steaming: 0,
-          earlyLactating: 0,
-          midLactating: 0,
-          lateLactating: 0,
-          dry: 0,
-          sickCows: 0,
-        };
-
-        animals.forEach((animal) => {
-          switch (animal.category) {
-            case "Bull":
-              counts.bulls += 1;
-              break;
-            case "Heifer":
-              counts.heifers += 1;
-              break;
-            case "Calf (0-3 months)":
-              counts.calves += 1;
-              break;
-            case "Weaner Stage 1 (3-6 months)":
-              counts.weanerStage1 += 1;
-              break;
-            case "Weaner Stage 2 (6-9 months)":
-              counts.weanerStage2 += 1;
-              break;
-            case "Yearling (9-12 months)":
-              counts.yearlings += 1;
-              break;
-            case "Bulling (12-15 months)":
-              counts.bulling += 1;
-              break;
-            case "In-Calf":
-              counts.inCalf += 1;
-              break;
-            case "Steaming":
-              counts.steaming += 1;
-              break;
-            case "Early Lactating":
-              counts.earlyLactating += 1;
-              break;
-            case "Mid Lactating":
-              counts.midLactating += 1;
-              break;
-            case "Late Lactating":
-              counts.lateLactating += 1;
-              break;
-            case "Dry":
-              counts.dry += 1;
-              break;
-            default:
-              break;
-          }
-          if (animal.is_sick) counts.sickCows += 1;
-        });
-
-        setLivestockData(counts);
-        setLoading(false);
-      } catch (error) {
-        console.error("Failed to load livestock data:", error);
-        setLoading(false);
-      }
-    };
-
-    loadLivestockData();
-  }, [farmId]);
-
-  const handleCategoryClick = (filter) => {
-    console.log("handleCategoryClick called with filter:", filter);
+  const loadLivestockData = useCallback(async () => {
     if (!farmId) {
-      console.error("Cannot navigate: farmId is undefined");
+      setLoading(false);
       return;
     }
-    const url = `/animal_list?${filter}&farmId=${farmId}`;
-    console.log("Navigating to:", url);
-    navigate(url);
-  };
+    try {
+      const animals = await fetchAnimals({ farmId });
+      const counts = {
+        totalCows: animals.length,
+        bulls: 0,
+        heifers: 0,
+        calves: 0,
+        weanerStage1: 0,
+        weanerStage2: 0,
+        yearlings: 0,
+        bulling: 0,
+        inCalf: 0,
+        steaming: 0,
+        earlyLactating: 0,
+        midLactating: 0,
+        lateLactating: 0,
+        dry: 0,
+        sickCows: 0,
+      };
 
-  const handleModalOpen = () => setOpenModal(true);
-  const handleModalClose = () => {
-    setOpenModal(false);
-    setFormData({
-      name: "",
-      gender: "Female",
-      dob: "",
-      category: "Calf (0-3 months)",
-      tag: "",
-      breed: "",
-      farm: "",
-      ownerId: "",
-      ownerDisplay: "",
-      images: [],
-      farms: formData.farms,
-    });
-  };
+      animals.forEach((animal) => {
+        if (animal.is_sick) counts.sickCows += 1;
+        switch (animal.category) {
+          case "Bull":
+            counts.bulls += 1;
+            break;
+          case "Heifer":
+            counts.heifers += 1;
+            break;
+          case "Calf (0-3 months)":
+            counts.calves += 1;
+            break;
+          case "Weaner Stage 1 (3-6 months)":
+            counts.weanerStage1 += 1;
+            break;
+          case "Weaner Stage 2 (6-9 months)":
+            counts.weanerStage2 += 1;
+            break;
+          case "Yearling (9-12 months)":
+            counts.yearlings += 1;
+            break;
+          case "Bulling (12-15 months)":
+            counts.bulling += 1;
+            break;
+          case "In-Calf":
+            counts.inCalf += 1;
+            break;
+          case "Steaming":
+            counts.steaming += 1;
+            break;
+          case "Early Lactating":
+            counts.earlyLactating += 1;
+            break;
+          case "Mid Lactating":
+            counts.midLactating += 1;
+            break;
+          case "Late Lactating":
+            counts.lateLactating += 1;
+            break;
+          case "Dry":
+            counts.dry += 1;
+            break;
+          default:
+            break;
+        }
+      });
+
+      setLivestockData(counts);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      alert("Failed to load livestock data. Please try again.");
+    }
+  }, [farmId]);
 
   useEffect(() => {
-    const getFarms = async () => {
+    loadLivestockData();
+  }, [loadLivestockData]);
+
+  useEffect(() => {
+    const fetchFarms = async () => {
       try {
-        const data = [
-          { id: "1", name: "Farm A" },
-          { id: "2", name: "Farm B" },
-        ];
-        return data;
+        const farmsData = await getFarms();
+        setFormData((prevState) => ({
+          ...prevState,
+          farms: farmsData,
+          farm: farmId && farmsData.some((f) => f.id === farmId) ? farmId : farmsData[0]?.id || "",
+        }));
       } catch (error) {
-        console.error("Error fetching farms:", error);
-        return [];
+        alert("Failed to load farms. Please try again.");
       }
     };
 
-    getFarms()
-      .then((data) => {
-        setFormData((prevState) => ({
-          ...prevState,
-          farms: data,
-        }));
-      })
-      .catch((error) => console.error("Error fetching farms:", error));
-  }, []);
+    fetchFarms();
+  }, [farmId]);
 
   useEffect(() => {
     const getUserById = async (userId) => {
       try {
-        return { username: "JohnDoe" };
+        return { username: "JohnDoe" }; // Replace with actual API call
       } catch (error) {
-        console.error("Error fetching user:", error);
-        return { username: "" };
+        throw new Error("Failed to fetch user data");
       }
     };
 
@@ -214,35 +182,105 @@ const LivestockSummary = ({ farmId = "123" }) => {
     if (token) {
       try {
         const decoded = jwtDecode(token);
+        const currentTime = Date.now() / 1000;
+        if (decoded.exp < currentTime) {
+          alert("Session expired. Please log in again.");
+          return;
+        }
         const userId = decoded.user_id;
-        console.log("Decoded userId:", userId);
-
         getUserById(userId)
           .then((data) => {
-            console.log("Fetched user data:", data);
             setFormData((prevState) => ({
               ...prevState,
               ownerId: userId,
               ownerDisplay: data.username,
             }));
           })
-          .catch((error) => {
-            console.error("Error fetching user data:", error);
+          .catch(() => {
+            alert("Failed to fetch user data. Please try again.");
           });
       } catch (error) {
-        console.error("Error decoding token:", error);
+        alert("Invalid session. Please log in again.");
       }
     }
   }, []);
 
+  const handleCategoryClick = (filter) => {
+    if (!farmId) {
+      alert("Cannot navigate: Farm ID is missing.");
+      return;
+    }
+    const url = `/animal_list?${filter}&farmId=${farmId}`;
+    navigate(url);
+  };
+
+  const handleModalOpen = () => setOpenModal(true);
+  const handleModalClose = () => {
+    setOpenModal(false);
+    setFormErrors({});
+    setFormData((prevState) => ({
+      ...prevState,
+      name: "",
+      gender: "Female",
+      dob: "",
+      category: "Calf (0-3 months)",
+      tag: "",
+      breed: "",
+      farm: farmId,
+      images: [],
+    }));
+  };
+
   const handleFormChange = (event) => {
-    setFormData({
-      ...formData,
-      [event.target.name]: event.target.value,
+    const { name, value } = event.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    setFormErrors((prev) => ({ ...prev, [name]: "" }));
+  };
+
+  const handleImageChange = (event) => {
+    const files = Array.from(event.target.files);
+    const validImageTypes = ["image/jpeg", "image/png"];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    const validFiles = files.filter((file) => {
+      if (!validImageTypes.includes(file.type)) {
+        alert(`${file.name} is not a valid image type (JPEG/PNG only).`);
+        return false;
+      }
+      if (file.size > maxSize) {
+        alert(`${file.name} exceeds the 5MB size limit.`);
+        return false;
+      }
+      return true;
     });
+
+    setFormData((prevData) => ({
+      ...prevData,
+      images: validFiles,
+    }));
+  };
+
+  const validateForm = () => {
+    const errors = {};
+    if (!formData.name) errors.name = "Animal name is required";
+    if (!formData.tag) errors.tag = "Tag is required";
+    if (!formData.breed) errors.breed = "Breed is required";
+    if (!formData.dob) errors.dob = "Date of birth is required";
+    if (!formData.farm || !farmId || !formData.farms.some((f) => f.id === formData.farm)) {
+      errors.farm = "A valid farm is required";
+    }
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleAddAnimal = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
     try {
       const payload = new FormData();
       payload.append("tag", formData.tag);
@@ -250,34 +288,34 @@ const LivestockSummary = ({ farmId = "123" }) => {
       payload.append("breed", formData.breed);
       payload.append("dob", formData.dob);
       payload.append("gender", formData.gender);
+      payload.append("category", formData.category);
       payload.append("farm", formData.farm);
       payload.append("owner", formData.ownerId);
-      if (formData.images && formData.images.length > 0) {
+      if (formData.images.length > 0) {
         formData.images.forEach((file) => {
           payload.append("images", file);
         });
       }
 
-      for (const pair of payload.entries()) {
-        console.log(`${pair[0]}:`, pair[1]);
-      }
-
       await createAnimal(payload);
       handleModalClose();
+      loadLivestockData(); // Refresh livestock data
     } catch (error) {
-      console.error("Failed to add animal:", error);
+      alert("Failed to add animal. Please try again.");
     }
   };
 
-  const handleImageChange = (event) => {
-    const files = Array.from(event.target.files);
-    setFormData((prevData) => ({
-      ...prevData,
-      images: files,
-    }));
-  };
+  if (!farmId) {
+    return <Typography color="error">Farm ID is required</Typography>;
+  }
 
-  if (loading) return <Typography>Loading...</Typography>;
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" mt={4}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box>
@@ -505,6 +543,8 @@ const LivestockSummary = ({ farmId = "123" }) => {
             fullWidth
             value={formData.name}
             onChange={handleFormChange}
+            error={!!formErrors.name}
+            helperText={formErrors.name}
           />
           <TextField
             margin="dense"
@@ -513,6 +553,8 @@ const LivestockSummary = ({ farmId = "123" }) => {
             fullWidth
             value={formData.tag}
             onChange={handleFormChange}
+            error={!!formErrors.tag}
+            helperText={formErrors.tag}
           />
           <TextField
             margin="dense"
@@ -521,13 +563,15 @@ const LivestockSummary = ({ farmId = "123" }) => {
             fullWidth
             value={formData.breed}
             onChange={handleFormChange}
+            error={!!formErrors.breed}
+            helperText={formErrors.breed}
           />
           <FormControl fullWidth margin="dense">
             <InputLabel id="gender-label">Gender</InputLabel>
             <Select
               labelId="gender-label"
               name="gender"
-              value={formData.gender} // Fixed typo: formId -> formData.gender
+              value={formData.gender}
               onChange={handleFormChange}
               label="Gender"
             >
@@ -544,6 +588,8 @@ const LivestockSummary = ({ farmId = "123" }) => {
             value={formData.dob}
             onChange={handleFormChange}
             InputLabelProps={{ shrink: true }}
+            error={!!formErrors.dob}
+            helperText={formErrors.dob}
           />
           <FormControl fullWidth margin="dense">
             <InputLabel id="category-label">Category</InputLabel>
@@ -577,7 +623,7 @@ const LivestockSummary = ({ farmId = "123" }) => {
               <MenuItem value="Bull">Bull</MenuItem>
             </Select>
           </FormControl>
-          <FormControl fullWidth margin="dense">
+          <FormControl fullWidth margin="dense" error={!!formErrors.farm}>
             <InputLabel id="farm-label">Farm</InputLabel>
             <Select
               labelId="farm-label"
@@ -585,13 +631,23 @@ const LivestockSummary = ({ farmId = "123" }) => {
               value={formData.farm}
               onChange={handleFormChange}
               label="Farm"
+              disabled={formData.farms.length === 0}
             >
-              {formData.farms.map((farm) => (
-                <MenuItem key={farm.id} value={farm.id}>
-                  {farm.name}
-                </MenuItem>
-              ))}
+              {formData.farms.length === 0 ? (
+                <MenuItem value="">No farms available</MenuItem>
+              ) : (
+                formData.farms.map((farm) => (
+                  <MenuItem key={farm.id} value={farm.id}>
+                    {farm.name}
+                  </MenuItem>
+                ))
+              )}
             </Select>
+            {formErrors.farm && (
+              <Typography color="error" variant="caption">
+                {formErrors.farm}
+              </Typography>
+            )}
           </FormControl>
           <TextField
             margin="dense"
@@ -603,6 +659,11 @@ const LivestockSummary = ({ farmId = "123" }) => {
             onChange={handleImageChange}
             InputLabelProps={{ shrink: true }}
           />
+          {formData.images.length > 0 && (
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              Selected images: {formData.images.map((file) => file.name).join(", ")}
+            </Typography>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleModalClose}>Cancel</Button>
@@ -610,6 +671,7 @@ const LivestockSummary = ({ farmId = "123" }) => {
             onClick={handleAddAnimal}
             variant="contained"
             color="primary"
+            disabled={formData.farms.length === 0 || !formData.farm}
           >
             Add Animal
           </Button>
@@ -617,6 +679,10 @@ const LivestockSummary = ({ farmId = "123" }) => {
       </Dialog>
     </Box>
   );
+};
+
+LivestockSummary.propTypes = {
+  farmId: PropTypes.string.isRequired,
 };
 
 export default LivestockSummary;
