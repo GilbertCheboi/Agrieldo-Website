@@ -24,13 +24,13 @@ import {
   LocalHospital,
   Store,
 } from "@mui/icons-material";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 // Menu items mapping by farm type
 const menuItemsByFarmType = {
   Dairy: [
     { to: "/dashboard", text: "Dashboard", icon: <Dashboard /> },
-    { to: "/animal_list", text: "Livestock Management", icon: <Agriculture /> },
+    { to: "/animal-list", text: "Livestock Management", icon: <Agriculture />, appendFarmId: true },
     { to: "/financials", text: "Financials", icon: <MonetizationOn /> },
     { to: "/farms", text: "Farms", icon: <Store /> },
     { to: "/farm-staff", text: "Farm Staff", icon: <People /> },
@@ -43,7 +43,7 @@ const menuItemsByFarmType = {
   ],
   Sheep: [
     { to: "/dashboard", text: "Dashboard", icon: <Dashboard /> },
-    { to: "/animal_list", text: "Livestock Management", icon: <Agriculture /> },
+    { to: "/animal_list", text: "Livestock Management", icon: <Agriculture />, appendFarmId: true },
     { to: "/financials", text: "Financials", icon: <MonetizationOn /> },
     { to: "/farms", text: "Farms", icon: <Store /> },
     { to: "/farm-staff", text: "Farm Staff", icon: <People /> },
@@ -70,8 +70,9 @@ const menuItemsByFarmType = {
   ],
 };
 
-const Slider = ({ farmType = "Default" }) => {
+const Slider = ({ farmType = "Default", farmId }) => {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
 
   const toggleDrawer = () => {
     setOpen(!open);
@@ -85,9 +86,9 @@ const Slider = ({ farmType = "Default" }) => {
   const menuItems =
     menuItemsByFarmType[normalizedFarmType] || menuItemsByFarmType.Default;
 
-  // Debug: Log farmType and menu items
-  console.log(`Slider farmType: ${farmType}, Normalized: ${normalizedFarmType}`);
-  console.log("Menu items:", menuItems.map((item) => item.text));
+  // Debug: Log farmType, farmId, and menu items
+  console.log(`Slider: farmType: ${farmType}, Normalized: ${normalizedFarmType}, farmId: ${farmId}`);
+  console.log("Slider: Menu items:", menuItems.map((item) => item.text));
 
   return (
     <>
@@ -118,7 +119,7 @@ const Slider = ({ farmType = "Default" }) => {
             variant="caption"
             sx={{ color: "#888", mb: 2, ml: 2, display: "block" }}
           >
-            Current Type: {normalizedFarmType}
+            Current Type: {normalizedFarmType}, Farm ID: {farmId || "None"}
           </Typography>
           <Divider sx={{ mb: 2 }} />
           <List>
@@ -126,9 +127,15 @@ const Slider = ({ farmType = "Default" }) => {
               <React.Fragment key={item.to}>
                 <ListItem
                   button
-                  component={Link}
-                  to={item.to}
-                  onClick={toggleDrawer}
+                  onClick={() => {
+                    console.log(`Slider: Navigating to ${item.text} with to: ${item.to}, farmId: ${farmId}`);
+                    if (item.appendFarmId && !farmId) {
+                      console.warn(`Slider: farmId is undefined for ${item.text}. Navigating without farmId.`);
+                    }
+                    const to = item.appendFarmId && farmId ? `${item.to}?farmId=${farmId}` : item.to;
+                    navigate(to);
+                    toggleDrawer();
+                  }}
                   sx={{
                     borderRadius: "8px",
                     mb: 0.5,

@@ -66,27 +66,27 @@ const FarmDashboard = () => {
   useEffect(() => {
     const fetchFarmDetails = async () => {
       try {
-        console.log(`fetchFarmDetails started, farmId: ${farmId}`);
+        console.log(`FarmDashboard: fetchFarmDetails started, farmId: ${farmId}`);
         setError(null);
         const farms = await getFarms();
-        console.log("Raw farms data from API in FarmDashboard:", JSON.stringify(farms, null, 2));
+        console.log("FarmDashboard: Raw farms data from API:", JSON.stringify(farms, null, 2));
         const selectedFarm = farms.find(f => f.id === parseInt(farmId));
-        console.log("Selected farm:", JSON.stringify(selectedFarm, null, 2));
+        console.log("FarmDashboard: Selected farm:", JSON.stringify(selectedFarm, null, 2));
         setFarm(selectedFarm);
         if (selectedFarm) {
           const normalizedType =
             selectedFarm.type.toLowerCase() === "dairy" ? "Dairy" :
             selectedFarm.type.toLowerCase() === "sheep" ? "Sheep" :
             selectedFarm.type.toLowerCase() === "crop" ? "Crop" : "Default";
-          console.log(`Setting farmType to ${normalizedType}`);
+          console.log(`FarmDashboard: Setting farmType to ${normalizedType}`);
           setFarmType(normalizedType);
           localStorage.setItem("selectedFarmType", normalizedType);
         } else {
-          console.warn(`No farm found for farmId: ${farmId}`);
+          console.warn(`FarmDashboard: No farm found for farmId: ${farmId}`);
           setFarmType(localStorage.getItem("selectedFarmType") || "Default");
         }
       } catch (error) {
-        console.error("Failed to fetch farm details:", error.response?.data || error.message);
+        console.error("FarmDashboard: Failed to fetch farm details:", error.response?.data || error.message);
         setError(error.message);
         setFarmType(localStorage.getItem("selectedFarmType") || "Default");
       }
@@ -94,9 +94,8 @@ const FarmDashboard = () => {
     fetchFarmDetails();
   }, [farmId]);
 
-  // Debug farmType changes
   useEffect(() => {
-    console.log(`farmType updated to: ${farmType}`);
+    console.log(`FarmDashboard: farmType updated to: ${farmType}`);
   }, [farmType]);
 
   const renderDashboard = () => {
@@ -123,7 +122,8 @@ const FarmDashboard = () => {
         background: "linear-gradient(135deg, #f4f6f8 0%, #e9ecef 100%)",
       }}
     >
-      <Slider key={farmType} farmType={farmType} />
+      {/* Pass farmId to Slider */}
+      <Slider key={farmType} farmType={farmType} farmId={farmId} />
       <Box sx={{ flexGrow: 1, p: { xs: 2, md: 3, lg: 4 } }}>
         <Container maxWidth="xl">
           <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>

@@ -95,7 +95,7 @@ const App = () => {
                   path="/animal/:id"
                   element={<AnimalProfileDashboard />}
                 />
-                <Route path="/animal_list" element={<AnimalList />} />
+                <Route path="/animal-list" element={<AnimalList />} />
                 <Route path="/farms" element={<Farms />} />
                 <Route path="/farm-vets" element={<VetStaff />} />
                 <Route path="/dashboard/:farmId" element={<FarmDashboard />} />
