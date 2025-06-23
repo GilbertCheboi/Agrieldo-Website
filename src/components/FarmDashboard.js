@@ -1,4 +1,3 @@
-// src/components/FarmDashboard.js
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -8,9 +7,9 @@ import {
   Container,
   Button,
 } from "@mui/material";
-import Slider from "./ Sidebar";
+import Slider from "./ Sidebar"; // Fixed typo in import
 import SheepDashboard from "../pages/SheepDashboard";
-import DairyDashboard from "./DairyDashboard"; // Import the new DairyDashboard
+import DairyDashboard from "./DairyDashboard";
 import { getFarms, fetchCropData } from "../services/api";
 
 const CropDashboard = ({ farmId }) => {
@@ -59,21 +58,48 @@ const FarmDashboard = () => {
   const { farmId } = useParams();
   const navigate = useNavigate();
   const [farm, setFarm] = useState(null);
+  const [error, setError] = useState(null);
+  const [farmType, setFarmType] = useState(
+    localStorage.getItem("selectedFarmType") || "Default"
+  );
 
   useEffect(() => {
     const fetchFarmDetails = async () => {
       try {
+        console.log(`FarmDashboard: fetchFarmDetails started, farmId: ${farmId}`);
+        setError(null);
         const farms = await getFarms();
+        console.log("FarmDashboard: Raw farms data from API:", JSON.stringify(farms, null, 2));
         const selectedFarm = farms.find(f => f.id === parseInt(farmId));
+        console.log("FarmDashboard: Selected farm:", JSON.stringify(selectedFarm, null, 2));
         setFarm(selectedFarm);
+        if (selectedFarm) {
+          const normalizedType =
+            selectedFarm.type.toLowerCase() === "dairy" ? "Dairy" :
+            selectedFarm.type.toLowerCase() === "sheep" ? "Sheep" :
+            selectedFarm.type.toLowerCase() === "crop" ? "Crop" : "Default";
+          console.log(`FarmDashboard: Setting farmType to ${normalizedType}`);
+          setFarmType(normalizedType);
+          localStorage.setItem("selectedFarmType", normalizedType);
+        } else {
+          console.warn(`FarmDashboard: No farm found for farmId: ${farmId}`);
+          setFarmType(localStorage.getItem("selectedFarmType") || "Default");
+        }
       } catch (error) {
-        console.error("Failed to fetch farm details:", error);
+        console.error("FarmDashboard: Failed to fetch farm details:", error.response?.data || error.message);
+        setError(error.message);
+        setFarmType(localStorage.getItem("selectedFarmType") || "Default");
       }
     };
     fetchFarmDetails();
   }, [farmId]);
 
+  useEffect(() => {
+    console.log(`FarmDashboard: farmType updated to: ${farmType}`);
+  }, [farmType]);
+
   const renderDashboard = () => {
+    if (error) return <Typography color="error">Error: {error}</Typography>;
     if (!farm) return <Typography>Loading...</Typography>;
     switch (farm.type) {
       case "Dairy":
@@ -96,7 +122,8 @@ const FarmDashboard = () => {
         background: "linear-gradient(135deg, #f4f6f8 0%, #e9ecef 100%)",
       }}
     >
-      <Slider />
+      {/* Pass farmId to Slider */}
+      <Slider key={farmType} farmType={farmType} farmId={farmId} />
       <Box sx={{ flexGrow: 1, p: { xs: 2, md: 3, lg: 4 } }}>
         <Container maxWidth="xl">
           <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>

@@ -3,8 +3,9 @@ import { toast } from "react-toastify";
 
 // Base API instance
 const API = axios.create({
-  baseURL: "http://127.0.0.1:8000/api/", // Update the base URL to match your backend
-  // baseURL: "http://207.154.253.97:8000/api/", // Alternative URL commented out
+  //baseURL: "http://207.154.253.97:8000/api/", // Update the base URL to match your backend
+  baseURL: "https://api.agrieldo.com/api/", // Alternative URL commented out
+  timeout: 10000, // Try adding this
 });
 
 // Add a request interceptor to include the JWT token in headers
@@ -12,6 +13,7 @@ API.interceptors.request.use(
   (config) => {
     console.log("Sending request to:", config.url); // Log the request URL
     const token = localStorage.getItem("accessToken");
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
       console.log("Using token:", token); // Log the token being used
@@ -820,6 +822,56 @@ export const updateHealthRecord = async (recordId, data) => {
   } catch (error) {
     console.error(
       "Error updating health record:",
+      error.response ? error.response.data : error.message
+    );
+    throw error;
+  }
+};
+export const addFeedManagement = async (animalId, data) => {
+  return API.post(
+    "animals/feed-management/",
+    { animal: animalId, ...data },
+    getAuthHeaders()
+  );
+};
+
+// Note: No updateFeedManagement provided yet; add if needed
+export const updateFeedManagement = async (recordId, data) => {
+  const headers = getAuthHeaders();
+  console.log("Auth Headers:", headers);
+  try {
+    const response = await API.patch(
+      `animals/feed-management/${recordId}/`,
+      {
+        date: data.date,
+        type: data.type,
+        quantity: data.quantity,
+        cost_per_unit: data.cost_per_unit,
+      },
+      headers
+    );
+    console.log("Update feed management response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error updating feed management:",
+      error.response ? error.response.data : error.message
+    );
+    throw error;
+  }
+};
+
+export const getFinancialDetails = async (animalId) => {
+  try {
+    const response = await API.get(
+      `financial/?animal=${animalId}`,
+      getAuthHeaders()
+    );
+    console.log("Fetched Financial Details:", response.data);
+    return response.data; // Might return a list; adjust in frontend if needed
+  } catch (error) {
+    console.error(
+      "Error fetching financial details:",
       error.response ? error.response.data : error.message
     );
     throw error;

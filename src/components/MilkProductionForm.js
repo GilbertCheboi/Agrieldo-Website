@@ -7,7 +7,7 @@ const MilkProductionForm = ({ onClose }) => {
     const [entries, setEntries] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [session, setSession] = useState("MORNING");
-    const [milkPrice, setMilkPrice] = useState(''); // Start empty
+    const [milkPrice, setMilkPrice] = useState('');
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
 
     useEffect(() => {
@@ -20,12 +20,12 @@ const MilkProductionForm = ({ onClose }) => {
                     animal_name: animal.name,
                     date: new Date().toISOString().split('T')[0],
                     session: "MORNING",
-                    milk_yield: '', // Start empty
-                    feed_consumption: '', // Start empty
-                    scc: '', // Start empty
-                    fat_percentage: '', // Start empty
-                    protein_percentage: '', // Start empty
-                    milk_price_per_liter: '', // Start empty
+                    milk_yield: '',
+                    feed_consumption: '',
+                    scc: '',
+                    fat_percentage: '',
+                    protein_percentage: '',
+                    milk_price_per_liter: '',
                 })));
             } catch (error) {
                 console.error("❌ Error fetching lactating animals:", error);
@@ -39,14 +39,14 @@ const MilkProductionForm = ({ onClose }) => {
             ...entry,
             date: date,
             session: session,
-            milk_price_per_liter: milkPrice, // Update globally if set
+            milk_price_per_liter: milkPrice,
         })));
     }, [date, session, milkPrice]);
 
     const handleChange = (index, field, value) => {
         setEntries(prevEntries => {
             const updatedEntries = [...prevEntries];
-            updatedEntries[index][field] = value; // Keep as string while typing
+            updatedEntries[index][field] = value;
             return updatedEntries;
         });
     };
@@ -76,7 +76,7 @@ const MilkProductionForm = ({ onClose }) => {
     
         try {
             console.log("📦 Submitting the following data:", JSON.stringify(cleanedEntries, null, 2));
-            await addMilkProductionRecords(cleanedEntries); // Sends all animals
+            await addMilkProductionRecords(cleanedEntries);
             alert('✅ Milk production records added successfully!');
             onClose();
             window.location.reload();
@@ -105,81 +105,83 @@ const MilkProductionForm = ({ onClose }) => {
                     <input
                         type="number"
                         value={milkPrice}
-                        onChange={(e) => setMilkPrice(e.target.value)} // Keep as string while typing
+                        onChange={(e) => setMilkPrice(e.target.value)}
                         min="0"
                         step="0.01"
                     />
                 </div>
                 <form onSubmit={handleSubmit}>
-                    <table className="milk-table">
-                        <thead>
-                            <tr>
-                                <th>Animal</th>
-                                <th>Milk Yield (L)</th>
-                                <th>Feed Consumption</th>
-                                <th>SCC</th>
-                                <th>Fat %</th>
-                                <th>Protein %</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {entries.map((entry, index) => (
-                                <tr key={index}>
-                                    <td>{entry.animal_name}</td>
-                                    <td>
-                                        <input
-                                            type="number"
-                                            value={entry.milk_yield}
-                                            onChange={(e) => handleChange(index, 'milk_yield', e.target.value)}
-                                            required
-                                            min="0"
-                                            step="0.1"
-                                        />
-                                    </td>
-                                    <td>
-                                        <input
-                                            type="number"
-                                            value={entry.feed_consumption}
-                                            onChange={(e) => handleChange(index, 'feed_consumption', e.target.value)}
-                                            required
-                                            min="0"
-                                            step="0.1"
-                                        />
-                                    </td>
-                                    <td>
-                                        <input
-                                            type="number"
-                                            value={entry.scc}
-                                            onChange={(e) => handleChange(index, 'scc', e.target.value)}
-                                            required
-                                            min="0"
-                                            step="1"
-                                        />
-                                    </td>
-                                    <td>
-                                        <input
-                                            type="number"
-                                            step="0.1"
-                                            value={entry.fat_percentage}
-                                            onChange={(e) => handleChange(index, 'fat_percentage', e.target.value)}
-                                            required
-                                            min="0"
-                                        />
-                                    </td>
-                                    <td>
-                                        <input
-                                            type="number"
-                                            step="0.1"
-                                            value={entry.fat_percentage}
-                                            onChange={(e) => handleChange(index, 'protein_percentage', e.target.value)}
-                                            required
-                                            min="0"
-                                        />
-                                    </td>
+                    <div className="table-container">
+                        <table className="milk-table">
+                            <thead>
+                                <tr>
+                                    <th>Animal</th>
+                                    <th>Milk Yield (L)</th>
+                                    <th>Feed Consumption</th>
+                                    <th>SCC</th>
+                                    <th>Fat %</th>
+                                    <th>Protein %</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {entries.map((entry, index) => (
+                                    <tr key={index}>
+                                        <td>{entry.animal_name}</td>
+                                        <td>
+                                            <input
+                                                type="number"
+                                                value={entry.milk_yield}
+                                                onChange={(e) => handleChange(index, 'milk_yield', e.target.value)}
+                                                required
+                                                min="0"
+                                                step="0.1"
+                                            />
+                                        </td>
+                                        <td>
+                                            <input
+                                                type="number"
+                                                value={entry.feed_consumption}
+                                                onChange={(e) => handleChange(index, 'feed_consumption', e.target.value)}
+                                                required
+                                                min="0"
+                                                step="0.1"
+                                            />
+                                        </td>
+                                        <td>
+                                            <input
+                                                type="number"
+                                                value={entry.scc}
+                                                onChange={(e) => handleChange(index, 'scc', e.target.value)}
+                                                required
+                                                min="0"
+                                                step="1"
+                                            />
+                                        </td>
+                                        <td>
+                                            <input
+                                                type="number"
+                                                step="0.1"
+                                                value={entry.fat_percentage}
+                                                onChange={(e) => handleChange(index, 'fat_percentage', e.target.value)}
+                                                required
+                                                min="0"
+                                            />
+                                        </td>
+                                        <td>
+                                            <input
+                                                type="number"
+                                                step="0.1"
+                                                value={entry.protein_percentage} // Fixed bug: was using fat_percentage
+                                                onChange={(e) => handleChange(index, 'protein_percentage', e.target.value)}
+                                                required
+                                                min="0"
+                                            />
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                     <div className="modal-actions">
                         <button type="button" onClick={onClose} className="cancel-btn">Cancel</button>
                         <button type="submit" className="submit-btn" disabled={isSubmitting}>

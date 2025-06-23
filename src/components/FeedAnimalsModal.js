@@ -23,7 +23,7 @@ const categories = [
 ];
 
 const FeedAnimalsModal = ({ open, onClose, onFeedUpdated }) => {
-  const [formData, setFormData] = useState({ category: '', plan_id: '' });
+  const [formData, setFormData] = useState({ category: '', plan_id: '', feeding_date: '' });
   const [feedingPlans, setFeedingPlans] = useState([]);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -46,7 +46,7 @@ const FeedAnimalsModal = ({ open, onClose, onFeedUpdated }) => {
     };
     if (open) {
       fetchPlans();
-      setFormData({ category: '', plan_id: '' });
+      setFormData({ category: '', plan_id: '', feeding_date: '' });
     }
   }, [open]);
 
@@ -64,10 +64,11 @@ const FeedAnimalsModal = ({ open, onClose, onFeedUpdated }) => {
     const dataToSend = {
       category: formData.category,
       plan_id: formData.plan_id,
+      feeding_date: formData.feeding_date,
     };
 
-    if (!dataToSend.category || !dataToSend.plan_id) {
-      setError('Category and feeding plan are required');
+    if (!dataToSend.category || !dataToSend.plan_id || !dataToSend.feeding_date) {
+      setError('Category, feeding plan, and date are required');
       return;
     }
 
@@ -76,7 +77,7 @@ const FeedAnimalsModal = ({ open, onClose, onFeedUpdated }) => {
       const response = await feedAnimals(dataToSend);
       setMessage(response.message);
       onFeedUpdated();
-      setFormData({ category: '', plan_id: '' });
+      setFormData({ category: '', plan_id: '', feeding_date: '' });
       setTimeout(() => onClose(), 1000);
     } catch (error) {
       console.error('API Error:', error.response || error);
@@ -127,6 +128,18 @@ const FeedAnimalsModal = ({ open, onClose, onFeedUpdated }) => {
                 <MenuItem key={plan.id} value={plan.id}>{plan.name}</MenuItem>
               ))}
             </TextField>
+            <TextField
+              type="date"
+              label="Feeding Date"
+              name="feeding_date"
+              value={formData.feeding_date}
+              onChange={handleChange}
+              fullWidth
+              margin="normal"
+              required
+              disabled={loading}
+              InputLabelProps={{ shrink: true }}
+            />
             <Button
               type="submit"
               variant="contained"
