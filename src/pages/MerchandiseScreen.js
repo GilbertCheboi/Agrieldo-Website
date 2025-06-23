@@ -9,7 +9,7 @@ const MerchandiseScreen = () => {
   useEffect(() => {
     // Fetch merchandise data from Django API
     axios
-      .get("https://api.agrieldo.comapi/merchandise/merchandise/") // Replace with the actual API URL
+      .get("http://207.154.253.97:8000api/merchandise/merchandise/") // Replace with the actual API URL
       .then((response) => {
         console.log("Merchandise data:", response.data); // Log the data from the API
         setMerchandise(response.data);

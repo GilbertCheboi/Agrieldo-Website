@@ -1,9 +1,5 @@
-import { useState, useEffect } from 'react';
-import {
-  fetchProduce,
-  fetchOutlets,
-  createInventory,
-} from '../services/api';
+import { useState, useEffect } from "react";
+import { fetchProduce, fetchOutlets, createInventory } from "../services/api";
 import {
   Modal,
   Box,
@@ -12,15 +8,15 @@ import {
   MenuItem,
   Typography,
   Alert,
-} from '@mui/material';
+} from "@mui/material";
 
 const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
   width: 400,
-  bgcolor: 'background.paper',
+  bgcolor: "background.paper",
   boxShadow: 24,
   p: 4,
   borderRadius: 2,
@@ -28,10 +24,10 @@ const style = {
 
 function TransferModal({ open, onClose, onSuccess, storeId }) {
   const [formData, setFormData] = useState({
-    produce_id: '',
-    quantity: '',
-    outlet_id: '',
-    created_at: '', // ✅ NEW FIELD
+    produce_id: "",
+    quantity: "",
+    outlet_id: "",
+    created_at: "", // ✅ NEW FIELD
   });
 
   const [produceList, setProduceList] = useState([]);
@@ -47,14 +43,14 @@ function TransferModal({ open, onClose, onSuccess, storeId }) {
         setProduceList(produceRes);
         setOutlets(outletsRes);
 
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
-          produce_id: produceRes.length > 0 ? produceRes[0].id : '',
-          outlet_id: outletsRes.length > 0 ? outletsRes[0].id : '',
+          produce_id: produceRes.length > 0 ? produceRes[0].id : "",
+          outlet_id: outletsRes.length > 0 ? outletsRes[0].id : "",
         }));
       } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Failed to load produce or outlets. Please try again.');
+        console.error("Error fetching data:", err);
+        setError("Failed to load produce or outlets. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -73,14 +69,14 @@ function TransferModal({ open, onClose, onSuccess, storeId }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    console.log("form data ", formData);
     if (
       !formData.produce_id ||
       !formData.quantity ||
       !formData.outlet_id ||
       !storeId
     ) {
-      setError('All fields are required, including store ID.');
+      setError("All fields are required, including store ID.");
       return;
     }
 
@@ -101,8 +97,8 @@ function TransferModal({ open, onClose, onSuccess, storeId }) {
       onSuccess();
       onClose();
     } catch (err) {
-      console.error('Transfer error:', err);
-      setError(err.message || 'Failed to transfer stock. Please try again.');
+      console.error("Transfer error:", err);
+      setError(err.message || "Failed to transfer stock. Please try again.");
     }
   };
 
@@ -132,7 +128,7 @@ function TransferModal({ open, onClose, onSuccess, storeId }) {
             margin="normal"
             required
           >
-            {produceList.map(item => (
+            {produceList.map((item) => (
               <MenuItem key={item.id} value={item.id}>
                 {item.name}
               </MenuItem>
@@ -161,7 +157,7 @@ function TransferModal({ open, onClose, onSuccess, storeId }) {
             margin="normal"
             required
           >
-            {outlets.map(outlet => (
+            {outlets.map((outlet) => (
               <MenuItem key={outlet.id} value={outlet.id}>
                 {outlet.name}
               </MenuItem>
@@ -181,7 +177,7 @@ function TransferModal({ open, onClose, onSuccess, storeId }) {
             }}
           />
 
-          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+          <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
             <Button onClick={onClose} sx={{ mr: 1 }}>
               Cancel
             </Button>

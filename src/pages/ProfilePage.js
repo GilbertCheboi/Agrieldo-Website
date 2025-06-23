@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const backendURL = "https://api.agrieldo.com"; // Update with your backend URL
+const backendURL = "http://207.154.253.97:8000"; // Update with your backend URL
 
 const ProfilePage = () => {
   const [profile, setProfile] = useState(null);

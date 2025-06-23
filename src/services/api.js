@@ -3,8 +3,8 @@ import { toast } from "react-toastify";
 
 // Base API instance
 const API = axios.create({
-  //baseURL: "http://207.154.253.97:8000/api/", // Update the base URL to match your backend
-  baseURL: "https://api.agrieldo.com/api/", // Alternative URL commented out
+  baseURL: "http://127.0.0.1:8000/api/", // Update the base URL to match your backend
+  // baseURL: "http://207.154.253.97:8000/api/", // Alternative URL commented out
 });
 
 // Add a request interceptor to include the JWT token in headers
@@ -883,6 +883,20 @@ export const fetchStoreInventory = async (
     throw error;
   }
 };
+
+// export const fetchStoreInventory = async () => {
+//   const url = "/inventory/inventory/";
+//   console.log("Calling API:", url);
+
+//   try {
+//     const response = await API.get(url, getAuthHeaders());
+//     console.log("fetchStoreInventory response:", response.data);
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error in fetchStoreInventory:", error);
+//     throw error;
+//   }
+// };
 
 // --- OUTLETS ---
 export const fetchOutlets = async () => {

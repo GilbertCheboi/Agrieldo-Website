@@ -28,7 +28,7 @@ import { getFarms, createFarm } from "../services/api";
 import axios from "axios";
 import { GiBarn } from "react-icons/gi";
 
-const backendURL = "https://api.agrieldo.com";
+const backendURL = "http://207.154.253.97:8000";
 
 const Dashboard = () => {
   const [profile, setProfile] = useState(null);

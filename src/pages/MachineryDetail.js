@@ -26,7 +26,7 @@ const MachineryDetails = () => {
     try {
       const token = localStorage.getItem("accessToken");
       const response = await axios.get(
-        `https://api.agrieldo.comapi/machinery/${id}/`,
+        `http://207.154.253.97:8000api/machinery/${id}/`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -41,7 +41,7 @@ const MachineryDetails = () => {
     try {
       const token = localStorage.getItem("accessToken");
       const response = await axios.get(
-        `https://api.agrieldo.comapi/machinery/${id}/${logType}/`,
+        `http://207.154.253.97:8000api/machinery/${id}/${logType}/`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

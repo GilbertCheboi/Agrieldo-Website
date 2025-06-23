@@ -31,6 +31,7 @@ import {
 } from "react-icons/gi";
 import { AiOutlinePlus } from "react-icons/ai";
 import { jwtDecode } from "jwt-decode";
+import { getFarms, getUserById } from "../services/api";
 
 const calculateAgeInMonths = (dob) => {
   const birthDate = new Date(dob);
@@ -292,7 +293,7 @@ const DairyDashboard = ({ farmId }) => {
   // Debugging: Log imported components
   console.log({
     MilkProductionChart,
-    FeedManagement,
+    // FeedManagement,
     DashboardCard: typeof DashboardCard,
   });
 
