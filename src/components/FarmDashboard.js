@@ -1,12 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import {
-  Grid,
-  Typography,
-  Box,
-  Container,
-  Button,
-} from "@mui/material";
+import { Grid, Typography, Box, Container, Button } from "@mui/material";
 import Slider from "./ Sidebar"; // Fixed typo in import
 import SheepDashboard from "../pages/SheepDashboard";
 import DairyDashboard from "./DairyDashboard";
@@ -38,7 +32,16 @@ const CropDashboard = ({ farmId }) => {
         <Box sx={{ p: 2, bgcolor: "#fff", borderRadius: 2, boxShadow: 1 }}>
           <Typography variant="h6">📈 Harvest Yield</Typography>
           <Typography variant="h6">
-            {cropData.reduce((sum, c) => sum + c.production_records.reduce((pSum, p) => pSum + p.harvest_yield, 0), 0)} tons
+            {cropData.reduce(
+              (sum, c) =>
+                sum +
+                c.production_records.reduce(
+                  (pSum, p) => pSum + p.harvest_yield,
+                  0
+                ),
+              0
+            )}{" "}
+            tons
           </Typography>
         </Box>
       </Grid>
@@ -46,7 +49,9 @@ const CropDashboard = ({ farmId }) => {
         <Box sx={{ p: 2, bgcolor: "#fff", borderRadius: 2, boxShadow: 1 }}>
           <Typography variant="h6">📅 Planting Dates</Typography>
           <Typography variant="body1">
-            {cropData.map(c => `${c.crop_type}: ${c.planting_date}`).join(", ")}
+            {cropData
+              .map((c) => `${c.crop_type}: ${c.planting_date}`)
+              .join(", ")}
           </Typography>
         </Box>
       </Grid>
@@ -66,18 +71,30 @@ const FarmDashboard = () => {
   useEffect(() => {
     const fetchFarmDetails = async () => {
       try {
-        console.log(`FarmDashboard: fetchFarmDetails started, farmId: ${farmId}`);
+        console.log(
+          `FarmDashboard: fetchFarmDetails started, farmId: ${farmId}`
+        );
         setError(null);
         const farms = await getFarms();
-        console.log("FarmDashboard: Raw farms data from API:", JSON.stringify(farms, null, 2));
-        const selectedFarm = farms.find(f => f.id === parseInt(farmId));
-        console.log("FarmDashboard: Selected farm:", JSON.stringify(selectedFarm, null, 2));
+        console.log(
+          "FarmDashboard: Raw farms data from API:",
+          JSON.stringify(farms, null, 2)
+        );
+        const selectedFarm = farms.find((f) => f.id === parseInt(farmId));
+        console.log(
+          "FarmDashboard: Selected farm:",
+          JSON.stringify(selectedFarm, null, 2)
+        );
         setFarm(selectedFarm);
         if (selectedFarm) {
           const normalizedType =
-            selectedFarm.type.toLowerCase() === "dairy" ? "Dairy" :
-            selectedFarm.type.toLowerCase() === "sheep" ? "Sheep" :
-            selectedFarm.type.toLowerCase() === "crop" ? "Crop" : "Default";
+            selectedFarm.type.toLowerCase() === "dairy"
+              ? "Dairy"
+              : selectedFarm.type.toLowerCase() === "sheep"
+              ? "Sheep"
+              : selectedFarm.type.toLowerCase() === "crop"
+              ? "Crop"
+              : "Default";
           console.log(`FarmDashboard: Setting farmType to ${normalizedType}`);
           setFarmType(normalizedType);
           localStorage.setItem("selectedFarmType", normalizedType);
@@ -86,7 +103,10 @@ const FarmDashboard = () => {
           setFarmType(localStorage.getItem("selectedFarmType") || "Default");
         }
       } catch (error) {
-        console.error("FarmDashboard: Failed to fetch farm details:", error.response?.data || error.message);
+        console.error(
+          "FarmDashboard: Failed to fetch farm details:",
+          error.response?.data || error.message
+        );
         setError(error.message);
         setFarmType(localStorage.getItem("selectedFarmType") || "Default");
       }
@@ -126,11 +146,22 @@ const FarmDashboard = () => {
       <Slider key={farmType} farmType={farmType} farmId={farmId} />
       <Box sx={{ flexGrow: 1, p: { xs: 2, md: 3, lg: 4 } }}>
         <Container maxWidth="xl">
-          <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Box
+            sx={{
+              mb: 4,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
             <Typography variant="h4" sx={{ fontWeight: 700, color: "#1a3c34" }}>
               {farm ? `${farm.name} Dashboard` : "Farm Dashboard"}
             </Typography>
-            <Button variant="contained" color="primary" onClick={() => navigate("/dashboard")}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => navigate("/dashboard")}
+            >
               Back to Farms
             </Button>
           </Box>
