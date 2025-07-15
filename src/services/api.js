@@ -3,8 +3,8 @@ import { toast } from "react-toastify";
 
 // Base API instance
 const API = axios.create({
-  //baseURL: "http://207.154.253.97:8000/api/", // Update the base URL to match your backend
-  baseURL: "https://api.agrieldo.com/api/", // Alternative URL commented out
+  baseURL: "http://127.0.0.1:8000/api/", // Update the base URL to match your backend
+  // baseURL: "https://api.agrieldo.com/api/", // Alternative URL commented out
   timeout: 10000, // Try adding this
 });
 
