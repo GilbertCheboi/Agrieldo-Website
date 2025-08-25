@@ -6,6 +6,8 @@ import { Badge } from "@mui/material";
 import { useCart } from "./CartContext";
 
 const Navbar = () => {
+  const [userType, setUserType] = useState(localStorage.getItem("user_type"));
+
   const [isOpen, setIsOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(
     !!localStorage.getItem("accessToken")
@@ -19,6 +21,7 @@ const Navbar = () => {
   useEffect(() => {
     const handleAuthChange = () => {
       setIsAuthenticated(!!localStorage.getItem("accessToken"));
+      setUserType(localStorage.getItem("user_type"));
     };
 
     window.addEventListener("authChanged", handleAuthChange);
@@ -38,6 +41,8 @@ const Navbar = () => {
     window.dispatchEvent(new Event("authChanged"));
     navigate("/login");
   };
+
+  const isMechanizationAgent = userType === "4";
 
   return (
     <div>
@@ -151,20 +156,36 @@ const Navbar = () => {
             ) : (
               <>
                 <li>
-                  <Link to="/dashboard" className="hover:text-amber-500">
+                  <Link to="/" className="hover:text-amber-500">
                     Home
                   </Link>
                 </li>
-                <li>
-                  <Link to="/inventory" className="hover:text-amber-500">
-                    Inventory
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/auction" className="hover:text-amber-500">
-                    Market/Auction
-                  </Link>
-                </li>
+                {!isMechanizationAgent && (
+                  <>
+                    <li>
+                      <Link to="/inventory" className="hover:text-amber-500">
+                        Inventory
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/auction" className="hover:text-amber-500">
+                        Market/Auction
+                      </Link>
+                    </li>
+                  </>
+                )}
+
+                {isMechanizationAgent && (
+                  <li>
+                    <Link
+                      to="/my-applications"
+                      className="hover:text-amber-500"
+                    >
+                      My Applications
+                    </Link>
+                  </li>
+                )}
+
                 {/* Account Dropdown */}
                 <li
                   className="relative"
@@ -203,17 +224,19 @@ const Navbar = () => {
                     </ul>
                   )}
                 </li>
-                <li>
-                  <Link
-                    to="/cart"
-                    className="hover:text-amber-500 flex items-center gap-1"
-                  >
-                    <Badge badgeContent={cartCount} color="primary">
-                      <ShoppingCartIcon fontSize="small" />
-                    </Badge>
-                    Cart
-                  </Link>
-                </li>
+                {!isMechanizationAgent && (
+                  <li>
+                    <Link
+                      to="/cart"
+                      className="hover:text-amber-500 flex items-center gap-1"
+                    >
+                      <Badge badgeContent={cartCount} color="primary">
+                        <ShoppingCartIcon fontSize="small" />
+                      </Badge>
+                      Cart
+                    </Link>
+                  </li>
+                )}
               </>
             )}
           </ul>

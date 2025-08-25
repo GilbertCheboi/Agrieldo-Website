@@ -47,6 +47,9 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SingleItemView from "./pages/SingleItemView";
 import Checkout from "./pages/Checkout";
+import MachineryResults from "./pages/MachineryResults";
+import MachineryApplicationForm from "./pages/MyApplications";
+import CreditTermsPage from "./pages/CreditTermsOfService";
 
 // MUI Theme for FABs and Modals
 const theme = createTheme({
@@ -116,6 +119,10 @@ const App = () => {
                 <Route path="/dashboard/:farmId" element={<FarmDashboard />} />
                 <Route path="/sheep-list/:farmId" element={<SheepList />} />
                 <Route
+                  path="/machinery-results"
+                  element={<MachineryResults />}
+                />
+                <Route
                   path="/sheep-details/:farmId/:sheepId"
                   element={<SheepDetails />}
                 />
@@ -127,6 +134,14 @@ const App = () => {
                   path="/inventory/outlet/:id"
                   element={<OutletInventory />}
                 />
+                {/* Machinery Leasing Routes */}
+                <Route
+                  path="/my-applications"
+                  element={<MachineryApplicationForm />}
+                />
+
+                {/* terms of service */}
+                <Route path="/credit-terms" element={<CreditTermsPage />} />
               </Routes>
             </div>
           </div>

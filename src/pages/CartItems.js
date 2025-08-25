@@ -15,39 +15,29 @@ import { Add, Remove } from "@mui/icons-material";
 import { Link } from "react-router-dom";
 import { useCart } from "../components/CartContext";
 import { jwtDecode } from "jwt-decode";
-import { useNavigate } from "react-router-dom"; // Add this at the top
+import { useNavigate } from "react-router-dom";
 
 const CartItems = () => {
   const navigate = useNavigate();
   const { cart, setCart } = useCart();
-  const [quantities, setQuantities] = useState(cart.map(() => 1));
+
+  // Handle quantity update for a specific cart item
+  const handleQuantityChange = (index, amount) => {
+    const updatedCart = [...cart];
+    const currentQty = updatedCart[index].quantity || 1;
+    updatedCart[index].quantity = Math.max(1, currentQty + amount);
+    setCart(updatedCart); // Update the cart context
+  };
 
   const handleRemove = (index) => {
     const updatedCart = [...cart];
     updatedCart.splice(index, 1);
-    const updatedQuantities = [...quantities];
-    updatedQuantities.splice(index, 1);
-    setCart(updatedCart);
-    setQuantities(updatedQuantities);
+    setCart(updatedCart); // Update the cart context
   };
 
   const handleClearCart = () => {
-    setCart([]);
-    setQuantities([]);
+    setCart([]); // Clear the cart context
   };
-
-  const handleQuantityChange = (index, amount) => {
-    setQuantities((prev) => {
-      const updated = [...prev];
-      updated[index] = Math.max(1, updated[index] + amount);
-      return updated;
-    });
-  };
-
-  const total = cart.reduce(
-    (sum, item, i) => sum + item.price * quantities[i],
-    0
-  );
 
   const handleProceedToCheckout = () => {
     const token = localStorage.getItem("accessToken");
@@ -60,20 +50,31 @@ const CartItems = () => {
         const isExpired = decoded.exp * 1000 < Date.now();
 
         if (isExpired) {
-          localStorage.removeItem("accessToken"); // Optional: clear expired token
+          localStorage.removeItem("accessToken");
+          sessionStorage.setItem(
+            "redirectAfterLogin",
+            window.location.pathname
+          ); // ⬅️ Save current path
           navigate("/login");
         } else {
           navigate("/checkout");
         }
       } catch (error) {
-        // Invalid token format
         console.error("Invalid token:", error);
+        sessionStorage.setItem("redirectAfterLogin", window.location.pathname); // ⬅️ Save current path
         navigate("/login");
       }
     } else {
+      sessionStorage.setItem("redirectAfterLogin", window.location.pathname); // ⬅️ Save current path
       navigate("/login");
     }
   };
+
+  // Calculate the total price of items in the cart
+  const total = cart.reduce(
+    (sum, item) => sum + item.price * (item.quantity || 1),
+    0
+  );
 
   return (
     <Box p={3}>
@@ -158,7 +159,7 @@ const CartItems = () => {
                       <Remove fontSize="small" />
                     </IconButton>
                     <Typography variant="h6" fontWeight="bold" sx={{ mx: 2 }}>
-                      {quantities[index]}
+                      {item.quantity || 1}
                     </Typography>
                     <IconButton
                       size="small"
@@ -196,7 +197,9 @@ const CartItems = () => {
             <Stack spacing={1}>
               <Typography>
                 Total Items:{" "}
-                <strong>{quantities.reduce((sum, q) => sum + q, 0)}</strong>
+                <strong>
+                  {cart.reduce((sum, item) => sum + (item.quantity || 1), 0)}
+                </strong>
               </Typography>
               <Typography>
                 Total Price: <strong>KES {total.toLocaleString()}</strong>

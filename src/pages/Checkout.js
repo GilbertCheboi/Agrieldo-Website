@@ -13,16 +13,23 @@ import {
 } from "@mui/material";
 import PhoneAndroidIcon from "@mui/icons-material/PhoneAndroid";
 import { useNavigate } from "react-router-dom";
+import { useCart } from "../components/CartContext";
 
 const Checkout = () => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [amount, setAmount] = useState("");
   const [status, setStatus] = useState("idle"); // idle | loading | success | cancelled | timeout
   const navigate = useNavigate();
+  const { cart } = useCart();
+
+  // Calculate the total price from the cart
+  const total = cart.reduce(
+    (sum, item) => sum + item.price * (item.quantity || 1),
+    0
+  );
 
   const handlePayment = () => {
-    if (!name || !phone || !amount) {
+    if (!name || !phone || total === 0) {
       alert("Please fill in all fields.");
       return;
     }
@@ -31,7 +38,6 @@ const Checkout = () => {
 
     // Simulate M-Pesa interaction delay (e.g. 8 seconds)
     setTimeout(() => {
-      // Random outcome (for demo): success, cancelled, or timeout
       const outcomes = ["success", "cancelled", "timeout"];
       const result = outcomes[Math.floor(Math.random() * outcomes.length)];
       setStatus(result);
@@ -42,7 +48,7 @@ const Checkout = () => {
     if (status === "success") {
       setTimeout(() => {
         navigate("/");
-      }, 2000); // Give user time to read success message
+      }, 2000); // Allow time for user to see success message
     }
   }, [status, navigate]);
 
@@ -122,8 +128,10 @@ const Checkout = () => {
                     label="Amount (KES)"
                     variant="outlined"
                     type="number"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
+                    value={total}
+                    InputProps={{
+                      readOnly: true,
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -133,6 +141,7 @@ const Checkout = () => {
                     fullWidth
                     size="large"
                     onClick={handlePayment}
+                    disabled={total === 0}
                   >
                     Pay with M-Pesa
                   </Button>

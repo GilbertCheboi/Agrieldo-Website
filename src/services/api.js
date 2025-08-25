@@ -3,8 +3,8 @@ import { toast } from "react-toastify";
 
 // Base API instance
 const API = axios.create({
-  baseURL: "http://192.168.100.4:8000/api/", // Update the base URL to match your backend
-  // baseURL: "https://api.agrieldo.com/api/", // Alternative URL commented out
+  // baseURL: "https://api.agrieldo.com/api/", // Update the base URL to match your backend
+  baseURL: "https://api.agrieldo.com/api/", // Alternative URL commented out
   timeout: 10000, // Try adding this
 });
 
@@ -41,6 +41,7 @@ export const login = async (credentials) => {
       farmer: "1",
       vet: "2",
       staff: "3",
+      mechanization_agent: "4",
     };
     const userType = userTypeMap[response.data.user_type.toLowerCase()] || "1"; // Default to "1" if unknown
 
@@ -1199,3 +1200,50 @@ export const fetchDailyFeedVsMilkRevenue = async (
     return [];
   }
 };
+
+export const getNearbyMachinery = async ({ type, lat, lng }) => {
+  try {
+    const response = await API.get("machinery/nearby/", {
+      headers: getAuthHeaders().headers,
+      params: { type, lat, lng },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching nearby machinery:", error);
+    throw error;
+  }
+};
+
+export const updateMyLocation = async ({ latitude, longitude }) => {
+  return API.patch(
+    "machinery/vendors/update-location/",
+    { latitude, longitude },
+    getAuthHeaders()
+  );
+};
+
+export const createMachineryOrder = async ({
+  machineryId,
+  customerName,
+  customerPhone,
+  landSizeAcres,
+  notes,
+  startDate,
+  endDate,
+}) => {
+  return API.post(
+    "machinery/orders/",
+    {
+      machinery: machineryId,
+      customer_name: customerName,
+      customer_phone: customerPhone,
+      land_size_acres: landSizeAcres,
+      notes,
+      start_date: startDate,
+      end_date: endDate,
+    },
+    getAuthHeaders()
+  );
+};
+
+export const submitMachineryApplicationLease = {};
