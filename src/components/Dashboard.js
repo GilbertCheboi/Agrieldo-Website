@@ -82,10 +82,16 @@ const Dashboard = () => {
       const response = await axios.get(`${backendURL}/api/farms/${farmId}/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log(`fetchFarmById ${farmId} response:`, JSON.stringify(response.data, null, 2));
+      console.log(
+        `fetchFarmById ${farmId} response:`,
+        JSON.stringify(response.data, null, 2)
+      );
       return response.data;
     } catch (error) {
-      console.error(`Failed to fetch farm ${farmId}:`, error.response?.data || error.message);
+      console.error(
+        `Failed to fetch farm ${farmId}:`,
+        error.response?.data || error.message
+      );
       return null;
     }
   };
@@ -93,7 +99,10 @@ const Dashboard = () => {
   // Fetch farms
   const fetchFarms = async () => {
     try {
-      console.log(`fetchFarms started, farmId: ${farmId}, farmsData:`, JSON.stringify(farmsData, null, 2));
+      console.log(
+        `fetchFarms started, farmId: ${farmId}, farmsData:`,
+        JSON.stringify(farmsData, null, 2)
+      );
       setError(null);
       const farms = await getFarms();
       console.log("Raw farms data from API:", JSON.stringify(farms, null, 2));
@@ -103,29 +112,47 @@ const Dashboard = () => {
       setLoadingFarms(false);
 
       // Sync selectedFarmType with farmId
-      console.log(`Syncing farmId: ${farmId}, current selectedFarmType: ${selectedFarmType}`);
+      console.log(
+        `Syncing farmId: ${farmId}, current selectedFarmType: ${selectedFarmType}`
+      );
       if (farmId) {
         const farmIdStr = String(farmId);
-        console.log(`Looking for farmId: ${farmIdStr} in farmsData:`, JSON.stringify(farmsArray.map(f => ({ id: f.id, type: f.type })), null, 2));
+        console.log(
+          `Looking for farmId: ${farmIdStr} in farmsData:`,
+          JSON.stringify(
+            farmsArray.map((f) => ({ id: f.id, type: f.type })),
+            null,
+            2
+          )
+        );
         let selectedFarm = farmsArray.find(
           (farm) => String(farm.id) === farmIdStr
         );
         if (!selectedFarm) {
-          console.log(`No farm found for farmId: ${farmId}, attempting fetchFarmById`);
+          console.log(
+            `No farm found for farmId: ${farmId}, attempting fetchFarmById`
+          );
           selectedFarm = await fetchFarmById(farmId);
           if (selectedFarm) {
             farmsArray.push(selectedFarm);
             setFarmsData([...farmsArray]);
-            console.log("Updated farmsData with fetchFarmById:", JSON.stringify(farmsArray, null, 2));
+            console.log(
+              "Updated farmsData with fetchFarmById:",
+              JSON.stringify(farmsArray, null, 2)
+            );
           }
         }
 
         if (selectedFarm) {
           const farmType = selectedFarm.type || "Default";
           const normalizedType =
-            farmType.toLowerCase() === "dairy" ? "Dairy" :
-            farmType.toLowerCase() === "sheep" ? "Sheep" :
-            farmType.toLowerCase() === "crop" ? "Crop" : "Default";
+            farmType.toLowerCase() === "dairy"
+              ? "Dairy"
+              : farmType.toLowerCase() === "sheep"
+              ? "Sheep"
+              : farmType.toLowerCase() === "crop"
+              ? "Crop"
+              : "Default";
           console.log(
             `Found farm for farmId ${farmId}:`,
             JSON.stringify(selectedFarm, null, 2),
@@ -133,15 +160,22 @@ const Dashboard = () => {
           );
           setSelectedFarmType((prev) => {
             if (prev !== normalizedType) {
-              console.log(`Setting selectedFarmType from ${prev} to ${normalizedType}`);
+              console.log(
+                `Setting selectedFarmType from ${prev} to ${normalizedType}`
+              );
               localStorage.setItem("selectedFarmType", normalizedType);
               return normalizedType;
             }
-            console.log(`selectedFarmType already ${normalizedType}, no update needed`);
+            console.log(
+              `selectedFarmType already ${normalizedType}, no update needed`
+            );
             return prev;
           });
         } else {
-          console.warn(`No farm found for farmId: ${farmId} in farmsData:`, JSON.stringify(farmsArray, null, 2));
+          console.warn(
+            `No farm found for farmId: ${farmId} in farmsData:`,
+            JSON.stringify(farmsArray, null, 2)
+          );
           console.log("Preserving current selectedFarmType:", selectedFarmType);
         }
       } else {
@@ -150,11 +184,17 @@ const Dashboard = () => {
         localStorage.setItem("selectedFarmType", "Default");
       }
     } catch (error) {
-      console.error("Failed to load farms data:", error.response?.data || error.message);
+      console.error(
+        "Failed to load farms data:",
+        error.response?.data || error.message
+      );
       setError(error.message);
       setFarmsData([]);
       setLoadingFarms(false);
-      console.log("Preserving current selectedFarmType on error:", selectedFarmType);
+      console.log(
+        "Preserving current selectedFarmType on error:",
+        selectedFarmType
+      );
     }
   };
 
@@ -187,9 +227,13 @@ const Dashboard = () => {
       `handleFarmCardClick triggered - farmId: ${farmId}, Raw Type: ${farmType}, Current selectedFarmType: ${selectedFarmType}`
     );
     const normalizedType =
-      farmType && farmType.toLowerCase() === "dairy" ? "Dairy" :
-      farmType && farmType.toLowerCase() === "sheep" ? "Sheep" :
-      farmType && farmType.toLowerCase() === "crop" ? "Crop" : "Default";
+      farmType && farmType.toLowerCase() === "dairy"
+        ? "Dairy"
+        : farmType && farmType.toLowerCase() === "sheep"
+        ? "Sheep"
+        : farmType && farmType.toLowerCase() === "crop"
+        ? "Crop"
+        : "Default";
     console.log(`Normalized type: ${normalizedType}`);
     setSelectedFarmType((prev) => {
       console.log(`Setting selectedFarmType from ${prev} to ${normalizedType}`);

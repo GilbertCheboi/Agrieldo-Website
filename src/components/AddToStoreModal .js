@@ -25,7 +25,7 @@ const style = {
   borderRadius: 2,
 };
 
-const IMAGE_BASE_URL = "https://api.agrieldo.com"; // Adjust in production if needed
+const IMAGE_BASE_URL = "http://207.154.253.97:8000"; // Adjust in production if needed
 
 function AddToStoreModal({ open, onClose, onSuccess }) {
   const [formData, setFormData] = useState({

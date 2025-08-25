@@ -89,7 +89,7 @@ const SheepList = () => {
                       <CardMedia
                         component="img"
                         height="140"
-                        image={`https://api.agrieldo.com${sheep.images[0].image}`} // Adjust base URL
+                        image={`http://207.154.253.97:8000${sheep.images[0].image}`} // Adjust base URL
                         alt={`${sheep.tag_number} image`}
                       />
                     ) : (

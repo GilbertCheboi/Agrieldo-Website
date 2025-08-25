@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Grid, Paper, Typography, Box, List, ListItem, ListItemText, Divider, Stack, Button } from "@mui/material";
+import {
+  Grid,
+  Paper,
+  Typography,
+  Box,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
+  Stack,
+  Button,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import MilkProductionChart from "./MilkProductionChart";
 import FeedVsMilkRevenueChart from "./FeedVsMilkRevenueChart";
@@ -57,32 +68,74 @@ const DairyDashboard = ({ farmId }) => {
     const loadDashboardData = async () => {
       try {
         const today = new Date();
-        const startDate = new Date(today.setDate(today.getDate() - 60)).toISOString().split("T")[0];
+        const startDate = new Date(today.setDate(today.getDate() - 60))
+          .toISOString()
+          .split("T")[0];
         const endDate = new Date().toISOString().split("T")[0];
         const dailyTotals = await fetchDailyTotals(startDate, endDate);
 
-        const revenueStartDate = new Date(today.setDate(today.getDate() - 30)).toISOString().split("T")[0];
-        const revenueData = await fetchDailyFeedVsMilkRevenue(farmId, revenueStartDate, endDate);
+        const revenueStartDate = new Date(today.setDate(today.getDate() - 30))
+          .toISOString()
+          .split("T")[0];
+        const revenueData = await fetchDailyFeedVsMilkRevenue(
+          farmId,
+          revenueStartDate,
+          endDate
+        );
 
-        const todayStr = new Date().toLocaleDateString("en-US", { day: "2-digit", month: "short" });
-        const todayData = dailyTotals.find((entry) => entry.date === todayStr) || { total_milk_yield: 0 };
+        const todayStr = new Date().toLocaleDateString("en-US", {
+          day: "2-digit",
+          month: "short",
+        });
+        const todayData = dailyTotals.find(
+          (entry) => entry.date === todayStr
+        ) || { total_milk_yield: 0 };
         const milkToday = todayData.total_milk_yield;
 
         const currentMonth = today.getMonth();
         const currentYear = today.getFullYear();
-        const monthMap = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+        const monthMap = {
+          Jan: 0,
+          Feb: 1,
+          Mar: 2,
+          Apr: 3,
+          May: 4,
+          Jun: 5,
+          Jul: 6,
+          Aug: 7,
+          Sep: 8,
+          Oct: 9,
+          Nov: 10,
+          Dec: 11,
+        };
         const currentMonthData = dailyTotals.filter((entry) => {
           const [monthStr] = entry.date.split(" ");
           const entryMonth = monthMap[monthStr];
           return entryMonth === currentMonth && currentYear === currentYear;
         });
-        const totalMilkThisMonth = currentMonthData.reduce((sum, entry) => sum + entry.total_milk_yield, 0);
+        const totalMilkThisMonth = currentMonthData.reduce(
+          (sum, entry) => sum + entry.total_milk_yield,
+          0
+        );
 
         const lactatingAnimals = 28; // Placeholder
-        const averageYield = lactatingAnimals > 0 ? (totalMilkThisMonth / lactatingAnimals / currentMonthData.length).toFixed(1) : 0;
+        const averageYield =
+          lactatingAnimals > 0
+            ? (
+                totalMilkThisMonth /
+                lactatingAnimals /
+                currentMonthData.length
+              ).toFixed(1)
+            : 0;
 
-        const milkRevenueThisMonth = revenueData.reduce((sum, entry) => sum + entry.milk_revenue, 0);
-        const feedCostThisMonth = revenueData.reduce((sum, entry) => sum + entry.feed_cost, 0);
+        const milkRevenueThisMonth = revenueData.reduce(
+          (sum, entry) => sum + entry.milk_revenue,
+          0
+        );
+        const feedCostThisMonth = revenueData.reduce(
+          (sum, entry) => sum + entry.feed_cost,
+          0
+        );
 
         setDashboardData({
           milkToday,
@@ -112,7 +165,10 @@ const DairyDashboard = ({ farmId }) => {
           variant="contained"
           color="primary"
           onClick={() => {
-            console.log("DairyDashboard: Navigating to AnimalList with farmId:", farmId);
+            console.log(
+              "DairyDashboard: Navigating to AnimalList with farmId:",
+              farmId
+            );
             navigate(`/animal-list?farmId=${farmId}`);
           }}
           disabled={!farmId} // Disable if farmId is undefined
@@ -123,7 +179,10 @@ const DairyDashboard = ({ farmId }) => {
 
       <Grid container spacing={3}>
         <Grid item xs={12} md={4}>
-          <Paper elevation={3} sx={{ p: 2, bgcolor: "#f0fdfa", borderRadius: "12px" }}>
+          <Paper
+            elevation={3}
+            sx={{ p: 2, bgcolor: "#f0fdfa", borderRadius: "12px" }}
+          >
             <Typography variant="h6" sx={{ color: "#1a3c34", mb: 1 }}>
               🥛 Today's Milk
             </Typography>
@@ -131,33 +190,64 @@ const DairyDashboard = ({ farmId }) => {
               {dashboardData.milkToday.toFixed(1)}L
             </Typography>
             <Divider sx={{ my: 1 }} />
-            <Typography>Avg Yield/Cow: <b>{dashboardData.averageYield}L</b></Typography>
-            <Typography>Lactating Cows: <b>{dashboardData.lactatingAnimals}</b></Typography>
+            <Typography>
+              Avg Yield/Cow: <b>{dashboardData.averageYield}L</b>
+            </Typography>
+            <Typography>
+              Lactating Cows: <b>{dashboardData.lactatingAnimals}</b>
+            </Typography>
           </Paper>
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Paper elevation={3} sx={{ p: 2, bgcolor: "#fef9c3", borderRadius: "12px" }}>
+          <Paper
+            elevation={3}
+            sx={{ p: 2, bgcolor: "#fef9c3", borderRadius: "12px" }}
+          >
             <Typography variant="h6" sx={{ color: "#92400e", mb: 1 }}>
               🐄 Animal Health
             </Typography>
             <Stack spacing={0.5}>
-              <Typography>Sick: <b>{healthSummary.sickAnimals}</b></Typography>
-              <Typography>Pregnant: <b>{healthSummary.pregnantCows}</b></Typography>
-              <Typography>Next Vet Visit: <b>{healthSummary.nextVetVisit}</b></Typography>
+              <Typography>
+                Sick: <b>{healthSummary.sickAnimals}</b>
+              </Typography>
+              <Typography>
+                Pregnant: <b>{healthSummary.pregnantCows}</b>
+              </Typography>
+              <Typography>
+                Next Vet Visit: <b>{healthSummary.nextVetVisit}</b>
+              </Typography>
             </Stack>
           </Paper>
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Paper elevation={3} sx={{ p: 2, bgcolor: "#ecfdf5", borderRadius: "12px" }}>
+          <Paper
+            elevation={3}
+            sx={{ p: 2, bgcolor: "#ecfdf5", borderRadius: "12px" }}
+          >
             <Typography variant="h6" sx={{ color: "#047857", mb: 1 }}>
               💰 Financials
             </Typography>
             <Stack spacing={0.5}>
-              <Typography>Milk Revenue: <b>Ksh.{dashboardData.milkRevenueThisMonth.toFixed(2)}</b></Typography>
-              <Typography>Feed Cost: <b>Ksh.{dashboardData.feedCostThisMonth.toFixed(2)}</b></Typography>
-              <Typography>Profit: <b>Ksh.{(dashboardData.milkRevenueThisMonth - dashboardData.feedCostThisMonth).toFixed(2)}</b></Typography>
+              <Typography>
+                Milk Revenue:{" "}
+                <b>Ksh.{dashboardData.milkRevenueThisMonth.toFixed(2)}</b>
+              </Typography>
+              <Typography>
+                Feed Cost:{" "}
+                <b>Ksh.{dashboardData.feedCostThisMonth.toFixed(2)}</b>
+              </Typography>
+              <Typography>
+                Profit:{" "}
+                <b>
+                  Ksh.
+                  {(
+                    dashboardData.milkRevenueThisMonth -
+                    dashboardData.feedCostThisMonth
+                  ).toFixed(2)}
+                </b>
+              </Typography>
             </Stack>
           </Paper>
         </Grid>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { login } from "../services/api"; // Import the login API function
+import { login, updateMyLocation } from "../services/api"; // Import the login API function
 import { useNavigate, Link } from "react-router-dom"; // Import useNavigate for navigation
 
 const Login = () => {
@@ -15,14 +15,14 @@ const Login = () => {
     console.log("🚀 Submitting login credentials:", credentials);
 
     try {
-      const response = await login(credentials); // Call the login API
+      // 1) Perform login
+      const response = await login(credentials);
       console.log("✅ Login API call successful. Full response:", response);
 
-      const { accessToken, refreshToken, user_type } = {
-        accessToken: localStorage.getItem("accessToken"),
-        refreshToken: localStorage.getItem("refreshToken"),
-        user_type: localStorage.getItem("user_type"),
-      };
+      // 2) Retrieve tokens/user info from localStorage (set by your login helper)
+      const accessToken = localStorage.getItem("accessToken");
+      const refreshToken = localStorage.getItem("refreshToken");
+      const user_type = localStorage.getItem("user_type");
 
       console.log("📦 Tokens and user type from localStorage after login:");
       console.log("➡️ Access Token:", accessToken);
@@ -30,7 +30,63 @@ const Login = () => {
       console.log("➡️ User Type:", user_type);
 
       alert("Login successful!");
-      navigate("/dashboard");
+
+      // 3) Try to get geolocation and update vendor location
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async ({ coords }) => {
+            try {
+              await updateMyLocation({
+                latitude: coords.latitude,
+                longitude: coords.longitude,
+              });
+              console.log("📍 Vendor location updated successfully");
+            } catch (locErr) {
+              console.warn("⚠️ Failed to update vendor location:", locErr);
+            } finally {
+              // 4) Redirect after location attempt
+              const redirectPath = sessionStorage.getItem("redirectAfterLogin");
+              if (redirectPath) {
+                sessionStorage.removeItem("redirectAfterLogin");
+                navigate(redirectPath);
+              } else {
+                if (user_type === "4") {
+                  navigate("/mechanization-dashboard");
+                } else {
+                  navigate("/dashboard");
+                }
+              }
+            }
+          },
+          (geoErr) => {
+            console.warn(
+              "⚠️ Geolocation error, proceeding without update:",
+              geoErr
+            );
+            const redirectPath = sessionStorage.getItem("redirectAfterLogin");
+            if (redirectPath) {
+              sessionStorage.removeItem("redirectAfterLogin");
+              navigate(redirectPath);
+            } else {
+              navigate("/dashboard");
+            }
+          },
+          { enableHighAccuracy: true }
+        );
+      } else {
+        console.warn("⚠️ Browser does not support geolocation");
+        const redirectPath = sessionStorage.getItem("redirectAfterLogin");
+        if (redirectPath) {
+          sessionStorage.removeItem("redirectAfterLogin");
+          navigate(redirectPath);
+        } else {
+          if (user_type == "4") {
+            navigate("/mechanization-dashboard");
+          } else {
+            navigate("/dashboard");
+          }
+        }
+      }
     } catch (error) {
       console.error("❌ Login failed!");
 

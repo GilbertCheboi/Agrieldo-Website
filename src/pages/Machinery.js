@@ -27,7 +27,7 @@ const Machinery = () => {
       }
 
       const response = await axios.get(
-        "https://api.agrieldo.comapi/machinery/",
+        "http://207.154.253.97:8000api/machinery/",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -68,7 +68,7 @@ const Machinery = () => {
         return;
       }
 
-      await axios.post("https://api.agrieldo.comapi/machinery/", data, {
+      await axios.post("http://207.154.253.97:8000/api/machinery/", data, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
@@ -91,7 +91,7 @@ const Machinery = () => {
         {machinery.map((item) => {
           const imageUrl = item.image.startsWith("http")
             ? item.image
-            : `https://api.agrieldo.com${item.image}`;
+            : `http://207.154.253.97:8000${item.image}`;
           return (
             <div
               key={item.id}

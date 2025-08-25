@@ -50,6 +50,12 @@ const features = [
       "Purchase veterinary drugs and treatments for your livestock, ensuring their health and well-being are always top priority.",
     icon: "💊",
   },
+  {
+    title: "Importation and Exportation",
+    description:
+      "We facilitate the seamless import and export of livestock and animal products, locally or internationally, adhering to international standards and ensuring proper documentation and health certifications.",
+    icon: "🐄",
+  },
 ];
 
 const Features = () => {

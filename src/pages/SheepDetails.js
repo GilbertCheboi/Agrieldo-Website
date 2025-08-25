@@ -275,7 +275,7 @@ const SheepDetails = () => {
                 <img
                   src={
                     sheep.images && sheep.images.length > 0
-                      ? `https://api.agrieldo.com${sheep.images[currentImageIndex].image}`
+                      ? `http://207.154.253.97:8000${sheep.images[currentImageIndex].image}`
                       : "https://via.placeholder.com/128"
                   }
                   alt={`Sheep Image ${currentImageIndex + 1}`}

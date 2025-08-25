@@ -161,6 +161,7 @@ const Signup = () => {
             <option value={1}>Farmer</option>
             <option value={2}>Vet</option>
             <option value={3}>Staff</option>
+            <option value={4}>Mechanization Agent</option>
           </select>
         </div>
 
@@ -240,7 +241,7 @@ export default Signup;
 
 //     try {
 //       const response = await axios.post(
-//         "https://api.agrieldo.comapi/accounts/users/",
+//         "http://207.154.253.97:8000api/accounts/users/",
 //         formDataToSend,
 //         {
 //           headers: {

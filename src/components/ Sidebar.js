@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Drawer,
   List,
@@ -23,14 +23,20 @@ import {
   BarChart,
   LocalHospital,
   Store,
+  Assignment,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
-// Menu items mapping by farm type
+// Menu items by farm type (for farmers)
 const menuItemsByFarmType = {
   Dairy: [
     { to: "/dashboard", text: "Dashboard", icon: <Dashboard /> },
-    { to: "/animal-list", text: "Livestock Management", icon: <Agriculture />, appendFarmId: true },
+    {
+      to: "/animal-list",
+      text: "Livestock Management",
+      icon: <Agriculture />,
+      appendFarmId: true,
+    },
     { to: "/financials", text: "Financials", icon: <MonetizationOn /> },
     { to: "/farms", text: "Farms", icon: <Store /> },
     { to: "/farm-staff", text: "Farm Staff", icon: <People /> },
@@ -38,12 +44,21 @@ const menuItemsByFarmType = {
     { to: "/machinery", text: "Machinery", icon: <Build /> },
     { to: "/feed_store", text: "Feed Store", icon: <Fastfood /> },
     { to: "/production", text: "Today's Production", icon: <BarChart /> },
-    { to: "/production-history", text: "Production History", icon: <History /> },
+    {
+      to: "/production-history",
+      text: "Production History",
+      icon: <History />,
+    },
     { to: "/my-farm", text: "My Farm (CCTV)", icon: <Videocam /> },
   ],
   Sheep: [
     { to: "/dashboard", text: "Dashboard", icon: <Dashboard /> },
-    { to: "/animal_list", text: "Livestock Management", icon: <Agriculture />, appendFarmId: true },
+    {
+      to: "/animal_list",
+      text: "Livestock Management",
+      icon: <Agriculture />,
+      appendFarmId: true,
+    },
     { to: "/financials", text: "Financials", icon: <MonetizationOn /> },
     { to: "/farms", text: "Farms", icon: <Store /> },
     { to: "/farm-staff", text: "Farm Staff", icon: <People /> },
@@ -51,7 +66,11 @@ const menuItemsByFarmType = {
     { to: "/machinery", text: "Machinery", icon: <Build /> },
     { to: "/feed_store", text: "Feed Store", icon: <Fastfood /> },
     { to: "/production", text: "Today's Production", icon: <BarChart /> },
-    { to: "/production-history", text: "Production History", icon: <History /> },
+    {
+      to: "/production-history",
+      text: "Production History",
+      icon: <History />,
+    },
     { to: "/my-farm", text: "My Farm (CCTV)", icon: <Videocam /> },
   ],
   Crop: [
@@ -61,7 +80,11 @@ const menuItemsByFarmType = {
     { to: "/farm-staff", text: "Farm Staff", icon: <People /> },
     { to: "/machinery", text: "Machinery", icon: <Build /> },
     { to: "/production", text: "Today's Production", icon: <BarChart /> },
-    { to: "/production-history", text: "Production History", icon: <History /> },
+    {
+      to: "/production-history",
+      text: "Production History",
+      icon: <History />,
+    },
     { to: "/my-farm", text: "My Farm (CCTV)", icon: <Videocam /> },
   ],
   Default: [
@@ -70,25 +93,40 @@ const menuItemsByFarmType = {
   ],
 };
 
+// Menu for Mechanization Agent (user_type = "4")
+const mechanizationMenu = [
+  { to: "/mechanization-dashboard", text: "Dashboard", icon: <Dashboard /> },
+  { to: "/my-orders", text: "My Orders", icon: <Assignment /> },
+  { to: "/available-equipment", text: "Available Equipment", icon: <Build /> },
+];
+
 const Slider = ({ farmType = "Default", farmId }) => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const [userType, setUserType] = useState(null);
+
+  useEffect(() => {
+    const storedType = localStorage.getItem("user_type");
+    setUserType(storedType);
+  }, []);
 
   const toggleDrawer = () => {
     setOpen(!open);
   };
 
-  // Normalize farmType to match menuItemsByFarmType keys
   const normalizedFarmType =
-    farmType && farmType.toLowerCase() === "dairy" ? "Dairy" :
-    farmType && farmType.toLowerCase() === "sheep" ? "Sheep" :
-    farmType && farmType.toLowerCase() === "crop" ? "Crop" : "Default";
-  const menuItems =
-    menuItemsByFarmType[normalizedFarmType] || menuItemsByFarmType.Default;
+    farmType && farmType.toLowerCase() === "dairy"
+      ? "Dairy"
+      : farmType && farmType.toLowerCase() === "sheep"
+      ? "Sheep"
+      : farmType && farmType.toLowerCase() === "crop"
+      ? "Crop"
+      : "Default";
 
-  // Debug: Log farmType, farmId, and menu items
-  console.log(`Slider: farmType: ${farmType}, Normalized: ${normalizedFarmType}, farmId: ${farmId}`);
-  console.log("Slider: Menu items:", menuItems.map((item) => item.text));
+  const menuItems =
+    userType === "4"
+      ? mechanizationMenu
+      : menuItemsByFarmType[normalizedFarmType] || menuItemsByFarmType.Default;
 
   return (
     <>
@@ -113,26 +151,26 @@ const Slider = ({ farmType = "Default", farmId }) => {
             variant="h6"
             sx={{ fontWeight: 700, color: "#1a3c34", mb: 1, ml: 2 }}
           >
-            Farm Menu
+            {userType === "4" ? "Mechanization Menu" : "Farm Menu"}
           </Typography>
           <Typography
             variant="caption"
             sx={{ color: "#888", mb: 2, ml: 2, display: "block" }}
           >
-            Current Type: {normalizedFarmType}, Farm ID: {farmId || "None"}
+            User Type: {userType || "Unknown"}, Farm ID: {farmId || "None"}
           </Typography>
           <Divider sx={{ mb: 2 }} />
+
           <List>
-            {menuItems.map((item, index) => (
+            {menuItems.map((item) => (
               <React.Fragment key={item.to}>
                 <ListItem
                   button
                   onClick={() => {
-                    console.log(`Slider: Navigating to ${item.text} with to: ${item.to}, farmId: ${farmId}`);
-                    if (item.appendFarmId && !farmId) {
-                      console.warn(`Slider: farmId is undefined for ${item.text}. Navigating without farmId.`);
-                    }
-                    const to = item.appendFarmId && farmId ? `${item.to}?farmId=${farmId}` : item.to;
+                    const to =
+                      item.appendFarmId && farmId
+                        ? `${item.to}?farmId=${farmId}`
+                        : item.to;
                     navigate(to);
                     toggleDrawer();
                   }}
