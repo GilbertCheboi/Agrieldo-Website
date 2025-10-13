@@ -187,43 +187,40 @@ const Navbar = () => {
                 )}
 
                 {/* Account Dropdown */}
-                <li
-                  className="relative"
-                  onMouseEnter={() => setIsDropdownOpen(true)}
-                  onMouseLeave={() => setIsDropdownOpen(false)}
-                >
+                <li className="relative group">
                   <button className="hover:text-amber-500 focus:outline-none">
                     Account
                   </button>
-                  {isDropdownOpen && (
-                    <ul className="absolute bg-gray-700 text-white mt-2 py-2 rounded shadow-lg w-40">
-                      <li>
-                        <Link
-                          to="/profile"
-                          className="block px-4 py-2 hover:bg-gray-600"
-                        >
-                          Profile
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          to="/settings"
-                          className="block px-4 py-2 hover:bg-gray-600"
-                        >
-                          Settings
-                        </Link>
-                      </li>
-                      <li>
-                        <button
-                          onClick={handleLogout}
-                          className="block w-full text-left px-4 py-2 hover:bg-gray-600"
-                        >
-                          Logout
-                        </button>
-                      </li>
-                    </ul>
-                  )}
+
+                  {/* dropdown stays visible while hovering inside group */}
+                  <ul className="absolute hidden group-hover:block bg-gray-700 text-white mt-2 py-2 rounded shadow-lg w-40 list-none p-0 m-0 z-50">
+                    <li>
+                      <Link
+                        to="/profile"
+                        className="block px-4 py-2 hover:bg-gray-600"
+                      >
+                        Profile
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        to="/settings"
+                        className="block px-4 py-2 hover:bg-gray-600"
+                      >
+                        Settings
+                      </Link>
+                    </li>
+                    <li>
+                      <button
+                        onClick={handleLogout}
+                        className="block w-full text-left px-4 py-2 hover:bg-gray-600"
+                      >
+                        Logout
+                      </button>
+                    </li>
+                  </ul>
                 </li>
+
                 {!isMechanizationAgent && (
                   <li>
                     <Link

@@ -1,16 +1,15 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 
-// Base API instance
+// // Base API instance
+// const API = axios.create({
+//   // baseURL: "https://api.agrieldo.com/api/", // Update the base URL to match your backend
+//   baseURL: "https://api.agrieldo.com/api/", // Alternative URL commented out
+//   timeout: 10000, // Try adding this
+// });
+
 const API = axios.create({
-<<<<<<< HEAD
-  baseURL: "http://192.168.100.4:8000/api/", // Update the base URL to match your backend
-  // baseURL: "https://api.agrieldo.com/api/", // Alternative URL commented out
-=======
-  // baseURL: "https://api.agrieldo.com/api/", // Update the base URL to match your backend
-  baseURL: "https://api.agrieldo.com/api/", // Alternative URL commented out
->>>>>>> c864922934d388518ef3a0da8cef4f525fc7a49c
-  timeout: 10000, // Try adding this
+  baseURL: "https://api.agrieldo.com/api/", // Local backend
 });
 
 // Add a request interceptor to include the JWT token in headers

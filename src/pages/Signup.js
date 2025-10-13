@@ -52,7 +52,7 @@ const Signup = () => {
 
     try {
       const response = await axios.post(
-        "http://192.168.100.4:8000/api/accounts/users/",
+        "https://api.agrieldo.com/api/accounts/users/",
         formDataToSend,
         {
           headers: {

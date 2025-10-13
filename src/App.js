@@ -50,6 +50,7 @@ import Checkout from "./pages/Checkout";
 import MachineryResults from "./pages/MachineryResults";
 import MachineryApplicationForm from "./pages/MyApplications";
 import CreditTermsPage from "./pages/CreditTermsOfService";
+import AccountDeletion from "./components/deleteUserAccount";
 
 // MUI Theme for FABs and Modals
 const theme = createTheme({
@@ -142,6 +143,7 @@ const App = () => {
 
                 {/* terms of service */}
                 <Route path="/credit-terms" element={<CreditTermsPage />} />
+                <Route path="/account-deletion" element={<AccountDeletion />} />
               </Routes>
             </div>
           </div>
