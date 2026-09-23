@@ -40,18 +40,13 @@ export const login = async (credentials) => {
     });
     console.log("Login API response:", response.data); // Log the full response for debugging
 
-    // Map user_type string to numeric value
-    const userTypeMap = {
-      farmer: "1",
-      vet: "2",
-      staff: "3",
-      mechanization_agent: "4",
-    };
-    const userType = userTypeMap[response.data.user_type.toLowerCase()] || "1"; // Default to "1" if unknown
+    // Backend now returns user_type as a number (e.g. 1, 2, 3, 4),
+    // so we just coerce it to a string for localStorage/comparisons.
+    const userType = String(response.data.user_type ?? "1"); // Default to "1" if missing
 
     localStorage.setItem("accessToken", response.data.access);
     localStorage.setItem("refreshToken", response.data.refresh);
-    localStorage.setItem("user_type", userType); // Store as "1", "2", or "3"
+    localStorage.setItem("user_type", userType); // Store as "1", "2", "3", "4", etc.
     console.log("Stored user_type in localStorage:", userType);
 
     window.dispatchEvent(new Event("authChanged"));
